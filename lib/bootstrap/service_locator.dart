@@ -15,6 +15,7 @@ import '../application/member/member_use_cases.dart';
 import '../application/onboarding/onboarding_use_cases.dart';
 import '../application/blog/blog_use_cases.dart';
 import '../application/payment/payment_use_cases.dart';
+import '../application/perk/perk_use_cases.dart';
 import '../application/sponsor/sponsor_use_cases.dart';
 import '../application/platform/platform_use_cases.dart';
 import '../application/profile/profile_use_cases.dart';
@@ -28,6 +29,7 @@ import '../domain/member/members_repository.dart';
 import '../domain/onboarding/onboarding_repository.dart';
 import '../domain/blog/blog_repository.dart';
 import '../domain/payment/payment_gateway.dart';
+import '../domain/perk/perk.dart';
 import '../domain/sponsor/sponsor.dart';
 import '../domain/payment/payments_repository.dart';
 import '../domain/payment/receipt.dart';
@@ -43,6 +45,7 @@ import '../infrastructure/member/supabase_members_repository.dart';
 import '../infrastructure/onboarding/supabase_onboarding_repository.dart';
 import '../infrastructure/blog/supabase_blog_repository.dart';
 import '../infrastructure/payment/manual_payment_gateway.dart';
+import '../infrastructure/perk/supabase_perk_repository.dart';
 import '../infrastructure/sponsor/supabase_sponsor_repository.dart';
 import '../infrastructure/payment/stripe_payment_gateway.dart';
 import '../infrastructure/payment/supabase_payments_repository.dart';
@@ -72,6 +75,9 @@ void configureDependencies() {
     )
     ..registerLazySingleton<ClubBrandingRepository>(
       () => SupabaseClubBrandingRepository(client),
+    )
+    ..registerLazySingleton<PerkRepository>(
+      () => SupabasePerkRepository(client),
     )
     ..registerLazySingleton<SponsorRepository>(
       () => SupabaseSponsorRepository(client),
@@ -186,6 +192,9 @@ void configureDependencies() {
         renewSponsors: RenewSponsors(serviceLocator()),
         uploadSponsorLogo: UploadSponsorLogo(serviceLocator()),
         getActiveSponsors: GetActiveSponsors(serviceLocator()),
+        getClubPerks: GetClubPerks(serviceLocator()),
+        savePerk: SavePerk(serviceLocator()),
+        setPerkStatus: SetPerkStatus(serviceLocator()),
       ),
     );
 }

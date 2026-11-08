@@ -37,8 +37,8 @@ dependencias ya estén todas `DONE` (salvo bloqueo explícito por decisión).
 | VS-026 | Blog: Inicio del socio | DONE | VS-025 | 7 · 0.7 Comunidad | RF-023 |
 | VS-027 | Patrocinadores por temporada (admin) | DONE | VS-012 | 7 · 0.7 Comunidad | RF-026…RF-028, RN-016 |
 | VS-028 | Patrocinadores para el socio | DONE | VS-027 | 7 · 0.7 Comunidad | RF-029 |
-| VS-029 | Ventajas (admin) | READY | VS-027 | 7 · 0.7 Comunidad | RF-024, RN-015 |
-| VS-030 | Mis ventajas | TODO | VS-029 | 7 · 0.7 Comunidad | RF-025 |
+| VS-029 | Ventajas (admin) | DONE | VS-027 | 7 · 0.7 Comunidad | RF-024, RN-015 |
+| VS-030 | Mis ventajas | READY | VS-029 | 7 · 0.7 Comunidad | RF-025 |
 | VS-031 | Dashboard del club | TODO | VS-020, VS-030 | 8 · 0.8 Piloto | §16 Dashboard |
 | VS-032 | Acabado visual y navegación final del socio | TODO | VS-031 | 8 · 0.8 Piloto | §14, §20 |
 | VS-033 | CI/CD y entorno staging | BLOCKED | (adelantada por el usuario) | 8 · 0.8 Piloto | - |

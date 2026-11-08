@@ -103,6 +103,7 @@ icono + texto, nunca solo color.
 | Editor de noticia | `presentation/blog/post_editor_page.dart` | Título (140), texto (párrafos), imagen opcional con vista previa, `SegmentedButton` Ahora/Programar con fecha y hora, «Guardar borrador» + acción principal «Publicar»/«Programar»; error inline |
 | `PostCard` / `PostImage` | `presentation/blog/post_widgets.dart` | Noticia en Inicio: imagen (URL firmada; nada si falla), fecha, título y extracto (primer párrafo, 160 caracteres); detalle con fecha larga y párrafos |
 | `SponsorLogo` | `presentation/sponsor/sponsor_widgets.dart` | Logo del patrocinador sobre fondo blanco con borde (logos pensados para fondo claro), `BoxFit.contain`; iniciales si no hay o falla; atenuado (45 %) si está desactivado |
+| `PerkStatusChip` | `presentation/perk/perk_labels.dart` | Estado de una ventaja hoy con icono + texto: Vigente, Próximamente, Caducada, Borrador, Archivada; vigencia «Del … al …» / «Hasta el …» / «Sin fecha de fin» |
 | Estado de mensaje (`_MessagePage`) | `presentation/session/session_status_pages.dart` | Pantalla vacía/error: título, explicación, acción |
 
 Patrones:

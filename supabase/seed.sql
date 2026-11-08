@@ -138,3 +138,12 @@ join public.seasons se on se.club_id = sp.club_id
 where sp.club_id = '20000000-0000-0000-0000-000000000001'
   and ((sp.name in ('Restaurante O Porto', 'Ferretería Galicia') and se.name in ('2025/2026', '2026/2027'))
     or (sp.name = 'Autoescuela Norte' and se.name = '2025/2026'));
+
+-- VS-029: IDEFIC perks.
+insert into public.perks (club_id, sponsor_id, title, body, status)
+select '20000000-0000-0000-0000-000000000001', s.id, '10 % de descuento en Restaurante O Porto',
+       'Presentando tu carnet de socio obtendrás un 10 % de descuento en la carta (no acumulable).', 'published'
+from public.sponsors s where s.name = 'Restaurante O Porto';
+insert into public.perks (club_id, title, body, status, valid_until) values
+  ('20000000-0000-0000-0000-000000000001', 'Entrada gratis al torneo de Navidad',
+   'Los socios entran gratis al torneo de Navidad enseñando el carnet en la puerta.', 'published', current_date + 60);

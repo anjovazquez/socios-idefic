@@ -149,6 +149,10 @@ class ClubHomePage extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (club.canAdminister) ...[
+                  const SizedBox(height: 24),
+                  const _AdminShortcuts(),
+                ],
                 const SizedBox(height: 32),
                 _HomeNews(feed: feed, clubName: club.name),
                 const SizedBox(height: 32),
@@ -231,4 +235,28 @@ class _HomeNews extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Club management entries that do not fit in the app bar (VS-032 will
+/// rework the navigation).
+class _AdminShortcuts extends StatelessWidget {
+  const _AdminShortcuts();
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 640),
+      child: Card(
+        key: const Key('admin-shortcuts'),
+        child: ListTile(
+          key: const Key('open-perks-admin'),
+          leading: const Icon(Icons.local_offer_outlined),
+          title: const Text('Ventajas para socios'),
+          subtitle: const Text('Descuentos y ventajas de patrocinadores'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.go('/club/perks'),
+        ),
+      ),
+    ),
+  );
 }

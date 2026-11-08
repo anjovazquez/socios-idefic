@@ -17,6 +17,8 @@ import '../payment/club_payments_page.dart';
 import '../payment/my_subscription_page.dart';
 import '../profile/my_data_page.dart';
 import '../season/renewal_page.dart';
+import '../perk/perk_editor_page.dart';
+import '../perk/perks_admin_page.dart';
 import '../season/seasons_page.dart';
 import '../sponsor/sponsors_page.dart';
 import '../platform/platform_clubs_page.dart';
@@ -151,6 +153,17 @@ GoRouter _createRouter(
         ),
         GoRoute(path: 'card', builder: (context, state) => const MyCardPage()),
         GoRoute(path: 'me', builder: (context, state) => const MyDataPage()),
+        GoRoute(
+          path: 'perks',
+          builder: (context, state) => const PerksAdminPage(),
+          routes: [
+            GoRoute(
+              path: 'edit',
+              builder: (context, state) =>
+                  PerkEditorPage(perkId: state.uri.queryParameters['id']),
+            ),
+          ],
+        ),
         GoRoute(
           path: 'sponsors',
           builder: (context, state) => const SponsorsPage(),

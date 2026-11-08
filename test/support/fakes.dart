@@ -14,6 +14,7 @@ import 'package:socios_idefic/application/member/member_use_cases.dart';
 import 'package:socios_idefic/application/onboarding/onboarding_use_cases.dart';
 import 'package:socios_idefic/application/blog/blog_use_cases.dart';
 import 'package:socios_idefic/application/payment/payment_use_cases.dart';
+import 'package:socios_idefic/application/perk/perk_use_cases.dart';
 import 'package:socios_idefic/application/sponsor/sponsor_use_cases.dart';
 import 'package:socios_idefic/application/platform/platform_use_cases.dart';
 import 'package:socios_idefic/application/profile/profile_use_cases.dart';
@@ -36,6 +37,7 @@ import 'package:socios_idefic/domain/onboarding/onboarding_repository.dart';
 import 'package:socios_idefic/domain/blog/blog_repository.dart';
 import 'package:socios_idefic/domain/blog/post.dart';
 import 'package:socios_idefic/domain/payment/club_payments.dart';
+import 'package:socios_idefic/domain/perk/perk.dart';
 import 'package:socios_idefic/domain/sponsor/sponsor.dart';
 import 'package:socios_idefic/domain/payment/my_subscription.dart';
 import 'package:socios_idefic/domain/payment/online_payments.dart';
@@ -1373,6 +1375,74 @@ class FakeSponsorRepository implements SponsorRepository {
   String logoUrl(String path) => 'https://assets.test/$path';
 }
 
+/// Perks per club; sponsors of the same club only (RN-015).
+class FakePerkRepository implements PerkRepository {
+  final Map<String, List<Perk>> perks = {};
+  FakeSponsorRepository? sponsors;
+  int _ids = 0;
+
+  @override
+  Future<List<Perk>> getClubPerks(String clubId) async => [...?perks[clubId]];
+
+  @override
+  Future<String> savePerk({
+    String? perkId,
+    required String clubId,
+    String? sponsorId,
+    required String title,
+    required String body,
+    String? imagePath,
+    DateTime? validFrom,
+    DateTime? validUntil,
+    required bool publish,
+  }) async {
+    final sponsor = sponsorId == null
+        ? null
+        : sponsors?.sponsors[clubId]
+              ?.where((s) => s.id == sponsorId)
+              .firstOrNull;
+    if (sponsorId != null && sponsor == null) {
+      throw const InvalidPerkFailure(PerkField.sponsor);
+    }
+    final list = perks.putIfAbsent(clubId, () => []);
+    final id = perkId ?? 'perk-${++_ids}';
+    final perk = Perk(
+      id: id,
+      sponsorId: sponsorId,
+      sponsorName: sponsor?.name,
+      title: title,
+      body: body,
+      imagePath: imagePath,
+      validFrom: validFrom,
+      validUntil: validUntil,
+      status: publish ? PerkStatus.published : PerkStatus.draft,
+    );
+    final i = list.indexWhere((p) => p.id == id);
+    i >= 0 ? list[i] = perk : list.add(perk);
+    return id;
+  }
+
+  @override
+  Future<void> setStatus(String perkId, PerkStatus status) async {
+    for (final list in perks.values) {
+      final i = list.indexWhere((p) => p.id == perkId);
+      if (i < 0) continue;
+      final p = list[i];
+      list[i] = Perk(
+        id: p.id,
+        sponsorId: p.sponsorId,
+        sponsorName: p.sponsorName,
+        title: p.title,
+        body: p.body,
+        imagePath: p.imagePath,
+        validFrom: p.validFrom,
+        validUntil: p.validUntil,
+        status: status,
+      );
+    }
+  }
+}
+
 AppUseCases buildUseCases({
   required FakeAuthRepository auth,
   required FakeClubRepository clubs,
@@ -1388,8 +1458,11 @@ AppUseCases buildUseCases({
   FakeReceiptRenderer? receiptRenderer,
   FakeBlogRepository? blog,
   FakeSponsorRepository? sponsors,
+  FakePerkRepository? perks,
 }) {
   final sponsorRepository = sponsors ?? FakeSponsorRepository();
+  final perkRepository = (perks ?? FakePerkRepository())
+    ..sponsors = sponsorRepository;
   final blogRepository = blog ?? FakeBlogRepository();
   final activeClubStore = store ?? InMemoryActiveClubStore();
   final platformRepository = platform ?? FakePlatformRepository();
@@ -1482,6 +1555,9 @@ AppUseCases buildUseCases({
     renewSponsors: RenewSponsors(sponsorRepository),
     uploadSponsorLogo: UploadSponsorLogo(sponsorRepository),
     getActiveSponsors: GetActiveSponsors(sponsorRepository),
+    getClubPerks: GetClubPerks(perkRepository),
+    savePerk: SavePerk(perkRepository),
+    setPerkStatus: SetPerkStatus(perkRepository),
     downloadReceipt: DownloadReceipt(
       paymentsRepository,
       receiptRenderer ?? FakeReceiptRenderer(),

@@ -10,6 +10,7 @@ import 'club/select_active_club.dart';
 import 'member/member_use_cases.dart';
 import 'onboarding/onboarding_use_cases.dart';
 import 'payment/payment_use_cases.dart';
+import 'perk/perk_use_cases.dart';
 import 'platform/platform_use_cases.dart';
 import 'profile/profile_use_cases.dart';
 import 'season/season_use_cases.dart';
@@ -89,6 +90,9 @@ class AppUseCases {
     required this.renewSponsors,
     required this.uploadSponsorLogo,
     required this.getActiveSponsors,
+    required this.getClubPerks,
+    required this.savePerk,
+    required this.setPerkStatus,
   });
 
   final WatchSession watchSession;
@@ -164,4 +168,7 @@ class AppUseCases {
   final RenewSponsors renewSponsors;
   final UploadSponsorLogo uploadSponsorLogo;
   final GetActiveSponsors getActiveSponsors;
+  final GetClubPerks getClubPerks;
+  final SavePerk savePerk;
+  final SetPerkStatus setPerkStatus;
 }
