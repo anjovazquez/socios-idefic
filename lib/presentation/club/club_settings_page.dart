@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../application/app_use_cases.dart';
 import '../../domain/club/club_branding_repository.dart';
+import '../payment/online_payments_section.dart';
 import '../payment/payment_instructions_section.dart';
 import '../session/session_view_model.dart';
 import '../theme/club_theme.dart';
@@ -145,6 +146,20 @@ class _ClubSettingsView extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             PaymentInstructionsSection(clubId: viewModel.clubId),
+            const SizedBox(height: 32),
+            Builder(
+              builder: (context) {
+                final returning =
+                    GoRouterState.of(context).uri.queryParameters['stripe'] ==
+                    'volver';
+                return OnlinePaymentsSection(
+                  // A new key re-reads the status when coming back.
+                  key: ValueKey('online-payments-$returning'),
+                  clubId: viewModel.clubId,
+                  returningFromStripe: returning,
+                );
+              },
+            ),
           ],
         ),
       },

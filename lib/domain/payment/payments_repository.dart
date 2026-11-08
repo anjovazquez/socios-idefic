@@ -1,5 +1,6 @@
 import 'club_payments.dart';
 import 'my_subscription.dart';
+import 'online_payments.dart';
 import 'payment.dart';
 import 'receipt.dart';
 
@@ -39,4 +40,16 @@ abstract interface class PaymentsRepository {
     int offset = 0,
     int limit = 50,
   });
+
+  /// Admin: status of the club Stripe account.
+  Future<OnlinePaymentsStatus> getOnlinePaymentsStatus(String clubId);
+
+  /// Admin: creates the club account if needed; returns the onboarding page.
+  Future<Uri> startOnlinePaymentsOnboarding(String clubId);
+
+  /// Admin: reads the account status from Stripe after the onboarding.
+  Future<OnlinePaymentsStatus> refreshOnlinePaymentsStatus(String clubId);
+
+  /// Member: opens the provider checkout of a pending fee.
+  Future<Uri> createCheckout(String seasonMembershipId);
 }

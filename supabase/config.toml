@@ -406,6 +406,9 @@ PUBLIC_SUPABASE_URL = "http://127.0.0.1:54321"
 # RESEND_API_KEY is set as a function secret (D-013).
 MAILPIT_URL = "http://supabase_inbucket_socios-idefic:8025"
 MAIL_FROM = "Socios <no-reply@socios.local>"
+# Local-only webhook secret to simulate signed Stripe events (not a real
+# key). Without STRIPE_SECRET_KEY online payments stay off (manual only).
+STRIPE_WEBHOOK_SECRET = "whsec_local_development_only"
 
 [analytics]
 enabled = true
@@ -438,4 +441,8 @@ enabled = true
 # Public card validation (VS-016): opened by whoever scans a QR, without a
 # session. It only returns the RF-020 data.
 [functions.validate-card]
+verify_jwt = false
+
+# Stripe calls it without a JWT; every event must carry a valid signature.
+[functions.payments-webhook]
 verify_jwt = false

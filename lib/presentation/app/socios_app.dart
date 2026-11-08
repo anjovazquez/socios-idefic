@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../application/app_use_cases.dart';
 import '../auth/login_view_model.dart';
 import '../club/image_picking.dart';
+import '../common/open_url.dart';
 import '../platform/impersonation_banner.dart';
 import '../session/session_view_model.dart';
 import '../theme/club_theme.dart';
@@ -16,12 +17,16 @@ class SociosApp extends StatefulWidget {
     required this.useCases,
     this.initialLocation,
     this.pickImage = pickImageFromGallery,
+    this.openUrl = openExternalUrl,
   });
 
   final AppUseCases useCases;
 
   /// Device image chooser (injectable for tests).
   final PickImage pickImage;
+
+  /// Opens provider pages such as Stripe Checkout (injectable for tests).
+  final OpenUrl openUrl;
 
   /// Deep link used on start (tests and web refreshes).
   final String? initialLocation;
@@ -51,6 +56,7 @@ class _SociosAppState extends State<SociosApp> {
       providers: [
         Provider<AppUseCases>.value(value: widget.useCases),
         Provider<PickImage>.value(value: widget.pickImage),
+        Provider<OpenUrl>.value(value: widget.openUrl),
         ChangeNotifierProvider.value(value: _session),
         ChangeNotifierProvider(
           create: (_) => LoginViewModel(

@@ -46,6 +46,10 @@ a la cuenta de ese club. La integración debe quedar desacoplada.
 - ¿Cada club cobra en su propia cuenta (Connect) o IDEFIC centraliza al principio?
 - ¿Comisión de plataforma?
 
+## Implementation
+
+- VS-021 (2026-11-09): Connect Express por club, cargos directos, sin comisión (default de las preguntas abiertas, pendiente de confirmar por el usuario). Ver D-031.
+
 ## Supersedes
 
 - None

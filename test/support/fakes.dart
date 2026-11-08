@@ -33,10 +33,12 @@ import 'package:socios_idefic/domain/onboarding/onboarding.dart';
 import 'package:socios_idefic/domain/onboarding/onboarding_repository.dart';
 import 'package:socios_idefic/domain/payment/club_payments.dart';
 import 'package:socios_idefic/domain/payment/my_subscription.dart';
+import 'package:socios_idefic/domain/payment/online_payments.dart';
 import 'package:socios_idefic/domain/payment/payment.dart';
 import 'package:socios_idefic/domain/payment/payments_repository.dart';
 import 'package:socios_idefic/domain/payment/receipt.dart';
 import 'package:socios_idefic/infrastructure/payment/manual_payment_gateway.dart';
+import 'package:socios_idefic/infrastructure/payment/stripe_payment_gateway.dart';
 import 'package:socios_idefic/domain/platform/audit_entry.dart';
 import 'package:socios_idefic/domain/profile/my_profile.dart';
 import 'package:socios_idefic/domain/profile/profile_repository.dart';
@@ -1012,6 +1014,34 @@ class FakePaymentsRepository implements PaymentsRepository {
     );
   }
 
+  /// Online payments (Stripe) per club; checkout pages per fee.
+  final Map<String, OnlinePaymentsStatus> online = {};
+  final Map<String, Uri> checkouts = {};
+  bool onlineConfigured = true;
+
+  @override
+  Future<OnlinePaymentsStatus> getOnlinePaymentsStatus(String clubId) async =>
+      online[clubId] ?? OnlinePaymentsStatus.notConnected;
+
+  @override
+  Future<Uri> startOnlinePaymentsOnboarding(String clubId) async {
+    if (!onlineConfigured) throw const OnlinePaymentsUnavailableFailure();
+    online[clubId] = OnlinePaymentsStatus.pendingVerification;
+    return Uri.parse('https://connect.stripe.test/$clubId');
+  }
+
+  @override
+  Future<OnlinePaymentsStatus> refreshOnlinePaymentsStatus(
+    String clubId,
+  ) async => online[clubId] ?? OnlinePaymentsStatus.notConnected;
+
+  @override
+  Future<Uri> createCheckout(String seasonMembershipId) async {
+    final url = checkouts[seasonMembershipId];
+    if (url == null) throw const OnlinePaymentsUnavailableFailure();
+    return url;
+  }
+
   /// Receipts by payment id; missing = not paid.
   final Map<String, Receipt> receipts = {};
 
@@ -1110,6 +1140,14 @@ AppUseCases buildUseCases({
     getMySubscription: GetMySubscription(paymentsRepository),
     getMyPayments: GetMyPayments(paymentsRepository),
     getClubPayments: GetClubPayments(paymentsRepository),
+    startOnlinePayment: StartPayment(StripePaymentGateway(paymentsRepository)),
+    getOnlinePaymentsStatus: GetOnlinePaymentsStatus(paymentsRepository),
+    startOnlinePaymentsOnboarding: StartOnlinePaymentsOnboarding(
+      paymentsRepository,
+    ),
+    refreshOnlinePaymentsStatus: RefreshOnlinePaymentsStatus(
+      paymentsRepository,
+    ),
     downloadReceipt: DownloadReceipt(
       paymentsRepository,
       receiptRenderer ?? FakeReceiptRenderer(),

@@ -38,6 +38,7 @@ import '../infrastructure/club/supabase_club_repository.dart';
 import '../infrastructure/member/supabase_members_repository.dart';
 import '../infrastructure/onboarding/supabase_onboarding_repository.dart';
 import '../infrastructure/payment/manual_payment_gateway.dart';
+import '../infrastructure/payment/stripe_payment_gateway.dart';
 import '../infrastructure/payment/supabase_payments_repository.dart';
 import '../presentation/receipt/pdf_receipt_renderer.dart';
 import '../infrastructure/platform/supabase_platform_repository.dart';
@@ -145,6 +146,16 @@ void configureDependencies() {
         getMyPayments: GetMyPayments(serviceLocator()),
         downloadReceipt: DownloadReceipt(serviceLocator(), serviceLocator()),
         getClubPayments: GetClubPayments(serviceLocator()),
+        startOnlinePayment: StartPayment(
+          StripePaymentGateway(serviceLocator<PaymentsRepository>()),
+        ),
+        getOnlinePaymentsStatus: GetOnlinePaymentsStatus(serviceLocator()),
+        startOnlinePaymentsOnboarding: StartOnlinePaymentsOnboarding(
+          serviceLocator(),
+        ),
+        refreshOnlinePaymentsStatus: RefreshOnlinePaymentsStatus(
+          serviceLocator(),
+        ),
       ),
     );
 }

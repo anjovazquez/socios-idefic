@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/payment/club_payments.dart';
 import '../../domain/payment/my_subscription.dart';
+import '../../domain/payment/online_payments.dart';
 import '../../domain/payment/payment.dart';
 import '../../domain/season/season_membership.dart';
 import '../../domain/payment/payments_repository.dart';
@@ -113,6 +114,66 @@ class SupabasePaymentsRepository implements PaymentsRepository {
   });
 
   @override
+  Future<OnlinePaymentsStatus> getOnlinePaymentsStatus(String clubId) =>
+      _guard(() async {
+        final rows = await _client.rpc<List<dynamic>>(
+          'get_club_online_payments',
+          params: {'p_club_id': clubId},
+        );
+        final row = rows.isEmpty
+            ? const <String, dynamic>{}
+            : rows.first as Map<String, dynamic>;
+        return onlinePaymentsStatusOf(
+          accountId: row['stripe_account_id'] as String?,
+          chargesEnabled: row['charges_enabled'] == true,
+        );
+      });
+
+  @override
+  Future<Uri> startOnlinePaymentsOnboarding(String clubId) async {
+    final data = await _invoke('stripe-onboarding', {'clubId': clubId});
+    return Uri.parse(data['url'] as String);
+  }
+
+  @override
+  Future<OnlinePaymentsStatus> refreshOnlinePaymentsStatus(
+    String clubId,
+  ) async {
+    final data = await _invoke('stripe-onboarding', {
+      'clubId': clubId,
+      'action': 'refresh',
+    });
+    return onlinePaymentsStatusOf(
+      accountId: data['accountId'] as String?,
+      chargesEnabled: data['chargesEnabled'] == true,
+    );
+  }
+
+  @override
+  Future<Uri> createCheckout(String seasonMembershipId) async {
+    final data = await _invoke('create-checkout', {
+      'seasonMembershipId': seasonMembershipId,
+    });
+    return Uri.parse(data['url'] as String);
+  }
+
+  Future<Map<String, dynamic>> _invoke(
+    String function,
+    Map<String, dynamic> body,
+  ) async {
+    try {
+      final response = await _client.functions.invoke(function, body: body);
+      return (response.data as Map).cast<String, dynamic>();
+    } on FunctionException catch (error) {
+      final details = error.details;
+      final code = details is Map ? details['error'] as String? : null;
+      throw mapOnlinePaymentError(error.status, code);
+    } catch (error) {
+      throw PaymentUnavailableFailure(error);
+    }
+  }
+
+  @override
   Future<Receipt> getReceipt(String paymentId) => _guard(() async {
     final rows = await _client.rpc<List<dynamic>>(
       'get_receipt',
@@ -191,6 +252,7 @@ MySubscription mySubscriptionFromRow(Map<String, dynamic> row) =>
       },
       lastMethod: _methodOf(row['payment_method']),
       nextChargeCents: row['next_charge_cents'] as int?,
+      onlinePayments: row['online_payments'] == true,
       nextChargeOn: switch (row['next_charge_on']) {
         final String value => DateTime.parse(value),
         _ => null,
@@ -270,3 +332,15 @@ ClubPaymentLine clubPaymentLineFromRow(Map<String, dynamic> row) {
     receiptNumber: row['receipt_number'] as int?,
   );
 }
+
+/// Edge Function errors of the online payments (create-checkout,
+/// stripe-onboarding).
+PaymentFailure mapOnlinePaymentError(int status, String? code) =>
+    switch ((status, code)) {
+      (503, _) || (_, 'online_payments_disabled') =>
+        const OnlinePaymentsUnavailableFailure(),
+      (403, _) => const PaymentPermissionFailure(),
+      (_, 'already_paid') => const AlreadyPaidFailure(),
+      (_, 'not_payable') => const NotPayableFailure(),
+      _ => PaymentUnavailableFailure('$status $code'),
+    };

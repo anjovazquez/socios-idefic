@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../application/app_use_cases.dart';
 import '../../domain/payment/my_subscription.dart';
 import '../../domain/payment/payment.dart';
+import '../../domain/payment/payment_gateway.dart';
 import 'payment_labels.dart';
 
 /// «Mi suscripción»: current season and payment history (RF-011, RF-016).
@@ -64,6 +65,39 @@ class MySubscriptionViewModel extends ChangeNotifier {
           'momento';
     } finally {
       _downloadingId = null;
+      notifyListeners();
+    }
+  }
+
+  bool _startingPayment = false;
+  bool get startingPayment => _startingPayment;
+
+  /// Returns the provider checkout page, or throws the error message.
+  Future<Uri> payOnline() async {
+    final seasonMembershipId = _subscription?.seasonMembershipId;
+    if (seasonMembershipId == null) {
+      throw paymentFailureMessage(const NotPayableFailure());
+    }
+    _startingPayment = true;
+    notifyListeners();
+    try {
+      final start = await _useCases.startOnlinePayment(
+        clubId: clubId,
+        seasonMembershipId: seasonMembershipId,
+      );
+      return switch (start) {
+        RedirectPaymentStart(:final url) => url,
+        ManualPaymentStart() => throw paymentFailureMessage(
+          const OnlinePaymentsUnavailableFailure(),
+        ),
+      };
+    } on PaymentFailure catch (failure) {
+      throw paymentFailureMessage(failure);
+    } catch (error) {
+      if (error is String) rethrow;
+      throw paymentFailureMessage(const PaymentUnavailableFailure());
+    } finally {
+      _startingPayment = false;
       notifyListeners();
     }
   }

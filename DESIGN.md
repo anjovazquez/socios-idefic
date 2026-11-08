@@ -98,6 +98,7 @@ icono + texto, nunca solo color.
 | `startFeePayment` | `presentation/payment/how_to_pay_sheet.dart` | Hoja «Cómo pagar tu cuota de X €» con las instrucciones del club (carnet y Mi suscripción) |
 | `PaymentStatusChip` | `presentation/payment/payment_labels.dart` | Estado del pago con icono + texto: Pagado, Pendiente, Fallido, Anulado |
 | Recibo PDF | `presentation/receipt/pdf_receipt_renderer.dart` | A4: cabecera del color del club (texto con `readableOn`), logo si existe, nombre y «Recibo de pago», nº `CODIGO-0001`; filas etiqueta/valor; importe en negrita; pie legal. Fuente Roboto incluida |
+| Pago online | `presentation/payment/my_subscription_page.dart`, `online_payments_section.dart` | Con cuota pendiente y club con Stripe: botón principal «Pagar ahora con tarjeta o domiciliación» y secundario «Otras formas de pago». Al volver del Checkout, aviso en `secondaryContainer` («Estamos confirmando tu pago…» / «No se ha completado el pago…»). En Configuración, «Pagos online» con estado (icono + frase) y «Conectar con Stripe» / «Completar verificación» / «Comprobar estado» |
 | Estado de mensaje (`_MessagePage`) | `presentation/session/session_status_pages.dart` | Pantalla vacía/error: título, explicación, acción |
 
 Patrones:

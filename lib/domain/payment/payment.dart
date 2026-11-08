@@ -72,6 +72,11 @@ final class NoReceiptFailure extends PaymentFailure {
   const NoReceiptFailure();
 }
 
+/// The platform or the club cannot take online payments yet.
+final class OnlinePaymentsUnavailableFailure extends PaymentFailure {
+  const OnlinePaymentsUnavailableFailure();
+}
+
 final class PaymentPermissionFailure extends PaymentFailure {
   const PaymentPermissionFailure();
 }

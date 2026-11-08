@@ -18,6 +18,8 @@ String paymentFailureMessage(PaymentFailure failure) => switch (failure) {
   InvalidPaymentTransitionFailure() =>
     'Este pago ya no se puede cambiar en ese sentido',
   NoReceiptFailure() => 'Este pago no tiene recibo',
+  OnlinePaymentsUnavailableFailure() =>
+    'El pago online no está disponible ahora. Usa otra forma de pago',
   PaymentPermissionFailure() =>
     'Solo el administrador del club puede registrar pagos',
   PaymentUnavailableFailure() =>

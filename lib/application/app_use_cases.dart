@@ -65,6 +65,10 @@ class AppUseCases {
     required this.getMyPayments,
     required this.downloadReceipt,
     required this.getClubPayments,
+    required this.startOnlinePayment,
+    required this.getOnlinePaymentsStatus,
+    required this.startOnlinePaymentsOnboarding,
+    required this.refreshOnlinePaymentsStatus,
   });
 
   final WatchSession watchSession;
@@ -116,4 +120,10 @@ class AppUseCases {
   final GetMyPayments getMyPayments;
   final DownloadReceipt downloadReceipt;
   final GetClubPayments getClubPayments;
+
+  /// Online payment (Stripe); [startPayment] stays the manual one.
+  final StartPayment startOnlinePayment;
+  final GetOnlinePaymentsStatus getOnlinePaymentsStatus;
+  final StartOnlinePaymentsOnboarding startOnlinePaymentsOnboarding;
+  final RefreshOnlinePaymentsStatus refreshOnlinePaymentsStatus;
 }

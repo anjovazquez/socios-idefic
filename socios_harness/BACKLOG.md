@@ -29,8 +29,8 @@ dependencias ya estén todas `DONE` (salvo bloqueo explícito por decisión).
 | VS-018 | Mi suscripción e histórico de pagos | DONE | VS-017 | 5 · 0.5 Pagos | RF-011, RF-016 |
 | VS-019 | Recibo descargable | DONE | VS-018 | 5 · 0.5 Pagos | RF-017 |
 | VS-020 | Pagos del club para el admin (filtros y recibos) | DONE | VS-019 | 5 · 0.5 Pagos | RF-018 |
-| VS-021 | Proveedor de pago real (checkout + webhook) | READY | VS-020, ADR-001 | 6 · 0.6 Renovación | §9 |
-| VS-022 | Método de pago guardado para renovaciones | TODO | VS-021 | 6 · 0.6 Renovación | RF-012 |
+| VS-021 | Proveedor de pago real (checkout + webhook) | DONE | VS-020, ADR-001 | 6 · 0.6 Renovación | §9 |
+| VS-022 | Método de pago guardado para renovaciones | READY | VS-021 | 6 · 0.6 Renovación | RF-012 |
 | VS-023 | Aviso previo de renovación | TODO | VS-022, VS-014 | 6 · 0.6 Renovación | RF-013, RN-012 |
 | VS-024 | Cancelación y cobro automático de la renovación | TODO | VS-023 | 6 · 0.6 Renovación | RF-014, RN-013 |
 | VS-025 | Blog: publicar (admin) | READY | VS-004 | 7 · 0.7 Comunidad | RF-022 |

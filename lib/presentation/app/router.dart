@@ -121,7 +121,9 @@ GoRouter createRouter(
         ),
         GoRoute(
           path: 'subscription',
-          builder: (context, state) => const MySubscriptionPage(),
+          builder: (context, state) => MySubscriptionPage(
+            paymentResult: state.uri.queryParameters['pago'],
+          ),
         ),
         GoRoute(
           path: 'seasons',

@@ -118,6 +118,9 @@ jobs:
         run: |
           npx supabase functions deploy invite-member --project-ref "$SUPABASE_PROJECT_REF"
           npx supabase functions deploy validate-card --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
+          npx supabase functions deploy create-checkout --project-ref "$SUPABASE_PROJECT_REF"
+          npx supabase functions deploy stripe-onboarding --project-ref "$SUPABASE_PROJECT_REF"
+          npx supabase functions deploy payments-webhook --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF_STAGING }}

@@ -11,6 +11,7 @@ class MySubscription {
     this.lastMethod,
     this.nextChargeCents,
     this.nextChargeOn,
+    this.onlinePayments = false,
   });
 
   /// Null when the club has no active season.
@@ -28,11 +29,16 @@ class MySubscription {
   final int? nextChargeCents;
   final DateTime? nextChargeOn;
 
+  /// The club takes online payments (Stripe account active).
+  final bool onlinePayments;
+
   bool get hasSeason => seasonName != null;
 
   bool get canPay =>
       status == SeasonMembershipStatus.pendingPayment &&
       seasonMembershipId != null;
+
+  bool get canPayOnline => canPay && onlinePayments;
 }
 
 /// One line of the payment history of the member (RF-016).

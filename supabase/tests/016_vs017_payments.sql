@@ -86,8 +86,8 @@ select throws_ok(
 insert into public.payments (season_membership_id, amount_cents, concept, status, provider)
 values ((select id from public.season_memberships where club_membership_id = 'e8000000-0000-0000-0000-000000000002'),
         5000, 'Cuota', 'pending', 'stripe');
-select lives_ok($$update public.payments set status = 'failed' where provider = 'stripe'$$, 'pending → failed');
-select throws_ok($$update public.payments set status = 'paid' where provider = 'stripe'$$, 'P0001', null,
+select lives_ok($$update public.payments set status = 'failed' where provider = 'stripe' and season_membership_id = (select id from public.season_memberships where club_membership_id = 'e8000000-0000-0000-0000-000000000002')$$, 'pending → failed');
+select throws_ok($$update public.payments set status = 'paid' where provider = 'stripe' and season_membership_id = (select id from public.season_memberships where club_membership_id = 'e8000000-0000-0000-0000-000000000002')$$, 'P0001', null,
   'failed → paid is not allowed');
 
 -- Visibility

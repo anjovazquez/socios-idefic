@@ -55,6 +55,8 @@ local.
 | `MAIL_FROM` | `Socios IDEFIC <socios@tu-dominio.es>` (dominio verificado en Resend) |
 | `APP_URL` | `https://<firebase-project>.web.app` |
 | `PUBLIC_SUPABASE_URL` | `https://<ref>.supabase.co` |
+| `STRIPE_SECRET_KEY` | `sk_test_…` (Stripe, modo test; ver §2.1) |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_…` del endpoint `payments-webhook` (§2.1) |
 
 `SUPABASE_URL`, `SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` los pone
 Supabase. `validate-card` es pública (se despliega con `--no-verify-jwt`):
@@ -68,6 +70,29 @@ quedan en el log de la función).
    registros DNS que indica (SPF/DKIM). Hasta verificarlo solo puedes enviar
    a tu propio email desde `onboarding@resend.dev`.
 2. *API Keys* → crea una con permiso *Sending access*.
+
+## 2.1 Stripe (pagos online, VS-021)
+
+Cada club cobra en su propia cuenta conectada (Stripe Connect, cuentas
+Express, sin comisión de plataforma; ADR-001).
+
+1. Cuenta en <https://dashboard.stripe.com>, en **modo test**. *Connect* →
+   actívalo (plataforma, cuentas Express, España).
+2. *Developers → API keys* → `STRIPE_SECRET_KEY` (`sk_test_…`).
+3. *Developers → Webhooks* → *Add endpoint*:
+   `https://<ref>.supabase.co/functions/v1/payments-webhook`, marcando
+   **«Listen to events on Connected accounts»**, con los eventos
+   `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+   `checkout.session.async_payment_failed`, `checkout.session.expired`,
+   `payment_intent.payment_failed` y `account.updated`. Su *Signing secret*
+   es `STRIPE_WEBHOOK_SECRET`.
+4. El admin del club conecta su cuenta desde *Configuración → Pagos online*.
+   Tarjetas de prueba: `4242 4242 4242 4242` (válida),
+   `4000 0000 0000 0002` (rechazada).
+
+Sin `STRIPE_SECRET_KEY` la app sigue con el pago manual y «Pagar ahora» no
+aparece. `payments-webhook` es pública (`--no-verify-jwt`) y rechaza todo
+evento sin firma válida.
 
 ## 3. Firebase Hosting
 

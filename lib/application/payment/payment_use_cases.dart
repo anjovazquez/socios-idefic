@@ -1,5 +1,6 @@
 import '../../domain/payment/club_payments.dart';
 import '../../domain/payment/my_subscription.dart';
+import '../../domain/payment/online_payments.dart';
 import '../../domain/payment/payment.dart';
 import '../../domain/payment/payment_gateway.dart';
 import '../../domain/payment/payments_repository.dart';
@@ -131,4 +132,31 @@ class GetClubPayments {
     ClubPaymentsFilter filter = const ClubPaymentsFilter(),
     int offset = 0,
   }) => _repository.getClubPayments(clubId, filter: filter, offset: offset);
+}
+
+class GetOnlinePaymentsStatus {
+  const GetOnlinePaymentsStatus(this._repository);
+
+  final PaymentsRepository _repository;
+
+  Future<OnlinePaymentsStatus> call(String clubId) =>
+      _repository.getOnlinePaymentsStatus(clubId);
+}
+
+class StartOnlinePaymentsOnboarding {
+  const StartOnlinePaymentsOnboarding(this._repository);
+
+  final PaymentsRepository _repository;
+
+  Future<Uri> call(String clubId) =>
+      _repository.startOnlinePaymentsOnboarding(clubId);
+}
+
+class RefreshOnlinePaymentsStatus {
+  const RefreshOnlinePaymentsStatus(this._repository);
+
+  final PaymentsRepository _repository;
+
+  Future<OnlinePaymentsStatus> call(String clubId) =>
+      _repository.refreshOnlinePaymentsStatus(clubId);
 }

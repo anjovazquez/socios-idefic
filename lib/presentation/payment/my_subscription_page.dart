@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../application/app_use_cases.dart';
 import '../../domain/payment/my_subscription.dart';
+import '../common/open_url.dart';
 import '../format/money.dart';
 import '../season/season_membership_chip.dart';
 import '../session/session_view_model.dart';
@@ -13,7 +14,10 @@ import 'payment_labels.dart';
 
 /// «Mi suscripción» (RF-011, RF-016).
 class MySubscriptionPage extends StatelessWidget {
-  const MySubscriptionPage({super.key});
+  const MySubscriptionPage({super.key, this.paymentResult});
+
+  /// `ok` or `cancelado` when coming back from the provider checkout.
+  final String? paymentResult;
 
   @override
   Widget build(BuildContext context) => ChangeNotifierProvider(
@@ -21,12 +25,14 @@ class MySubscriptionPage extends StatelessWidget {
       context.read<AppUseCases>(),
       clubId: context.read<SessionViewModel>().activeClub!.id,
     )..load(),
-    child: const _MySubscriptionView(),
+    child: _MySubscriptionView(paymentResult: paymentResult),
   );
 }
 
 class _MySubscriptionView extends StatelessWidget {
-  const _MySubscriptionView();
+  const _MySubscriptionView({this.paymentResult});
+
+  final String? paymentResult;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +66,23 @@ class _MySubscriptionView extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              if (paymentResult == 'ok')
+                const _ReturnNotice(
+                  key: Key('payment-return-ok'),
+                  icon: Icons.hourglass_top,
+                  text:
+                      'Estamos confirmando tu pago. En cuanto llegue la '
+                      'confirmación verás tu cuota pagada; desliza hacia abajo '
+                      'para actualizar.',
+                ),
+              if (paymentResult == 'cancelado')
+                const _ReturnNotice(
+                  key: Key('payment-return-cancelled'),
+                  icon: Icons.info_outline,
+                  text:
+                      'No se ha completado el pago. Puedes intentarlo de nuevo '
+                      'cuando quieras.',
+                ),
               _CurrentSeason(subscription: value),
               const SizedBox(height: 16),
               const _NextCharges(),
@@ -133,9 +156,15 @@ class _CurrentSeason extends StatelessWidget {
                   ? 'Sin método registrado'
                   : paymentMethodLabel(subscription.lastMethod!),
             ),
-            if (subscription.canPay) ...[
+            if (subscription.canPayOnline) ...[
               const SizedBox(height: 12),
-              FilledButton.icon(
+              const _PayOnlineButton(),
+            ],
+            if (subscription.canPay) ...[
+              const SizedBox(height: 8),
+              (subscription.canPayOnline
+                  ? OutlinedButton.icon
+                  : FilledButton.icon)(
                 key: const Key('subscription-how-to-pay'),
                 onPressed: () => startFeePayment(
                   context,
@@ -145,7 +174,11 @@ class _CurrentSeason extends StatelessWidget {
                   feeCents: subscription.feeCents,
                 ),
                 icon: const Icon(Icons.payments_outlined),
-                label: const Text('Cómo pagar'),
+                label: Text(
+                  subscription.canPayOnline
+                      ? 'Otras formas de pago'
+                      : 'Cómo pagar',
+                ),
               ),
             ],
           ],
@@ -262,6 +295,64 @@ class _ReceiptButton extends StatelessWidget {
             )
           : const Icon(Icons.download_outlined),
       label: const Text('Descargar recibo'),
+    );
+  }
+}
+
+class _PayOnlineButton extends StatelessWidget {
+  const _PayOnlineButton();
+
+  Future<void> _pay(BuildContext context) async {
+    final viewModel = context.read<MySubscriptionViewModel>();
+    final openUrl = context.read<OpenUrl>();
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await openUrl(await viewModel.payOnline());
+    } on String catch (message) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final busy = context.watch<MySubscriptionViewModel>().startingPayment;
+    return FilledButton.icon(
+      key: const Key('subscription-pay-online'),
+      onPressed: busy ? null : () => _pay(context),
+      icon: busy
+          ? const SizedBox.square(
+              dimension: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.credit_card),
+      label: const Text('Pagar ahora con tarjeta o domiciliación'),
+    );
+  }
+}
+
+class _ReturnNotice extends StatelessWidget {
+  const _ReturnNotice({super.key, required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Card(
+      color: scheme.secondaryContainer,
+      margin: const EdgeInsets.only(bottom: 16),
+      child: ListTile(
+        leading: Icon(icon, color: scheme.onSecondaryContainer),
+        title: Text(
+          text,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: scheme.onSecondaryContainer),
+        ),
+      ),
     );
   }
 }
