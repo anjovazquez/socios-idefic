@@ -93,6 +93,7 @@ class AppUseCases {
     required this.getClubPerks,
     required this.savePerk,
     required this.setPerkStatus,
+    required this.getMyPerks,
   });
 
   final WatchSession watchSession;
@@ -171,4 +172,5 @@ class AppUseCases {
   final GetClubPerks getClubPerks;
   final SavePerk savePerk;
   final SetPerkStatus setPerkStatus;
+  final GetMyPerks getMyPerks;
 }

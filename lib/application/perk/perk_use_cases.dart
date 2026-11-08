@@ -62,3 +62,11 @@ class SetPerkStatus {
     return _repository.setStatus(perkId, status);
   }
 }
+
+class GetMyPerks {
+  const GetMyPerks(this._repository);
+
+  final PerkRepository _repository;
+
+  Future<List<Perk>> call(String clubId) => _repository.getMyPerks(clubId);
+}

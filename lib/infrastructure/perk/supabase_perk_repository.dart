@@ -52,6 +52,24 @@ class SupabasePerkRepository implements PerkRepository {
     ),
   );
 
+  @override
+  Future<List<Perk>> getMyPerks(String clubId) => _guard(() async {
+    final rows = await _client.rpc<List<dynamic>>(
+      'get_my_perks',
+      params: {'p_club_id': clubId},
+    );
+    return rows
+        .cast<Map<String, dynamic>>()
+        .map(
+          (row) => myPerkFromRow(
+            row,
+            logoUrl: (path) =>
+                _client.storage.from('club-assets').getPublicUrl(path),
+          ),
+        )
+        .toList();
+  });
+
   static String? _date(DateTime? value) =>
       value?.toIso8601String().substring(0, 10);
 
@@ -102,3 +120,22 @@ PerkFailure mapPerkError(String? code, String message) => switch (code) {
   '22023' => const InvalidPerkFailure(PerkField.body),
   _ => PerkUnavailableFailure('$code $message'),
 };
+
+Perk myPerkFromRow(
+  Map<String, dynamic> row, {
+  required String Function(String path) logoUrl,
+}) {
+  final logoPath = row['sponsor_logo_path'] as String?;
+  return Perk(
+    id: row['id'] as String,
+    title: row['title'] as String,
+    body: row['body'] as String,
+    status: PerkStatus.published,
+    imagePath: row['image_path'] as String?,
+    validFrom: _parseDate(row['valid_from']),
+    validUntil: _parseDate(row['valid_until']),
+    sponsorName: row['sponsor_name'] as String?,
+    sponsorLogoUrl: logoPath == null ? null : logoUrl(logoPath),
+    sponsorWebsiteUrl: row['sponsor_website_url'] as String?,
+  );
+}

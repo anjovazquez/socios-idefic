@@ -145,6 +145,13 @@ class ClubHomePage extends StatelessWidget {
                           icon: const Icon(Icons.receipt_long_outlined),
                           label: const Text('Mi suscripción'),
                         ),
+                        const SizedBox(height: 8),
+                        OutlinedButton.icon(
+                          key: const Key('open-my-perks'),
+                          onPressed: () => context.go('/club/benefits'),
+                          icon: const Icon(Icons.local_offer_outlined),
+                          label: const Text('Mis ventajas'),
+                        ),
                       ],
                     ),
                   ),

@@ -16,6 +16,8 @@ class Perk {
     this.imagePath,
     this.validFrom,
     this.validUntil,
+    this.sponsorLogoUrl,
+    this.sponsorWebsiteUrl,
   });
 
   final String id;
@@ -27,6 +29,10 @@ class Perk {
   final String? imagePath;
   final DateTime? validFrom;
   final DateTime? validUntil;
+
+  /// Member view (VS-030): the sponsor's public logo and website.
+  final String? sponsorLogoUrl;
+  final String? sponsorWebsiteUrl;
 
   PerkVisibility visibilityOn(DateTime today) {
     final day = DateTime(today.year, today.month, today.day);
@@ -84,4 +90,7 @@ abstract interface class PerkRepository {
 
   /// Archive or back to draft.
   Future<void> setStatus(String perkId, PerkStatus status);
+
+  /// Member: valid perks of the club, with their active sponsor (RF-025).
+  Future<List<Perk>> getMyPerks(String clubId);
 }

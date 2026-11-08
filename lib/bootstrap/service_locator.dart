@@ -195,6 +195,7 @@ void configureDependencies() {
         getClubPerks: GetClubPerks(serviceLocator()),
         savePerk: SavePerk(serviceLocator()),
         setPerkStatus: SetPerkStatus(serviceLocator()),
+        getMyPerks: GetMyPerks(serviceLocator()),
       ),
     );
 }

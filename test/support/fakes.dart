@@ -1377,7 +1377,34 @@ class FakeSponsorRepository implements SponsorRepository {
 
 /// Perks per club; sponsors of the same club only (RN-015).
 class FakePerkRepository implements PerkRepository {
+  FakePerkRepository({DateTime? today})
+    : today = today ?? DateTime(2026, 11, 9);
+
+  /// The members' calendar day.
+  DateTime today;
   final Map<String, List<Perk>> perks = {};
+
+  @override
+  Future<List<Perk>> getMyPerks(String clubId) async => [
+    for (final p in perks[clubId] ?? <Perk>[])
+      if (p.visibilityOn(today) == PerkVisibility.visible)
+        Perk(
+          id: p.id,
+          title: p.title,
+          body: p.body,
+          status: p.status,
+          imagePath: p.imagePath,
+          validFrom: p.validFrom,
+          validUntil: p.validUntil,
+          sponsorName: p.sponsorName,
+          sponsorWebsiteUrl: p.sponsorId == null
+              ? null
+              : sponsors?.sponsors[clubId]
+                    ?.where((s) => s.id == p.sponsorId)
+                    .firstOrNull
+                    ?.websiteUrl,
+        ),
+  ];
   FakeSponsorRepository? sponsors;
   int _ids = 0;
 
@@ -1558,6 +1585,7 @@ AppUseCases buildUseCases({
     getClubPerks: GetClubPerks(perkRepository),
     savePerk: SavePerk(perkRepository),
     setPerkStatus: SetPerkStatus(perkRepository),
+    getMyPerks: GetMyPerks(perkRepository),
     downloadReceipt: DownloadReceipt(
       paymentsRepository,
       receiptRenderer ?? FakeReceiptRenderer(),
