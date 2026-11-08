@@ -53,6 +53,14 @@ Memoria estable. Solo hechos válidos durante muchas tareas (ver `MEMORY_POLICY.
 `season_memberships`, `payments`, `payment_methods`, `renewal_notices`,
 `sponsors`, `sponsor_seasons`, `posts`, `perks`, `platform_admins`, `audit_log`.
 
+## Conocimiento técnico estable
+
+- Supabase Auth: el registro público se cierra con `auth.enable_signup = false`; `[auth.email].enable_signup` debe seguir en `true` porque en GoTrue activa el proveedor email (si es `false`, no se puede iniciar sesión con contraseña).
+- Cliente: `Supabase.initialize(publishableKey: ...)` (`anonKey` está deprecado).
+- Navegación: cada `SessionStatus` tiene una ruta; `go_router` redirige con `refreshListenable` = `SessionViewModel`.
+- Club activo recordado por dispositivo (`ActiveClubStore`, shared_preferences) y olvidado al cerrar sesión.
+- Pruebas web en el sandbox: `flutter build web --no-web-resources-cdn` (gstatic bloqueado); los campos de Flutter web se rellenan haciendo clic por coordenadas y escribiendo con el teclado.
+
 ## Producto / UX
 
 - Socio: navegación Inicio/Blog · Mi carnet · Mis ventajas · Mi suscripción · Mis datos.

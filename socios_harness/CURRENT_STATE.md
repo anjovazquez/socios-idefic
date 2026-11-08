@@ -6,8 +6,8 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 - Fase actual: **1 — Acceso multi-club (0.1)**.
 - Tarea activa: ninguna.
-- Última tarea completada: `BOOTSTRAP-000` (2026-11-08).
-- Siguiente tarea READY: `VS-001 — Login email/contraseña y selector de club`.
+- Última tarea completada: `VS-001 — Login email/contraseña y selector de club` (2026-11-08).
+- Siguiente tarea READY: `VS-002 — Login con Google` (después `VS-003`). VS-002 se implementa y testea con fakes; la prueba OAuth real necesita un client ID de Google (lo configura el usuario).
 - Bloqueos globales: ninguno.
 
 ## Milestones
@@ -15,7 +15,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 | Milestone | Estado |
 |---|---|
 | Bootstrap | DONE |
-| 0.1 Acceso multi-club | READY (VS-001) |
+| 0.1 Acceso multi-club | IN_PROGRESS (VS-001 DONE; VS-002, VS-003 READY) |
 | 0.2 Socios | TODO |
 | 0.3 Temporadas y cuotas | TODO |
 | 0.4 Carnet digital | TODO |
@@ -36,4 +36,5 @@ Snapshot operativo. Se actualiza al final de cada loop.
 - Config cliente: `--dart-define=SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` (ver `.env.example`).
 - Supabase CLI 2.122 (devDependency npm); signup deshabilitado; Google declarado y desactivado.
 - CI: `.github/workflows/ci.yml` con `quality` y `sql-tests` (aún sin ejecución en GitHub: el workflow corre en PR/main).
+- Esquema: `profiles`, `clubs`, `club_memberships` + RPC `get_my_clubs` (VS-001). Seed local: `admin@`, `ana@`, `luis@example.com` (contraseña `<nombre>-password`).
 - Sesión cloud: Flutter en `$HOME/flutter/bin`; Docker requiere arrancar `dockerd` en segundo plano (ver `QUALITY_GATES.md`).
