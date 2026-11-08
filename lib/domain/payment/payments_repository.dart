@@ -50,6 +50,19 @@ abstract interface class PaymentsRepository {
   /// Admin: reads the account status from Stripe after the onboarding.
   Future<OnlinePaymentsStatus> refreshOnlinePaymentsStatus(String clubId);
 
-  /// Member: opens the provider checkout of a pending fee.
-  Future<Uri> createCheckout(String seasonMembershipId);
+  /// Member: opens the provider checkout of a pending fee;
+  /// [saveForRenewal] keeps the method for automatic renewals.
+  Future<Uri> createCheckout(
+    String seasonMembershipId, {
+    bool saveForRenewal = false,
+  });
+
+  /// Member: saved method and automatic renewal in [clubId].
+  Future<RenewalSetup> getMyRenewalSetup(String clubId);
+
+  /// Member: provider page to save a method without paying.
+  Future<Uri> startPaymentMethodSetup(String clubId);
+
+  /// Member: removes the saved method; renewals stop being automatic.
+  Future<void> removePaymentMethod(String clubId);
 }

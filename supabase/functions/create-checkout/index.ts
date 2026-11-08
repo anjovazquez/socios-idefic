@@ -1,7 +1,10 @@
 // VS-021: the member pays their fee online (ADR-001). Opens a Stripe
 // Checkout Session on the club's connected account for the pending payment.
 //
-// POST { seasonMembershipId } (member JWT) → 200 { url, paymentId }
+// POST { seasonMembershipId, saveForRenewal? } (member JWT)
+//   → 200 { url, paymentId }
+// With saveForRenewal the card or bank account is kept for the automatic
+// renewals (VS-022); the webhook stores it.
 // Errors: 401 unauthorized, 403 forbidden, 409 online_payments_disabled |
 // not_payable | already_paid, 503 payments_not_configured.
 
@@ -28,15 +31,21 @@ export interface Deps {
   appUrl: string;
 }
 
-export function checkoutParams(row: Row, appUrl: string): Row {
+export function checkoutParams(row: Row, appUrl: string, saveForRenewal = false): Row {
   const base = appUrl.replace(/\/$/, "");
   const paymentId = row.payment_id as string;
+  const customer = row.stripe_customer_id as string | null;
+  const metadata = {
+    payment_id: paymentId,
+    club_membership_id: row.club_membership_id,
+    save_method: saveForRenewal ? "true" : "false",
+  };
   return {
     mode: "payment",
     payment_method_types: ["card", "sepa_debit"],
-    customer_email: row.member_email,
+    ...(customer ? { customer } : { customer_email: row.member_email, customer_creation: "always" }),
     client_reference_id: paymentId,
-    metadata: { payment_id: paymentId },
+    metadata,
     line_items: [{
       quantity: 1,
       price_data: {
@@ -46,22 +55,22 @@ export function checkoutParams(row: Row, appUrl: string): Row {
       },
     }],
     payment_intent_data: {
-      // Saved for the automatic renewals (VS-022…VS-024).
-      setup_future_usage: "off_session",
-      metadata: { payment_id: paymentId },
+      // Only kept for automatic renewals when the member asks (VS-022).
+      ...(saveForRenewal ? { setup_future_usage: "off_session" } : {}),
+      metadata,
     },
     success_url: `${base}/#/club/subscription?pago=ok`,
     cancel_url: `${base}/#/club/subscription?pago=cancelado`,
   };
 }
 
-export async function handle(body: { seasonMembershipId?: string }, deps: Deps) {
+export async function handle(body: { seasonMembershipId?: string; saveForRenewal?: boolean }, deps: Deps) {
   if (!deps.createSession) throw new HttpError(503, "payments_not_configured");
   if (!body.seasonMembershipId) throw new HttpError(400, "invalid_request");
   const [row] = await guardRpc(() =>
     deps.backend.userRpc("prepare_online_payment", { p_season_membership_id: body.seasonMembershipId })
   );
-  const session = await deps.createSession(row.stripe_account_id as string, checkoutParams(row, deps.appUrl));
+  const session = await deps.createSession(row.stripe_account_id as string, checkoutParams(row, deps.appUrl, body.saveForRenewal === true));
   await guardRpc(() =>
     deps.backend.serviceRpc("attach_checkout_session", {
       p_payment_id: row.payment_id,

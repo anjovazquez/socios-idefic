@@ -67,3 +67,32 @@ class MyPayment {
 
   bool get hasReceipt => status == PaymentStatus.paid && receiptNumber != null;
 }
+
+enum SavedMethodKind { card, sepaDebit }
+
+/// Payment method kept for automatic renewals (RF-012). Masked data only.
+class SavedPaymentMethod {
+  const SavedPaymentMethod({
+    required this.kind,
+    this.brand,
+    this.last4,
+    this.country,
+  });
+
+  final SavedMethodKind kind;
+  final String? brand;
+  final String? last4;
+  final String? country;
+}
+
+/// Whether the member renews automatically and with which method.
+class RenewalSetup {
+  const RenewalSetup({this.method, this.autoRenew = false});
+
+  static const none = RenewalSetup();
+
+  final SavedPaymentMethod? method;
+  final bool autoRenew;
+
+  bool get isAutomatic => autoRenew && method != null;
+}

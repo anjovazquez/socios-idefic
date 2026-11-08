@@ -12,6 +12,11 @@ class StripePaymentGateway implements PaymentGateway {
   Future<PaymentStart> start({
     required String clubId,
     required String seasonMembershipId,
-  }) async =>
-      RedirectPaymentStart(await _payments.createCheckout(seasonMembershipId));
+    bool saveForRenewal = false,
+  }) async => RedirectPaymentStart(
+    await _payments.createCheckout(
+      seasonMembershipId,
+      saveForRenewal: saveForRenewal,
+    ),
+  );
 }

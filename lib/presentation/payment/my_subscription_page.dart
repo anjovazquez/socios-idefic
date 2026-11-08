@@ -14,7 +14,10 @@ import 'payment_labels.dart';
 
 /// «Mi suscripción» (RF-011, RF-016).
 class MySubscriptionPage extends StatelessWidget {
-  const MySubscriptionPage({super.key, this.paymentResult});
+  const MySubscriptionPage({super.key, this.paymentResult, this.methodResult});
+
+  /// `ok` or `cancelado` when coming back from saving a method.
+  final String? methodResult;
 
   /// `ok` or `cancelado` when coming back from the provider checkout.
   final String? paymentResult;
@@ -25,14 +28,18 @@ class MySubscriptionPage extends StatelessWidget {
       context.read<AppUseCases>(),
       clubId: context.read<SessionViewModel>().activeClub!.id,
     )..load(),
-    child: _MySubscriptionView(paymentResult: paymentResult),
+    child: _MySubscriptionView(
+      paymentResult: paymentResult,
+      methodResult: methodResult,
+    ),
   );
 }
 
 class _MySubscriptionView extends StatelessWidget {
-  const _MySubscriptionView({this.paymentResult});
+  const _MySubscriptionView({this.paymentResult, this.methodResult});
 
   final String? paymentResult;
+  final String? methodResult;
 
   @override
   Widget build(BuildContext context) {
@@ -83,8 +90,20 @@ class _MySubscriptionView extends StatelessWidget {
                       'No se ha completado el pago. Puedes intentarlo de nuevo '
                       'cuando quieras.',
                 ),
+              if (methodResult == 'ok')
+                const _ReturnNotice(
+                  key: Key('method-return-ok'),
+                  icon: Icons.hourglass_top,
+                  text:
+                      'Estamos guardando tu método de pago. Aparecerá aquí en '
+                      'unos segundos; desliza hacia abajo para actualizar.',
+                ),
               _CurrentSeason(subscription: value),
               const SizedBox(height: 16),
+              if (value.onlinePayments || viewModel.renewal.method != null) ...[
+                _RenewalSection(renewal: viewModel.renewal),
+                const SizedBox(height: 16),
+              ],
               const _NextCharges(),
               const SizedBox(height: 24),
               Text(
@@ -158,6 +177,7 @@ class _CurrentSeason extends StatelessWidget {
             ),
             if (subscription.canPayOnline) ...[
               const SizedBox(height: 12),
+              const _SaveForRenewalCheckbox(),
               const _PayOnlineButton(),
             ],
             if (subscription.canPay) ...[
@@ -351,6 +371,168 @@ class _ReturnNotice extends StatelessWidget {
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(color: scheme.onSecondaryContainer),
+        ),
+      ),
+    );
+  }
+}
+
+/// «4242», «Visa ···· 4242», «Cuenta ES ···· 3000».
+String savedMethodLabel(SavedPaymentMethod method) {
+  final last4 = method.last4 == null ? '' : ' ···· ${method.last4}';
+  return switch (method.kind) {
+    SavedMethodKind.card =>
+      '${method.brand == null ? 'Tarjeta' : _brandName(method.brand!)}$last4',
+    SavedMethodKind.sepaDebit =>
+      'Domiciliación ${method.country ?? ''}$last4'.replaceAll('  ', ' '),
+  };
+}
+
+String _brandName(String brand) => switch (brand) {
+  'visa' => 'Visa',
+  'mastercard' => 'Mastercard',
+  'amex' => 'American Express',
+  _ => 'Tarjeta ${brand[0].toUpperCase()}${brand.substring(1)}',
+};
+
+class _SaveForRenewalCheckbox extends StatelessWidget {
+  const _SaveForRenewalCheckbox();
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = context.watch<MySubscriptionViewModel>();
+    return CheckboxListTile(
+      key: const Key('save-for-renewal'),
+      contentPadding: EdgeInsets.zero,
+      controlAffinity: ListTileControlAffinity.leading,
+      value: viewModel.saveForRenewal,
+      onChanged: (value) => viewModel.setSaveForRenewal(value ?? false),
+      title: const Text('Usar este método para renovar automáticamente'),
+      subtitle: const Text('Te avisaremos antes de cada renovación'),
+    );
+  }
+}
+
+class _RenewalSection extends StatelessWidget {
+  const _RenewalSection({required this.renewal});
+
+  final RenewalSetup renewal;
+
+  Future<void> _setUp(BuildContext context) async {
+    final viewModel = context.read<MySubscriptionViewModel>();
+    final openUrl = context.read<OpenUrl>();
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await openUrl(await viewModel.setUpMethod());
+    } on String catch (message) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
+  Future<void> _remove(BuildContext context) async {
+    final viewModel = context.read<MySubscriptionViewModel>();
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('¿Eliminar el método de pago?'),
+        content: const Text(
+          'La renovación automática se desactivará y tendrás que pagar la '
+          'próxima cuota tú mismo. Tus pagos y recibos no cambian.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            key: const Key('remove-method-confirm'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    String message;
+    try {
+      message = await viewModel.removeMethod();
+    } on String catch (error) {
+      message = error;
+    }
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final busy = context.watch<MySubscriptionViewModel>().changingMethod;
+    final method = renewal.method;
+    return Card(
+      key: const Key('renewal-section'),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Renovación automática', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            if (method == null)
+              Text(
+                'Guarda una tarjeta o una cuenta bancaria y tu cuota se '
+                'renovará sola cada temporada.',
+                style: theme.textTheme.bodyMedium,
+              )
+            else ...[
+              Row(
+                children: [
+                  Icon(
+                    method.kind == SavedMethodKind.card
+                        ? Icons.credit_card
+                        : Icons.account_balance_outlined,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      savedMethodLabel(method),
+                      key: const Key('saved-method'),
+                      style: theme.textTheme.titleSmall,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              if (renewal.isAutomatic)
+                const Chip(
+                  key: Key('auto-renew-on'),
+                  avatar: Icon(Icons.autorenew, size: 16),
+                  label: Text('Renovación automática activada'),
+                ),
+            ],
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                if (method != null)
+                  TextButton(
+                    key: const Key('remove-method'),
+                    onPressed: busy ? null : () => _remove(context),
+                    child: const Text('Eliminar método'),
+                  ),
+                OutlinedButton(
+                  key: const Key('set-up-method'),
+                  onPressed: busy ? null : () => _setUp(context),
+                  child: Text(
+                    method == null ? 'Guardar un método' : 'Cambiar método',
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

@@ -64,14 +64,46 @@ String? redirectFor(SessionStatus status, String location) {
   return target;
 }
 
+/// Keeps the link opened while the session loads (a full page load, e.g.
+/// back from Stripe to `/club/subscription?pago=ok`) and goes back to it once
+/// the session allows it, instead of the area root.
+class DeepLinkKeeper {
+  String? _pending;
+
+  String? redirect(SessionStatus status, Uri uri) {
+    final target = redirectFor(status, uri.path);
+    if (status == SessionStatus.loading) {
+      if (target == AppRoutes.loading && uri.path != AppRoutes.loading) {
+        _pending = uri.toString();
+      }
+      return target;
+    }
+    final pending = _pending;
+    if (pending != null) {
+      _pending = null;
+      if (redirectFor(status, Uri.parse(pending).path) == null &&
+          pending != uri.toString()) {
+        return pending;
+      }
+    }
+    return target;
+  }
+}
+
 GoRouter createRouter(
   SessionViewModel session, {
   String? initialLocation,
-}) => GoRouter(
+  DeepLinkKeeper? deepLinks,
+}) => _createRouter(session, initialLocation, deepLinks ?? DeepLinkKeeper());
+
+GoRouter _createRouter(
+  SessionViewModel session,
+  String? initialLocation,
+  DeepLinkKeeper keeper,
+) => GoRouter(
   initialLocation: initialLocation ?? AppRoutes.loading,
   refreshListenable: session,
-  redirect: (context, state) =>
-      redirectFor(session.status, state.matchedLocation),
+  redirect: (context, state) => keeper.redirect(session.status, state.uri),
   routes: [
     GoRoute(
       path: AppRoutes.loading,
@@ -123,6 +155,7 @@ GoRouter createRouter(
           path: 'subscription',
           builder: (context, state) => MySubscriptionPage(
             paymentResult: state.uri.queryParameters['pago'],
+            methodResult: state.uri.queryParameters['metodo'],
           ),
         ),
         GoRoute(

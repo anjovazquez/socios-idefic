@@ -156,6 +156,9 @@ void configureDependencies() {
         refreshOnlinePaymentsStatus: RefreshOnlinePaymentsStatus(
           serviceLocator(),
         ),
+        getMyRenewalSetup: GetMyRenewalSetup(serviceLocator()),
+        startPaymentMethodSetup: StartPaymentMethodSetup(serviceLocator()),
+        removePaymentMethod: RemovePaymentMethod(serviceLocator()),
       ),
     );
 }

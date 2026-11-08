@@ -1,6 +1,6 @@
 import { assertEquals } from "jsr:@std/assert@1";
 import { signPayload } from "../_shared/stripe.ts";
-import { type Deps, handle, paymentUpdateOf } from "./index.ts";
+import { type Deps, handle, paymentUpdateOf, savedMethodOf } from "./index.ts";
 
 const secret = "whsec_test";
 const now = 1_800_000_000;
@@ -99,4 +99,73 @@ Deno.test("account updates enable the club online payments", async () => {
     fn: "set_club_stripe_account",
     params: { p_club_id: null, p_account_id: "acct_idefic", p_charges_enabled: true },
   });
+});
+
+function depsWithIntents(intent: Record<string, unknown>) {
+  const { deps, calls } = fakeDeps();
+  deps.retrieveIntent = (account, kind, id) => {
+    calls.push({ fn: `stripe.${kind}`, params: { account, id } });
+    return Promise.resolve(intent);
+  };
+  return { deps, calls };
+}
+
+Deno.test("«renovar automáticamente»: the card ending in 4242 is saved", async () => {
+  const { deps, calls } = depsWithIntents({
+    id: "pi_1",
+    customer: "cus_marta",
+    payment_method: { id: "pm_card", type: "card", card: { brand: "visa", last4: "4242", country: "ES" } },
+  });
+  const payload = event("evt_paid_save", "checkout.session.completed", {
+    id: "cs_1",
+    mode: "payment",
+    payment_status: "paid",
+    payment_intent: "pi_1",
+    customer: "cus_marta",
+    metadata: { payment_id: "pay-marta", club_membership_id: "cm-marta", save_method: "true" },
+  });
+  await deliver(payload, deps);
+
+  assertEquals(calls[0], { fn: "stripe.payment_intents", params: { account: "acct_idefic", id: "pi_1" } });
+  assertEquals(calls[1].fn, "save_payment_method");
+  assertEquals(calls[1].params.p_last4, "4242");
+  assertEquals(calls[1].params.p_brand, "visa");
+  assertEquals(calls[2].fn, "apply_payment_event");
+});
+
+Deno.test("a bank account saved in setup mode keeps its mandate", async () => {
+  const { deps, calls } = depsWithIntents({
+    id: "seti_1",
+    mandate: "mandate_1",
+    payment_method: { id: "pm_sepa", type: "sepa_debit", sepa_debit: { last4: "3000", country: "ES" } },
+  });
+  const result = await deliver(
+    event("evt_setup", "checkout.session.completed", {
+      id: "cs_setup",
+      mode: "setup",
+      setup_intent: "seti_1",
+      customer: "cus_marta",
+      metadata: { club_membership_id: "cm-marta", save_method: "true" },
+    }),
+    deps,
+  );
+  assertEquals(calls[0].fn, "stripe.setup_intents");
+  assertEquals(calls[1].params.p_kind, "sepa_debit");
+  assertEquals(calls[1].params.p_mandate_id, "mandate_1");
+  assertEquals(result.status, 200);
+});
+
+Deno.test("without «renovar automáticamente» nothing is saved", async () => {
+  const { deps, calls } = depsWithIntents({});
+  await deliver(paidCheckout, deps);
+  assertEquals(calls.map((c) => c.fn), ["apply_payment_event"]);
+});
+
+Deno.test("only masked data leaves the intent", () => {
+  const method = savedMethodOf(
+    { customer: "cus", metadata: { club_membership_id: "cm" } },
+    { payment_method: { id: "pm", type: "card", card: { brand: "visa", last4: "4242", number: "4242424242424242" } } },
+  );
+  assertEquals(Object.values(method ?? {}).includes("4242424242424242"), false);
+  assertEquals(savedMethodOf({ metadata: {} }, { payment_method: "pm_not_expanded" }), null);
 });

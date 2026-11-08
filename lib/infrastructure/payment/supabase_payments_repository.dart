@@ -150,11 +150,40 @@ class SupabasePaymentsRepository implements PaymentsRepository {
   }
 
   @override
-  Future<Uri> createCheckout(String seasonMembershipId) async {
+  Future<Uri> createCheckout(
+    String seasonMembershipId, {
+    bool saveForRenewal = false,
+  }) async {
     final data = await _invoke('create-checkout', {
       'seasonMembershipId': seasonMembershipId,
+      'saveForRenewal': saveForRenewal,
     });
     return Uri.parse(data['url'] as String);
+  }
+
+  @override
+  Future<RenewalSetup> getMyRenewalSetup(String clubId) => _guard(() async {
+    final rows = await _client.rpc<List<dynamic>>(
+      'get_my_payment_method',
+      params: {'p_club_id': clubId},
+    );
+    return rows.isEmpty
+        ? RenewalSetup.none
+        : renewalSetupFromRow(rows.first as Map<String, dynamic>);
+  });
+
+  @override
+  Future<Uri> startPaymentMethodSetup(String clubId) async {
+    final data = await _invoke('payment-methods', {
+      'clubId': clubId,
+      'action': 'setup',
+    });
+    return Uri.parse(data['url'] as String);
+  }
+
+  @override
+  Future<void> removePaymentMethod(String clubId) async {
+    await _invoke('payment-methods', {'clubId': clubId, 'action': 'remove'});
   }
 
   Future<Map<String, dynamic>> _invoke(
@@ -344,3 +373,18 @@ PaymentFailure mapOnlinePaymentError(int status, String? code) =>
       (_, 'not_payable') => const NotPayableFailure(),
       _ => PaymentUnavailableFailure('$status $code'),
     };
+
+RenewalSetup renewalSetupFromRow(Map<String, dynamic> row) => RenewalSetup(
+  autoRenew: row['auto_renew'] == true,
+  method: switch (row['kind']) {
+    final String kind => SavedPaymentMethod(
+      kind: kind == 'sepa_debit'
+          ? SavedMethodKind.sepaDebit
+          : SavedMethodKind.card,
+      brand: row['brand'] as String?,
+      last4: row['last4'] as String?,
+      country: row['country'] as String?,
+    ),
+    _ => null,
+  },
+);

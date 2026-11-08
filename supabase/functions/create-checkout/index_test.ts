@@ -1,7 +1,7 @@
 import { assertEquals, assertRejects } from "jsr:@std/assert@1";
 import { HttpError } from "../_shared/http.ts";
 import { RpcFailure } from "../_shared/supabase_rest.ts";
-import { type Deps, handle } from "./index.ts";
+import { checkoutParams, type Deps, handle } from "./index.ts";
 
 const prepared = {
   payment_id: "pay-1",
@@ -10,6 +10,8 @@ const prepared = {
   stripe_account_id: "acct_idefic",
   club_name: "IDEFIC",
   member_email: "marta@example.com",
+  club_membership_id: "cm-marta",
+  stripe_customer_id: null,
 };
 
 function deps(overrides: Partial<Deps> = {}) {
@@ -46,7 +48,8 @@ Deno.test("opens a Checkout in the club account for Marta's 50 € fee", async (
   const params = checkout.params as {
     line_items: { price_data: { unit_amount: number; currency: string } }[];
     metadata: { payment_id: string };
-    payment_intent_data: { metadata: { payment_id: string } };
+    payment_intent_data: { metadata: { payment_id: string }; setup_future_usage?: string };
+    customer_creation?: string;
     payment_method_types: string[];
     success_url: string;
   };
@@ -55,6 +58,8 @@ Deno.test("opens a Checkout in the club account for Marta's 50 € fee", async (
   assertEquals(params.metadata.payment_id, "pay-1");
   assertEquals(params.payment_intent_data.metadata.payment_id, "pay-1");
   assertEquals(params.payment_method_types, ["card", "sepa_debit"]);
+  assertEquals(params.payment_intent_data.setup_future_usage, undefined);
+  assertEquals(params.customer_creation, "always");
   assertEquals(params.success_url, "https://socios.example/#/club/subscription?pago=ok");
   assertEquals(calls[2], {
     fn: "attach_checkout_session",
@@ -78,4 +83,22 @@ Deno.test("database refusals become HTTP errors", async () => {
   });
   const error = await assertRejects(() => handle({ seasonMembershipId: "sm" }, value), HttpError);
   assertEquals([error.status, error.code], [409, "online_payments_disabled"]);
+});
+
+Deno.test("«renovar automáticamente» keeps the method for renewals", async () => {
+  const { value, calls } = deps();
+  await handle({ seasonMembershipId: "sm-marta", saveForRenewal: true }, value);
+  const params = calls[1].params as {
+    metadata: Record<string, string>;
+    payment_intent_data: { setup_future_usage?: string };
+  };
+  assertEquals(params.payment_intent_data.setup_future_usage, "off_session");
+  assertEquals(params.metadata.save_method, "true");
+  assertEquals(params.metadata.club_membership_id, "cm-marta");
+});
+
+Deno.test("a known Stripe customer is reused", () => {
+  const params = checkoutParams({ ...prepared, stripe_customer_id: "cus_marta" }, "https://x");
+  assertEquals(params.customer, "cus_marta");
+  assertEquals(params.customer_email, undefined);
 });

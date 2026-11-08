@@ -1035,12 +1035,35 @@ class FakePaymentsRepository implements PaymentsRepository {
     String clubId,
   ) async => online[clubId] ?? OnlinePaymentsStatus.notConnected;
 
+  final List<bool> checkoutSaveFlags = [];
+
   @override
-  Future<Uri> createCheckout(String seasonMembershipId) async {
+  Future<Uri> createCheckout(
+    String seasonMembershipId, {
+    bool saveForRenewal = false,
+  }) async {
     final url = checkouts[seasonMembershipId];
     if (url == null) throw const OnlinePaymentsUnavailableFailure();
+    checkoutSaveFlags.add(saveForRenewal);
     return url;
   }
+
+  /// Saved methods per club (signed-in member).
+  final Map<String, RenewalSetup> renewal = {};
+
+  @override
+  Future<RenewalSetup> getMyRenewalSetup(String clubId) async =>
+      renewal[clubId] ?? RenewalSetup.none;
+
+  @override
+  Future<Uri> startPaymentMethodSetup(String clubId) async {
+    if (!onlineConfigured) throw const OnlinePaymentsUnavailableFailure();
+    return Uri.parse('https://checkout.stripe.test/setup/$clubId');
+  }
+
+  @override
+  Future<void> removePaymentMethod(String clubId) async =>
+      renewal[clubId] = RenewalSetup.none;
 
   /// Receipts by payment id; missing = not paid.
   final Map<String, Receipt> receipts = {};
@@ -1148,6 +1171,9 @@ AppUseCases buildUseCases({
     refreshOnlinePaymentsStatus: RefreshOnlinePaymentsStatus(
       paymentsRepository,
     ),
+    getMyRenewalSetup: GetMyRenewalSetup(paymentsRepository),
+    startPaymentMethodSetup: StartPaymentMethodSetup(paymentsRepository),
+    removePaymentMethod: RemovePaymentMethod(paymentsRepository),
     downloadReceipt: DownloadReceipt(
       paymentsRepository,
       receiptRenderer ?? FakeReceiptRenderer(),

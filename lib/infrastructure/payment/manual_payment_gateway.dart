@@ -12,6 +12,7 @@ class ManualPaymentGateway implements PaymentGateway {
   Future<PaymentStart> start({
     required String clubId,
     required String seasonMembershipId,
+    bool saveForRenewal = false,
   }) async =>
       ManualPaymentStart(await _payments.getPaymentInstructions(clubId));
 }

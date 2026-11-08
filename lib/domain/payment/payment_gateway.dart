@@ -2,9 +2,12 @@
 /// The manual gateway shows the club instructions; Stripe (VS-021) will
 /// return a checkout URL.
 abstract interface class PaymentGateway {
+  /// [saveForRenewal]: keep the method for automatic renewals (VS-022);
+  /// only providers with recurring payments use it.
   Future<PaymentStart> start({
     required String clubId,
     required String seasonMembershipId,
+    bool saveForRenewal = false,
   });
 }
 

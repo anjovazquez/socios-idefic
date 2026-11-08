@@ -69,6 +69,9 @@ class AppUseCases {
     required this.getOnlinePaymentsStatus,
     required this.startOnlinePaymentsOnboarding,
     required this.refreshOnlinePaymentsStatus,
+    required this.getMyRenewalSetup,
+    required this.startPaymentMethodSetup,
+    required this.removePaymentMethod,
   });
 
   final WatchSession watchSession;
@@ -126,4 +129,7 @@ class AppUseCases {
   final GetOnlinePaymentsStatus getOnlinePaymentsStatus;
   final StartOnlinePaymentsOnboarding startOnlinePaymentsOnboarding;
   final RefreshOnlinePaymentsStatus refreshOnlinePaymentsStatus;
+  final GetMyRenewalSetup getMyRenewalSetup;
+  final StartPaymentMethodSetup startPaymentMethodSetup;
+  final RemovePaymentMethod removePaymentMethod;
 }

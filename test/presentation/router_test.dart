@@ -31,4 +31,26 @@ void main() {
     expect(redirectFor(SessionStatus.loading, '/activar'), isNull);
     expect(redirectFor(SessionStatus.onboarding, '/activar'), '/primer-acceso');
   });
+
+  test('a link opened while the session loads is restored afterwards', () {
+    final keeper = DeepLinkKeeper();
+    final link = Uri.parse('/club/subscription?pago=ok');
+
+    expect(keeper.redirect(SessionStatus.loading, link), '/');
+    expect(keeper.redirect(SessionStatus.loading, Uri.parse('/')), isNull);
+    expect(
+      keeper.redirect(SessionStatus.inClub, Uri.parse('/')),
+      '/club/subscription?pago=ok',
+    );
+    expect(keeper.redirect(SessionStatus.inClub, link), isNull);
+    // Only once.
+    expect(keeper.redirect(SessionStatus.inClub, Uri.parse('/')), '/club');
+  });
+
+  test('a kept link outside the session area is dropped', () {
+    final keeper = DeepLinkKeeper();
+    keeper.redirect(SessionStatus.loading, Uri.parse('/club/payments'));
+    expect(keeper.redirect(SessionStatus.signedOut, Uri.parse('/')), '/login');
+    expect(keeper.redirect(SessionStatus.inClub, Uri.parse('/')), '/club');
+  });
 }

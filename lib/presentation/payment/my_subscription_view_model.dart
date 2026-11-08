@@ -33,9 +33,13 @@ class MySubscriptionViewModel extends ChangeNotifier {
       final results = await Future.wait([
         _useCases.getMySubscription(clubId),
         _useCases.getMyPayments(clubId),
+        _useCases
+            .getMyRenewalSetup(clubId)
+            .catchError((_) => RenewalSetup.none),
       ]);
       _subscription = results[0] as MySubscription;
       _payments = results[1] as List<MyPayment>;
+      _renewal = results[2] as RenewalSetup;
     } catch (_) {
       _loadError =
           'No hemos podido cargar tu suscripción. Inténtalo de nuevo en un '
@@ -69,6 +73,49 @@ class MySubscriptionViewModel extends ChangeNotifier {
     }
   }
 
+  RenewalSetup _renewal = RenewalSetup.none;
+  RenewalSetup get renewal => _renewal;
+
+  /// «Usar este método para renovar automáticamente» (explicit opt-in).
+  bool _saveForRenewal = false;
+  bool get saveForRenewal => _saveForRenewal;
+
+  void setSaveForRenewal(bool value) {
+    _saveForRenewal = value;
+    notifyListeners();
+  }
+
+  bool _changingMethod = false;
+  bool get changingMethod => _changingMethod;
+
+  /// Returns the provider page to save a method, or throws the message.
+  Future<Uri> setUpMethod() =>
+      _method(() => _useCases.startPaymentMethodSetup(clubId));
+
+  /// Returns the confirmation, or throws the error message.
+  Future<String> removeMethod() async {
+    await _method(() => _useCases.removePaymentMethod(clubId));
+    _renewal = RenewalSetup.none;
+    notifyListeners();
+    return 'Método eliminado. La renovación automática está desactivada';
+  }
+
+  Future<T> _method<T>(Future<T> Function() action) async {
+    _changingMethod = true;
+    notifyListeners();
+    try {
+      return await action();
+    } on PaymentFailure catch (failure) {
+      throw paymentFailureMessage(failure);
+    } catch (error) {
+      if (error is String) rethrow;
+      throw paymentFailureMessage(const PaymentUnavailableFailure());
+    } finally {
+      _changingMethod = false;
+      notifyListeners();
+    }
+  }
+
   bool _startingPayment = false;
   bool get startingPayment => _startingPayment;
 
@@ -84,6 +131,7 @@ class MySubscriptionViewModel extends ChangeNotifier {
       final start = await _useCases.startOnlinePayment(
         clubId: clubId,
         seasonMembershipId: seasonMembershipId,
+        saveForRenewal: _saveForRenewal,
       );
       return switch (start) {
         RedirectPaymentStart(:final url) => url,

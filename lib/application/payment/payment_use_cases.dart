@@ -88,7 +88,12 @@ class StartPayment {
   Future<PaymentStart> call({
     required String clubId,
     required String seasonMembershipId,
-  }) => _gateway.start(clubId: clubId, seasonMembershipId: seasonMembershipId);
+    bool saveForRenewal = false,
+  }) => _gateway.start(
+    clubId: clubId,
+    seasonMembershipId: seasonMembershipId,
+    saveForRenewal: saveForRenewal,
+  );
 }
 
 class GetMySubscription {
@@ -159,4 +164,30 @@ class RefreshOnlinePaymentsStatus {
 
   Future<OnlinePaymentsStatus> call(String clubId) =>
       _repository.refreshOnlinePaymentsStatus(clubId);
+}
+
+class GetMyRenewalSetup {
+  const GetMyRenewalSetup(this._repository);
+
+  final PaymentsRepository _repository;
+
+  Future<RenewalSetup> call(String clubId) =>
+      _repository.getMyRenewalSetup(clubId);
+}
+
+class StartPaymentMethodSetup {
+  const StartPaymentMethodSetup(this._repository);
+
+  final PaymentsRepository _repository;
+
+  Future<Uri> call(String clubId) =>
+      _repository.startPaymentMethodSetup(clubId);
+}
+
+class RemovePaymentMethod {
+  const RemovePaymentMethod(this._repository);
+
+  final PaymentsRepository _repository;
+
+  Future<void> call(String clubId) => _repository.removePaymentMethod(clubId);
 }
