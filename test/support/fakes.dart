@@ -14,6 +14,7 @@ import 'package:socios_idefic/application/member/member_use_cases.dart';
 import 'package:socios_idefic/application/onboarding/onboarding_use_cases.dart';
 import 'package:socios_idefic/application/blog/blog_use_cases.dart';
 import 'package:socios_idefic/application/payment/payment_use_cases.dart';
+import 'package:socios_idefic/application/sponsor/sponsor_use_cases.dart';
 import 'package:socios_idefic/application/platform/platform_use_cases.dart';
 import 'package:socios_idefic/application/profile/profile_use_cases.dart';
 import 'package:socios_idefic/application/season/season_use_cases.dart';
@@ -35,6 +36,7 @@ import 'package:socios_idefic/domain/onboarding/onboarding_repository.dart';
 import 'package:socios_idefic/domain/blog/blog_repository.dart';
 import 'package:socios_idefic/domain/blog/post.dart';
 import 'package:socios_idefic/domain/payment/club_payments.dart';
+import 'package:socios_idefic/domain/sponsor/sponsor.dart';
 import 'package:socios_idefic/domain/payment/my_subscription.dart';
 import 'package:socios_idefic/domain/payment/online_payments.dart';
 import 'package:socios_idefic/domain/payment/payment.dart';
@@ -1247,6 +1249,114 @@ class FakeBlogRepository implements BlogRepository {
   Future<String?> imageUrl(String path) async => null;
 }
 
+/// Sponsors per club; [seasonNames] resolves season ids to names.
+class FakeSponsorRepository implements SponsorRepository {
+  FakeSponsorRepository({Map<String, String>? seasonNames})
+    : seasonNames = seasonNames ?? {};
+
+  final Map<String, String> seasonNames;
+  final Map<String, List<Sponsor>> sponsors = {};
+  int _ids = 0;
+  int uploads = 0;
+
+  Sponsor _copy(
+    Sponsor s, {
+    String? name,
+    String? logoPath,
+    String? websiteUrl,
+    bool? isActive,
+    List<String>? seasonIds,
+  }) {
+    final ids = seasonIds ?? s.seasonIds;
+    return Sponsor(
+      id: s.id,
+      name: name ?? s.name,
+      logoPath: logoPath ?? s.logoPath,
+      websiteUrl: websiteUrl ?? s.websiteUrl,
+      isActive: isActive ?? s.isActive,
+      seasonIds: ids,
+      seasonNames: [for (final id in ids) seasonNames[id] ?? id],
+    );
+  }
+
+  (String, int) _find(String id) {
+    for (final entry in sponsors.entries) {
+      final i = entry.value.indexWhere((s) => s.id == id);
+      if (i >= 0) return (entry.key, i);
+    }
+    throw StateError('no sponsor $id');
+  }
+
+  @override
+  Future<List<Sponsor>> getClubSponsors(String clubId) async => [
+    ...?sponsors[clubId],
+  ];
+
+  @override
+  Future<String> saveSponsor({
+    String? sponsorId,
+    required String clubId,
+    required String name,
+    String? logoPath,
+    String? websiteUrl,
+  }) async {
+    final list = sponsors.putIfAbsent(clubId, () => []);
+    if (list.any((s) => s.name == name && s.id != sponsorId)) {
+      throw const SponsorAlreadyExistsFailure();
+    }
+    if (sponsorId == null) {
+      final id = 'sponsor-${++_ids}';
+      list.add(
+        Sponsor(id: id, name: name, logoPath: logoPath, websiteUrl: websiteUrl),
+      );
+      return id;
+    }
+    final (club, i) = _find(sponsorId);
+    sponsors[club]![i] = _copy(
+      sponsors[club]![i],
+      name: name,
+      logoPath: logoPath,
+      websiteUrl: websiteUrl,
+    );
+    return sponsorId;
+  }
+
+  @override
+  Future<void> setActive(String sponsorId, bool active) async {
+    final (club, i) = _find(sponsorId);
+    sponsors[club]![i] = _copy(sponsors[club]![i], isActive: active);
+  }
+
+  @override
+  Future<void> setSeasons(String sponsorId, List<String> seasonIds) async {
+    final (club, i) = _find(sponsorId);
+    sponsors[club]![i] = _copy(sponsors[club]![i], seasonIds: seasonIds);
+  }
+
+  @override
+  Future<int> renew(String seasonId, List<String> sponsorIds) async {
+    var added = 0;
+    for (final id in sponsorIds) {
+      final (club, i) = _find(id);
+      final s = sponsors[club]![i];
+      if (s.seasonIds.contains(seasonId)) continue;
+      sponsors[club]![i] = _copy(s, seasonIds: [...s.seasonIds, seasonId]);
+      added++;
+    }
+    return added;
+  }
+
+  @override
+  Future<String> uploadLogo({
+    required String clubId,
+    required Uint8List bytes,
+    required String contentType,
+  }) async => '$clubId/sponsor-${++uploads}.png';
+
+  @override
+  String logoUrl(String path) => 'https://assets.test/$path';
+}
+
 AppUseCases buildUseCases({
   required FakeAuthRepository auth,
   required FakeClubRepository clubs,
@@ -1261,7 +1371,9 @@ AppUseCases buildUseCases({
   FakePaymentsRepository? payments,
   FakeReceiptRenderer? receiptRenderer,
   FakeBlogRepository? blog,
+  FakeSponsorRepository? sponsors,
 }) {
+  final sponsorRepository = sponsors ?? FakeSponsorRepository();
   final blogRepository = blog ?? FakeBlogRepository();
   final activeClubStore = store ?? InMemoryActiveClubStore();
   final platformRepository = platform ?? FakePlatformRepository();
@@ -1348,6 +1460,11 @@ AppUseCases buildUseCases({
     getPostImageUrl: GetPostImageUrl(blogRepository),
     getClubFeed: GetClubFeed(blogRepository),
     getPost: GetPost(blogRepository),
+    getClubSponsors: GetClubSponsors(sponsorRepository),
+    saveSponsor: SaveSponsor(sponsorRepository),
+    setSponsorActive: SetSponsorActive(sponsorRepository),
+    renewSponsors: RenewSponsors(sponsorRepository),
+    uploadSponsorLogo: UploadSponsorLogo(sponsorRepository),
     downloadReceipt: DownloadReceipt(
       paymentsRepository,
       receiptRenderer ?? FakeReceiptRenderer(),

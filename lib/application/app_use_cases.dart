@@ -13,6 +13,7 @@ import 'payment/payment_use_cases.dart';
 import 'platform/platform_use_cases.dart';
 import 'profile/profile_use_cases.dart';
 import 'season/season_use_cases.dart';
+import 'sponsor/sponsor_use_cases.dart';
 
 /// Use cases the presentation layer needs, built by the composition root.
 class AppUseCases {
@@ -82,6 +83,11 @@ class AppUseCases {
     required this.getPostImageUrl,
     required this.getClubFeed,
     required this.getPost,
+    required this.getClubSponsors,
+    required this.saveSponsor,
+    required this.setSponsorActive,
+    required this.renewSponsors,
+    required this.uploadSponsorLogo,
   });
 
   final WatchSession watchSession;
@@ -151,4 +157,9 @@ class AppUseCases {
   final GetPostImageUrl getPostImageUrl;
   final GetClubFeed getClubFeed;
   final GetPost getPost;
+  final GetClubSponsors getClubSponsors;
+  final SaveSponsor saveSponsor;
+  final SetSponsorActive setSponsorActive;
+  final RenewSponsors renewSponsors;
+  final UploadSponsorLogo uploadSponsorLogo;
 }

@@ -51,6 +51,13 @@ class ClubHomePage extends StatelessWidget {
             ),
           if (club.canAdminister)
             IconButton(
+              key: const Key('open-sponsors'),
+              tooltip: 'Patrocinadores',
+              icon: const Icon(Icons.handshake_outlined),
+              onPressed: () => context.go('/club/sponsors'),
+            ),
+          if (club.canAdminister)
+            IconButton(
               key: const Key('open-payments'),
               tooltip: 'Pagos',
               icon: const Icon(Icons.payments_outlined),

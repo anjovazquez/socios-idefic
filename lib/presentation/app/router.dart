@@ -18,6 +18,7 @@ import '../payment/my_subscription_page.dart';
 import '../profile/my_data_page.dart';
 import '../season/renewal_page.dart';
 import '../season/seasons_page.dart';
+import '../sponsor/sponsors_page.dart';
 import '../platform/platform_clubs_page.dart';
 import '../session/session_status_pages.dart';
 import '../session/session_view_model.dart';
@@ -150,6 +151,10 @@ GoRouter _createRouter(
         ),
         GoRoute(path: 'card', builder: (context, state) => const MyCardPage()),
         GoRoute(path: 'me', builder: (context, state) => const MyDataPage()),
+        GoRoute(
+          path: 'sponsors',
+          builder: (context, state) => const SponsorsPage(),
+        ),
         GoRoute(
           path: 'post',
           builder: (context, state) =>

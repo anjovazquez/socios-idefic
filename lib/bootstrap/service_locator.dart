@@ -15,6 +15,7 @@ import '../application/member/member_use_cases.dart';
 import '../application/onboarding/onboarding_use_cases.dart';
 import '../application/blog/blog_use_cases.dart';
 import '../application/payment/payment_use_cases.dart';
+import '../application/sponsor/sponsor_use_cases.dart';
 import '../application/platform/platform_use_cases.dart';
 import '../application/profile/profile_use_cases.dart';
 import '../application/season/season_use_cases.dart';
@@ -27,6 +28,7 @@ import '../domain/member/members_repository.dart';
 import '../domain/onboarding/onboarding_repository.dart';
 import '../domain/blog/blog_repository.dart';
 import '../domain/payment/payment_gateway.dart';
+import '../domain/sponsor/sponsor.dart';
 import '../domain/payment/payments_repository.dart';
 import '../domain/payment/receipt.dart';
 import '../domain/platform/platform_repository.dart';
@@ -41,6 +43,7 @@ import '../infrastructure/member/supabase_members_repository.dart';
 import '../infrastructure/onboarding/supabase_onboarding_repository.dart';
 import '../infrastructure/blog/supabase_blog_repository.dart';
 import '../infrastructure/payment/manual_payment_gateway.dart';
+import '../infrastructure/sponsor/supabase_sponsor_repository.dart';
 import '../infrastructure/payment/stripe_payment_gateway.dart';
 import '../infrastructure/payment/supabase_payments_repository.dart';
 import '../presentation/receipt/pdf_receipt_renderer.dart';
@@ -69,6 +72,9 @@ void configureDependencies() {
     )
     ..registerLazySingleton<ClubBrandingRepository>(
       () => SupabaseClubBrandingRepository(client),
+    )
+    ..registerLazySingleton<SponsorRepository>(
+      () => SupabaseSponsorRepository(client),
     )
     ..registerLazySingleton<BlogRepository>(
       () => SupabaseBlogRepository(client),
@@ -174,6 +180,11 @@ void configureDependencies() {
         getPostImageUrl: GetPostImageUrl(serviceLocator()),
         getClubFeed: GetClubFeed(serviceLocator()),
         getPost: GetPost(serviceLocator()),
+        getClubSponsors: GetClubSponsors(serviceLocator()),
+        saveSponsor: SaveSponsor(serviceLocator()),
+        setSponsorActive: SetSponsorActive(serviceLocator()),
+        renewSponsors: RenewSponsors(serviceLocator()),
+        uploadSponsorLogo: UploadSponsorLogo(serviceLocator()),
       ),
     );
 }

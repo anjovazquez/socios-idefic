@@ -125,3 +125,16 @@ insert into public.posts (club_id, title, body, status, published_at, author_id)
    'published', now() - interval '1 day', '10000000-0000-0000-0000-000000000001'),
   ('20000000-0000-0000-0000-000000000001', 'Cena de Navidad',
    'Estamos cerrando fecha y restaurante.', 'draft', null, '10000000-0000-0000-0000-000000000001');
+
+-- VS-027: IDEFIC sponsors (logos are uploaded from the app).
+insert into public.sponsors (club_id, name, website_url) values
+  ('20000000-0000-0000-0000-000000000001', 'Restaurante O Porto', 'https://restauranteoporto.example'),
+  ('20000000-0000-0000-0000-000000000001', 'Ferretería Galicia', 'https://ferreteriagalicia.example'),
+  ('20000000-0000-0000-0000-000000000001', 'Autoescuela Norte', 'https://autoescuelanorte.example');
+insert into public.sponsor_seasons (sponsor_id, season_id)
+select sp.id, se.id
+from public.sponsors sp
+join public.seasons se on se.club_id = sp.club_id
+where sp.club_id = '20000000-0000-0000-0000-000000000001'
+  and ((sp.name in ('Restaurante O Porto', 'Ferretería Galicia') and se.name in ('2025/2026', '2026/2027'))
+    or (sp.name = 'Autoescuela Norte' and se.name = '2025/2026'));
