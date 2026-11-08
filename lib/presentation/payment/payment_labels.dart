@@ -18,6 +18,9 @@ String paymentFailureMessage(PaymentFailure failure) => switch (failure) {
   InvalidPaymentTransitionFailure() =>
     'Este pago ya no se puede cambiar en ese sentido',
   NoReceiptFailure() => 'Este pago no tiene recibo',
+  RenewalTooLateFailure() =>
+    'La renovación ya se ha cobrado o se está cobrando. Si necesitas '
+        'cambiarla, contacta con tu club',
   OnlinePaymentsUnavailableFailure() =>
     'El pago online no está disponible ahora. Usa otra forma de pago',
   PaymentPermissionFailure() =>

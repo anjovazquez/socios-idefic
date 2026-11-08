@@ -1085,6 +1085,31 @@ class FakePaymentsRepository implements PaymentsRepository {
     return Uri.parse('https://checkout.stripe.test/setup/$clubId');
   }
 
+  /// Renewals already charged (cancelling them is too late).
+  final Set<String> chargedRenewals = {};
+  final List<String> cancelledRenewals = [];
+
+  @override
+  Future<void> cancelRenewal(String seasonMembershipId) async {
+    if (chargedRenewals.contains(seasonMembershipId)) {
+      throw const RenewalTooLateFailure();
+    }
+    cancelledRenewals.add(seasonMembershipId);
+    for (final entry in subscriptions.entries) {
+      final s = entry.value;
+      if (s.nextChargeSeasonMembershipId == seasonMembershipId) {
+        subscriptions[entry.key] = MySubscription(
+          seasonName: s.seasonName,
+          seasonMembershipId: s.seasonMembershipId,
+          feeCents: s.feeCents,
+          status: s.status,
+          lastMethod: s.lastMethod,
+          onlinePayments: s.onlinePayments,
+        );
+      }
+    }
+  }
+
   @override
   Future<void> removePaymentMethod(String clubId) async =>
       renewal[clubId] = RenewalSetup.none;
@@ -1199,6 +1224,7 @@ AppUseCases buildUseCases({
     getMyRenewalSetup: GetMyRenewalSetup(paymentsRepository),
     startPaymentMethodSetup: StartPaymentMethodSetup(paymentsRepository),
     removePaymentMethod: RemovePaymentMethod(paymentsRepository),
+    cancelRenewal: CancelRenewal(paymentsRepository),
     downloadReceipt: DownloadReceipt(
       paymentsRepository,
       receiptRenderer ?? FakeReceiptRenderer(),

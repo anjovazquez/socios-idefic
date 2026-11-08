@@ -101,6 +101,12 @@ export function paymentUpdateOf(event: StripeEvent): PaymentUpdate | null {
       return object.payment_status === "paid" ? { paymentId, status: "paid", method: "card", reference } : null;
     case "checkout.session.async_payment_succeeded":
       return { paymentId, status: "paid", method: "sepa", reference };
+    case "payment_intent.succeeded": {
+      // Automatic renewals (VS-024); Checkout payments use the session events.
+      const metadata = object.metadata as Row | undefined;
+      if (metadata?.source !== "renewal") return null;
+      return { paymentId, status: "paid", method: (metadata.method as string | undefined) ?? "card", reference };
+    }
     case "checkout.session.async_payment_failed":
     case "payment_intent.payment_failed":
       return { paymentId, status: "failed", reference };

@@ -11,7 +11,12 @@ export interface StripeOptions {
 }
 
 export class StripeError extends Error {
-  constructor(readonly status: number, readonly code: string | undefined, message: string) {
+  constructor(
+    readonly status: number,
+    readonly code: string | undefined,
+    message: string,
+    readonly declineCode?: string,
+  ) {
     super(message);
   }
 }
@@ -41,6 +46,7 @@ export async function stripeRequest<T>(
   path: string,
   params: Record<string, unknown> = {},
   account?: string,
+  idempotencyKey?: string,
 ): Promise<T> {
   const body = method === "POST" ? formEncode(params) : undefined;
   const query = method === "GET" && Object.keys(params).length ? `?${formEncode(params)}` : "";
@@ -50,14 +56,16 @@ export async function stripeRequest<T>(
     "Stripe-Version": "2024-06-20",
   };
   if (account) headers["Stripe-Account"] = account;
+  // Same key → Stripe returns the first result instead of charging twice.
+  if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
   const response = await (options.fetcher ?? fetch)(
     `${options.apiUrl ?? "https://api.stripe.com"}${path}${query}`,
     { method, headers, body },
   );
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = (payload as { error?: { code?: string; message?: string } }).error ?? {};
-    throw new StripeError(response.status, error.code, error.message ?? "stripe request failed");
+    const error = (payload as { error?: { code?: string; message?: string; decline_code?: string } }).error ?? {};
+    throw new StripeError(response.status, error.code, error.message ?? "stripe request failed", error.decline_code);
   }
   return payload as T;
 }

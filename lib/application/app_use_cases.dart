@@ -73,6 +73,7 @@ class AppUseCases {
     required this.getMyRenewalSetup,
     required this.startPaymentMethodSetup,
     required this.removePaymentMethod,
+    required this.cancelRenewal,
   });
 
   final WatchSession watchSession;
@@ -134,4 +135,5 @@ class AppUseCases {
   final GetMyRenewalSetup getMyRenewalSetup;
   final StartPaymentMethodSetup startPaymentMethodSetup;
   final RemovePaymentMethod removePaymentMethod;
+  final CancelRenewal cancelRenewal;
 }

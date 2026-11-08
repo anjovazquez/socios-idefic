@@ -4,10 +4,10 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 ## Estado general
 
-- Fase actual: **6 — Pago real y renovación automática (0.6)**.
+- Fase actual: **7 — Comunidad (0.7)**.
 - Tarea activa: ninguna.
-- Última tarea completada: `VS-023 — Aviso previo de renovación` (2026-11-09).
-- Siguiente tarea READY: `VS-024 — Cancelación y cobro automático de la renovación` (también READY: VS-025, VS-027).
+- Última tarea completada: `VS-024 — Cancelación y cobro automático de la renovación` (2026-11-09).
+- Siguiente tarea READY: `VS-025 — Blog: publicar (admin)` (también READY: VS-027).
 - Bloqueos globales: ninguno. VS-033 (staging) BLOCKED a la espera de credenciales del usuario.
 
 ## Milestones
@@ -20,7 +20,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 | 0.3 Temporadas y cuotas | DONE |
 | 0.4 Carnet digital | DONE |
 | 0.5 Pagos | DONE |
-| 0.6 Pago real y renovación automática | IN_PROGRESS (VS-021…VS-023 DONE; VS-024 READY; prueba real con Stripe pendiente de claves) |
+| 0.6 Pago real y renovación automática | DONE (con Stripe falso local; prueba real pendiente de claves) |
 | 0.7 Comunidad | READY (VS-025, VS-027) |
 | 0.8 Piloto IDEFIC | TODO (VS-033 adelantada, BLOCKED por credenciales) |
 
@@ -33,7 +33,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 ## Infraestructura
 
-- Flutter 202.35.1 (`.fvmrc`); proyecto `socios_idefic`, plataformas web/android/ios.
+- Flutter 207.35.1 (`.fvmrc`); proyecto `socios_idefic`, plataformas web/android/ios.
 - Config cliente: `--dart-define=SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` (ver `.env.example`).
 - Supabase CLI 2.122 (devDependency npm); signup deshabilitado; Google declarado y desactivado.
 - CI/CD: `.github/workflows/ci.yml` con `quality`, `edge-functions`, `sql-tests` y despliegue manual a staging (`deploy-migrations`, `deploy-functions`, `deploy-hosting`). Aún sin ejecutar en GitHub.
@@ -56,4 +56,5 @@ Snapshot operativo. Se actualiza al final de cada loop.
 - Pago online (VS-021): Stripe Connect (Express, cargos directos en la cuenta del club, sin comisión); `clubs.stripe_account_id/stripe_charges_enabled`, `payment_provider_events` (idempotencia), RPC `prepare_online_payment`, `attach_checkout_session`, `apply_payment_event`, `set_club_stripe_account`, `get_club_online_payments`; Edge Functions `create-checkout`, `payments-webhook` (pública, firma verificada), `stripe-onboarding`; `_shared/stripe.ts` y `_shared/http.ts`; `StripePaymentGateway`; «Pagar ahora» en Mi suscripción y «Pagos online» en Configuración. Sin `STRIPE_SECRET_KEY` responde 503 y la app sigue con el pago manual.
 - Método guardado (VS-022): `payment_methods` (solo marca/últimos 4/país/mandato; uno activo por socio y club), `club_memberships.auto_renew` y `stripe_customer_id`; RPC `get_my_payment_method`, `prepare_payment_method_setup`, `remove_my_payment_method`, `save_payment_method` (webhook, idempotente); Edge Function `payment-methods` (setup / remove con detach); el webhook guarda el método si `metadata.save_method=true`; casilla «Usar este método para renovar automáticamente» (opt-in) y sección «Renovación automática» en Mi suscripción. `DeepLinkKeeper` en el router conserva el enlace abierto durante la carga (vuelta de Stripe).
 - Aviso previo (VS-023): `seasons.renewal_charge_on` (null = inicio) y `renewal_notice_days` (15); vista `automatic_renewals`; `renewal_notices` (uno por renovación); RPC `get_due_renewal_notices`, `claim/release_renewal_notice`, `can_charge_renewal` (RN-012: sin aviso para esa fecha e importe no hay cobro), `set_season_renewal` (admin), `madrid_today`; `get_my_subscription` rellena el próximo cargo; Edge Function `send-renewal-notices` (solo service role) lanzada por pg_cron 07:05 UTC vía pg_net con `project_url`/`service_role_key` de Vault; email `renewalNoticeEmail`; «Cobro automático» por temporada en Temporadas.
+- Cobro y cancelación (VS-024): `cancel_renewal` (dueño, antes de la fecha de cobro en hora de Madrid; P0001 `renewal_too_late`); `renewal_charges` (un intento por renovación, `failure_notified_at`); RPC `get_due_renewal_charges`, `claim_renewal_charge`, `get_failed_renewal_charges`, `mark_renewal_failure_notified`; Edge Function `charge-renewals` (pg_cron 08:05 UTC; PaymentIntent off-session con `Idempotency-Key renewal-<id>`; rechazo → fallido) y email `renewalFailedEmail`; webhook `payment_intent.succeeded` con `metadata.source=renewal`; Mi suscripción «Cancelar renovación»; Pagos lista renovaciones canceladas.
 - Sesión cloud: Flutter en `$HOME/flutter/bin`; Docker requiere arrancar `dockerd` en segundo plano (ver `QUALITY_GATES.md`). Para probar Edge Functions arrancar sin excluir `edge-runtime`; emails locales en Mailpit `http://127.0.0.1:54324`. El edge-runtime del sandbox no puede descargar de npm (CA del proxy): las funciones no usan npm.

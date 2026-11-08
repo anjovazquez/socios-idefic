@@ -160,6 +160,7 @@ void configureDependencies() {
         getMyRenewalSetup: GetMyRenewalSetup(serviceLocator()),
         startPaymentMethodSetup: StartPaymentMethodSetup(serviceLocator()),
         removePaymentMethod: RemovePaymentMethod(serviceLocator()),
+        cancelRenewal: CancelRenewal(serviceLocator()),
       ),
     );
 }

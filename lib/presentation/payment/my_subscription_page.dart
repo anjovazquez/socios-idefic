@@ -234,21 +234,73 @@ class _NextCharges extends StatelessWidget {
 
   final MySubscription subscription;
 
+  Future<void> _cancel(BuildContext context) async {
+    final viewModel = context.read<MySubscriptionViewModel>();
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          '¿Cancelar la renovación de ${subscription.nextChargeSeason ?? 'la próxima temporada'}?',
+        ),
+        content: const Text(
+          'No se te cobrará la cuota y no serás socio de esa temporada salvo '
+          'que pagues después por tu cuenta. Tu método de pago sigue guardado.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Volver'),
+          ),
+          FilledButton(
+            key: const Key('cancel-renewal-confirm'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Cancelar renovación'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    String message;
+    try {
+      message = await viewModel.cancelRenewal();
+    } on String catch (error) {
+      message = error;
+    }
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) => Card(
     key: const Key('subscription-next-charges'),
-    child: ListTile(
-      leading: const Icon(Icons.event_repeat),
-      title: const Text('Próximos cargos'),
-      subtitle: Text(
-        subscription.hasNextCharge
-            ? 'Próximo cargo: ${formatCents(subscription.nextChargeCents!)} el '
-                  '${formatLongDate(subscription.nextChargeOn!)}'
-                  '${subscription.nextChargeSeason == null ? '' : ' · Temporada ${subscription.nextChargeSeason}'}. '
-                  'Te avisaremos antes.'
-            : 'No tienes cargos programados.',
-        key: const Key('next-charge'),
-      ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.event_repeat),
+          title: const Text('Próximos cargos'),
+          subtitle: Text(
+            subscription.hasNextCharge
+                ? 'Próximo cargo: ${formatCents(subscription.nextChargeCents!)} el '
+                      '${formatLongDate(subscription.nextChargeOn!)}'
+                      '${subscription.nextChargeSeason == null ? '' : ' · Temporada ${subscription.nextChargeSeason}'}. '
+                      'Te avisaremos antes.'
+                : 'No tienes cargos programados.',
+            key: const Key('next-charge'),
+          ),
+        ),
+        if (subscription.hasNextCharge && subscription.nextChargeCancellable)
+          Padding(
+            padding: const EdgeInsets.only(right: 8, bottom: 8),
+            child: TextButton(
+              key: const Key('cancel-renewal'),
+              onPressed: () => _cancel(context),
+              child: const Text('Cancelar renovación'),
+            ),
+          ),
+      ],
     ),
   );
 }

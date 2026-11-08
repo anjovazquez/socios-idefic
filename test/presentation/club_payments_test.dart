@@ -229,6 +229,30 @@ void main() {
     expect(find.text('Recibo IDEFIC-0001 listo'), findsOneWidget);
   });
 
+  testWidgets('a renewal cancelled by the member says so', (tester) async {
+    payments.clubLines[ideficAsAdmin.id]!.add(
+      const ClubPaymentLine(
+        seasonMembershipId: 'sm-ana-27',
+        seasonId: 'season-26',
+        seasonName: '2026/2027',
+        memberName: 'Ana',
+        memberEmail: 'ana@example.com',
+        concept: 'Renovación cancelada por el socio',
+        amountCents: 5000,
+        status: PaymentStatus.cancelled,
+      ),
+    );
+    await openPayments(tester);
+    await tester.tap(find.byKey(const Key('payments-filter-cancelled')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('Renovación cancelada por el socio'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Cuota sin pagar'), findsNothing);
+  });
+
   test('maps get_club_payments rows with totals and pending fees', () {
     final page = clubPaymentsPageFromRows([
       {

@@ -251,7 +251,8 @@ class _PaymentLineTile extends StatelessWidget {
       'Temporada ${line.seasonName}',
       if (line.date != null) formatDate(line.date!.toLocal()),
       if (line.method != null) paymentMethodLabel(line.method!),
-      if (line.paymentId == null) 'Cuota sin pagar',
+      if (line.paymentId == null)
+        line.status == PaymentStatus.pending ? 'Cuota sin pagar' : line.concept,
     ].join(' · ');
     return Card(
       key: Key('club-payment-${line.id}'),

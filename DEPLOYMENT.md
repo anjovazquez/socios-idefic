@@ -103,6 +103,10 @@ select vault.create_secret('<service_role key>', 'service_role_key');
 
 Sin ellos el job no hace nada. Los emails salen por Resend (`RESEND_API_KEY`).
 
+Con los mismos secretos, un segundo job (`charge-renewals`, 08:05 UTC) cobra
+las renovaciones en su fecha (VS-024) y avisa por email de los cobros
+fallidos. Sin `STRIPE_SECRET_KEY` no cobra nada.
+
 Sin `STRIPE_SECRET_KEY` la app sigue con el pago manual y «Pagar ahora» no
 aparece. `payments-webhook` es pública (`--no-verify-jwt`) y rechaza todo
 evento sin firma válida.

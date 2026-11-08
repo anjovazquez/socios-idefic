@@ -63,6 +63,9 @@ abstract interface class PaymentsRepository {
   /// Member: provider page to save a method without paying.
   Future<Uri> startPaymentMethodSetup(String clubId);
 
+  /// Member: cancels a renewal before its charge (RF-014).
+  Future<void> cancelRenewal(String seasonMembershipId);
+
   /// Member: removes the saved method; renewals stop being automatic.
   Future<void> removePaymentMethod(String clubId);
 }

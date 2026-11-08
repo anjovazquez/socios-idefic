@@ -182,6 +182,14 @@ class SupabasePaymentsRepository implements PaymentsRepository {
   }
 
   @override
+  Future<void> cancelRenewal(String seasonMembershipId) => _guard(
+    () => _client.rpc<void>(
+      'cancel_renewal',
+      params: {'p_season_membership_id': seasonMembershipId},
+    ),
+  );
+
+  @override
   Future<void> removePaymentMethod(String clubId) async {
     await _invoke('payment-methods', {'clubId': clubId, 'action': 'remove'});
   }
@@ -259,6 +267,7 @@ PaymentFailure mapPaymentError(String? code, String message, String? hint) =>
       'P0001' when hint == 'already_paid' => const AlreadyPaidFailure(),
       'P0001' when hint == 'not_payable' => const NotPayableFailure(),
       'P0001' when hint == 'no_receipt' => const NoReceiptFailure(),
+      'P0001' when hint == 'renewal_too_late' => const RenewalTooLateFailure(),
       'P0002' => const NoReceiptFailure(),
       'P0001' when hint == 'invalid_transition' =>
         const InvalidPaymentTransitionFailure(),
@@ -283,6 +292,9 @@ MySubscription mySubscriptionFromRow(Map<String, dynamic> row) =>
       nextChargeCents: row['next_charge_cents'] as int?,
       onlinePayments: row['online_payments'] == true,
       nextChargeSeason: row['next_charge_season'] as String?,
+      nextChargeSeasonMembershipId:
+          row['next_charge_season_membership_id'] as String?,
+      nextChargeCancellable: row['next_charge_cancellable'] == true,
       nextChargeOn: switch (row['next_charge_on']) {
         final String value => DateTime.parse(value),
         _ => null,

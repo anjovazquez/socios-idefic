@@ -191,3 +191,12 @@ class RemovePaymentMethod {
 
   Future<void> call(String clubId) => _repository.removePaymentMethod(clubId);
 }
+
+class CancelRenewal {
+  const CancelRenewal(this._repository);
+
+  final PaymentsRepository _repository;
+
+  Future<void> call(String seasonMembershipId) =>
+      _repository.cancelRenewal(seasonMembershipId);
+}

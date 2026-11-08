@@ -116,6 +116,17 @@ class MySubscriptionViewModel extends ChangeNotifier {
     }
   }
 
+  /// Returns the confirmation, or throws the error message (RF-014).
+  Future<String> cancelRenewal() async {
+    final subscription = _subscription;
+    final id = subscription?.nextChargeSeasonMembershipId;
+    if (id == null) throw paymentFailureMessage(const RenewalTooLateFailure());
+    await _method(() => _useCases.cancelRenewal(id));
+    await load();
+    return 'Renovación de ${subscription!.nextChargeSeason ?? 'la temporada'} '
+        'cancelada. No se te cobrará';
+  }
+
   bool _startingPayment = false;
   bool get startingPayment => _startingPayment;
 

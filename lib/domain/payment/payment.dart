@@ -77,6 +77,11 @@ final class OnlinePaymentsUnavailableFailure extends PaymentFailure {
   const OnlinePaymentsUnavailableFailure();
 }
 
+/// The renewal was already charged or is being charged (RN-013).
+final class RenewalTooLateFailure extends PaymentFailure {
+  const RenewalTooLateFailure();
+}
+
 final class PaymentPermissionFailure extends PaymentFailure {
   const PaymentPermissionFailure();
 }

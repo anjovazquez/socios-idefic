@@ -169,3 +169,16 @@ Deno.test("only masked data leaves the intent", () => {
   assertEquals(Object.values(method ?? {}).includes("4242424242424242"), false);
   assertEquals(savedMethodOf({ metadata: {} }, { payment_method: "pm_not_expanded" }), null);
 });
+
+Deno.test("renewal payment intents are confirmed by the webhook; Checkout ones are not", () => {
+  const renewal = paymentUpdateOf(JSON.parse(event("e", "payment_intent.succeeded", {
+    id: "pi_r",
+    metadata: { payment_id: "pay-r", source: "renewal", method: "sepa" },
+  })));
+  assertEquals(renewal, { paymentId: "pay-r", status: "paid", method: "sepa", reference: "pi_r" });
+  const checkout = paymentUpdateOf(JSON.parse(event("e", "payment_intent.succeeded", {
+    id: "pi_c",
+    metadata: { payment_id: "pay-c" },
+  })));
+  assertEquals(checkout, null);
+});

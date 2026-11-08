@@ -181,3 +181,42 @@ Fecha del cargo: <strong>${escapeHtml(date)}</strong>
 
   return { to, subject, html, text };
 }
+
+/** VS-024: the automatic renewal charge failed; pay manually. */
+export function renewalFailedEmail(params: {
+  club: ClubIdentity;
+  to: { email: string; name?: string };
+  seasonName: string;
+  amountCents: number;
+  link: string;
+}): EmailMessage {
+  const { club, to, seasonName, amountCents, link } = params;
+  const color = /^#[0-9A-Fa-f]{6}$/.test(club.primaryColor ?? "") ? club.primaryColor! : "#0B3D91";
+  const onColor = readableOn(color);
+  const greeting = to.name ? `Hola, ${to.name}` : "Hola";
+  const main =
+    `No hemos podido cobrar tu cuota de ${club.name} para la temporada ${seasonName} ` +
+    `(${euros(amountCents)}) con tu método de pago guardado.`;
+  const next =
+    "Tu renovación sigue pendiente. Puedes pagarla desde Mi suscripción con otra tarjeta, " +
+    "domiciliación o las formas de pago del club.";
+  const subject = `No hemos podido cobrar tu cuota de ${club.name}`;
+  const logo = club.logoUrl
+    ? `<img src="${escapeHtml(club.logoUrl)}" alt="${escapeHtml(club.name)}" width="56" height="56" style="border-radius:28px;background:#FFFFFF;display:block;margin:0 auto 8px">`
+    : "";
+  const html = `<!doctype html>
+<html lang="es"><body style="margin:0;background:#F4F5F7;font-family:Arial,Helvetica,sans-serif;color:#111111">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#FFFFFF;border-radius:12px;overflow:hidden">
+<tr><td align="center" style="background:${color};color:${onColor};padding:24px 16px">${logo}<div style="font-size:20px;font-weight:bold">${escapeHtml(club.name)}</div></td></tr>
+<tr><td style="padding:24px">
+<p style="font-size:16px;margin:0 0 12px">${escapeHtml(greeting)}:</p>
+<p style="font-size:15px;line-height:1.5;margin:0 0 16px">${escapeHtml(main)}</p>
+<p style="font-size:15px;line-height:1.5;margin:0 0 24px">${escapeHtml(next)}</p>
+<p style="text-align:center;margin:0 0 8px"><a href="${escapeHtml(link)}" style="background:${color};color:${onColor};padding:12px 24px;border-radius:24px;text-decoration:none;font-weight:bold;display:inline-block">Pagar mi cuota</a></p>
+</td></tr></table>
+<p style="font-size:12px;color:#777777;margin:16px 0 0">Recibes este aviso porque tenías activada la renovación automática en ${escapeHtml(club.name)}.</p>
+</td></tr></table></body></html>`;
+  const text = [`${greeting}:`, "", main, "", next, "", `Pagar mi cuota: ${link}`].join("\n");
+  return { to, subject, html, text };
+}

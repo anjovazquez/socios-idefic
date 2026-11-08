@@ -13,6 +13,8 @@ class MySubscription {
     this.nextChargeOn,
     this.onlinePayments = false,
     this.nextChargeSeason,
+    this.nextChargeSeasonMembershipId,
+    this.nextChargeCancellable = false,
   });
 
   /// Null when the club has no active season.
@@ -30,6 +32,10 @@ class MySubscription {
   final int? nextChargeCents;
   final DateTime? nextChargeOn;
   final String? nextChargeSeason;
+
+  /// Renewal of the next charge, which can be cancelled before it (RF-014).
+  final String? nextChargeSeasonMembershipId;
+  final bool nextChargeCancellable;
 
   bool get hasNextCharge => nextChargeCents != null && nextChargeOn != null;
 
