@@ -94,6 +94,13 @@ class ClubHomePage extends StatelessWidget {
                 style: theme.textTheme.bodyLarge,
               ),
             ],
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              key: const Key('open-card'),
+              onPressed: () => context.go('/club/card'),
+              icon: const Icon(Icons.badge_outlined),
+              label: const Text('Mi carnet'),
+            ),
           ],
         ),
       ),

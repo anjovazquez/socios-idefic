@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../auth/login_page.dart';
+import '../card/my_card_page.dart';
 import '../club/club_home_page.dart';
 import '../club/club_settings_page.dart';
 import '../member/members_page.dart';
@@ -58,84 +59,84 @@ String? redirectFor(SessionStatus status, String location) {
   return target;
 }
 
-GoRouter createRouter(SessionViewModel session, {String? initialLocation}) =>
-    GoRouter(
-      initialLocation: initialLocation ?? AppRoutes.loading,
-      refreshListenable: session,
-      redirect: (context, state) =>
-          redirectFor(session.status, state.matchedLocation),
+GoRouter createRouter(
+  SessionViewModel session, {
+  String? initialLocation,
+}) => GoRouter(
+  initialLocation: initialLocation ?? AppRoutes.loading,
+  refreshListenable: session,
+  redirect: (context, state) =>
+      redirectFor(session.status, state.matchedLocation),
+  routes: [
+    GoRoute(
+      path: AppRoutes.loading,
+      builder: (context, state) => const LoadingPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.activation,
+      builder: (context, state) => ActivationPage(
+        tokenHash: state.uri.queryParameters['token_hash'],
+        type: state.uri.queryParameters['type'],
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.onboarding,
+      builder: (context, state) => const OnboardingPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.login,
+      builder: (context, state) => const LoginPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.clubs,
+      builder: (context, state) => const ClubSelectorPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.club,
+      builder: (context, state) => const ClubHomePage(),
       routes: [
         GoRoute(
-          path: AppRoutes.loading,
-          builder: (context, state) => const LoadingPage(),
+          path: 'settings',
+          builder: (context, state) => const ClubSettingsPage(),
         ),
         GoRoute(
-          path: AppRoutes.activation,
-          builder: (context, state) => ActivationPage(
-            tokenHash: state.uri.queryParameters['token_hash'],
-            type: state.uri.queryParameters['type'],
-          ),
+          path: 'members',
+          builder: (context, state) => const MembersPage(),
         ),
+        GoRoute(path: 'card', builder: (context, state) => const MyCardPage()),
+        GoRoute(path: 'me', builder: (context, state) => const MyDataPage()),
         GoRoute(
-          path: AppRoutes.onboarding,
-          builder: (context, state) => const OnboardingPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.login,
-          builder: (context, state) => const LoginPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.clubs,
-          builder: (context, state) => const ClubSelectorPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.club,
-          builder: (context, state) => const ClubHomePage(),
+          path: 'seasons',
+          builder: (context, state) => const SeasonsPage(),
           routes: [
             GoRoute(
-              path: 'settings',
-              builder: (context, state) => const ClubSettingsPage(),
-            ),
-            GoRoute(
-              path: 'members',
-              builder: (context, state) => const MembersPage(),
-            ),
-            GoRoute(
-              path: 'me',
-              builder: (context, state) => const MyDataPage(),
-            ),
-            GoRoute(
-              path: 'seasons',
-              builder: (context, state) => const SeasonsPage(),
-              routes: [
-                GoRoute(
-                  path: 'renew',
-                  builder: (context, state) => RenewalPage(
-                    seasonId: state.uri.queryParameters['season'] ?? '',
-                    seasonName: state.uri.queryParameters['name'],
-                  ),
-                ),
-              ],
+              path: 'renew',
+              builder: (context, state) => RenewalPage(
+                seasonId: state.uri.queryParameters['season'] ?? '',
+                seasonName: state.uri.queryParameters['name'],
+              ),
             ),
           ],
-        ),
-        GoRoute(
-          path: AppRoutes.noClubs,
-          builder: (context, state) => const NoClubsPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.platform,
-          builder: (context, state) => const PlatformClubsPage(),
-          routes: [
-            GoRoute(
-              path: 'audit',
-              builder: (context, state) => const AuditLogPage(),
-            ),
-          ],
-        ),
-        GoRoute(
-          path: AppRoutes.error,
-          builder: (context, state) => const SessionErrorPage(),
         ),
       ],
-    );
+    ),
+    GoRoute(
+      path: AppRoutes.noClubs,
+      builder: (context, state) => const NoClubsPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.platform,
+      builder: (context, state) => const PlatformClubsPage(),
+      routes: [
+        GoRoute(
+          path: 'audit',
+          builder: (context, state) => const AuditLogPage(),
+        ),
+      ],
+    ),
+    GoRoute(
+      path: AppRoutes.error,
+      builder: (context, state) => const SessionErrorPage(),
+    ),
+  ],
+);

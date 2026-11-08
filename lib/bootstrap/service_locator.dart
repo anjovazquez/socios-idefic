@@ -7,6 +7,7 @@ import '../application/auth/sign_in_with_google.dart';
 import '../application/auth/sign_in_with_password.dart';
 import '../application/auth/sign_out.dart';
 import '../application/auth/watch_session.dart';
+import '../application/card/card_use_cases.dart';
 import '../application/club/club_branding_use_cases.dart';
 import '../application/club/resolve_club_entry.dart';
 import '../application/club/select_active_club.dart';
@@ -16,6 +17,7 @@ import '../application/platform/platform_use_cases.dart';
 import '../application/profile/profile_use_cases.dart';
 import '../application/season/season_use_cases.dart';
 import '../domain/auth/auth_repository.dart';
+import '../domain/card/card_repository.dart';
 import '../domain/club/active_club_store.dart';
 import '../domain/club/club_branding_repository.dart';
 import '../domain/club/club_repository.dart';
@@ -25,6 +27,7 @@ import '../domain/platform/platform_repository.dart';
 import '../domain/profile/profile_repository.dart';
 import '../domain/season/season_repository.dart';
 import '../infrastructure/auth/supabase_auth_repository.dart';
+import '../infrastructure/card/supabase_card_repository.dart';
 import '../infrastructure/club/shared_preferences_active_club_store.dart';
 import '../infrastructure/club/supabase_club_branding_repository.dart';
 import '../infrastructure/club/supabase_club_repository.dart';
@@ -55,6 +58,9 @@ void configureDependencies() {
     )
     ..registerLazySingleton<ClubBrandingRepository>(
       () => SupabaseClubBrandingRepository(client),
+    )
+    ..registerLazySingleton<CardRepository>(
+      () => SupabaseCardRepository(client),
     )
     ..registerLazySingleton<SeasonRepository>(
       () => SupabaseSeasonRepository(client),
@@ -113,6 +119,7 @@ void configureDependencies() {
         setSeasonMembershipPaid: SetSeasonMembershipPaid(serviceLocator()),
         getRenewalCandidates: GetRenewalCandidates(serviceLocator()),
         bulkRenew: BulkRenew(serviceLocator()),
+        getMyCard: GetMyCard(serviceLocator()),
       ),
     );
 }

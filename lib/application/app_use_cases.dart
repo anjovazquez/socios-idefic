@@ -2,6 +2,7 @@ import 'auth/sign_in_with_google.dart';
 import 'auth/sign_in_with_password.dart';
 import 'auth/sign_out.dart';
 import 'auth/watch_session.dart';
+import 'card/card_use_cases.dart';
 import 'club/club_branding_use_cases.dart';
 import 'club/resolve_club_entry.dart';
 import 'club/select_active_club.dart';
@@ -51,6 +52,7 @@ class AppUseCases {
     required this.setSeasonMembershipPaid,
     required this.getRenewalCandidates,
     required this.bulkRenew,
+    required this.getMyCard,
   });
 
   final WatchSession watchSession;
@@ -90,4 +92,5 @@ class AppUseCases {
   final SetSeasonMembershipPaid setSeasonMembershipPaid;
   final GetRenewalCandidates getRenewalCandidates;
   final BulkRenew bulkRenew;
+  final GetMyCard getMyCard;
 }

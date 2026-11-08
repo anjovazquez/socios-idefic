@@ -86,6 +86,7 @@ icono + texto, nunca solo color.
 | Componente | Archivo | Uso |
 |---|---|---|
 | `ClubAvatar` | `presentation/club/club_avatar.dart` | Logo del club o iniciales sobre su color; con `Semantics` «Logo de …» |
+| `MembershipCardView` | `presentation/card/membership_card_view.dart` | Carnet: proporción de tarjeta (1,586), degradado del color principal a su versión oscura, franja del color secundario, logo, foto, nombre, nº, temporada y hueco blanco para el QR. Si no está activo se muestra atenuado (45 %) con un aviso debajo |
 | `buildClubTheme` / `readableOn` | `presentation/theme/club_theme.dart` | Tema y contraste |
 | `ClubFormDialog` | `presentation/platform/club_form_dialog.dart` | Patrón de formulario en diálogo: error inline, botón principal a la derecha |
 | Estado de mensaje (`_MessagePage`) | `presentation/session/session_status_pages.dart` | Pantalla vacía/error: título, explicación, acción |

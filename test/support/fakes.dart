@@ -6,6 +6,7 @@ import 'package:socios_idefic/application/auth/sign_in_with_google.dart';
 import 'package:socios_idefic/application/auth/sign_in_with_password.dart';
 import 'package:socios_idefic/application/auth/sign_out.dart';
 import 'package:socios_idefic/application/auth/watch_session.dart';
+import 'package:socios_idefic/application/card/card_use_cases.dart';
 import 'package:socios_idefic/application/club/club_branding_use_cases.dart';
 import 'package:socios_idefic/application/club/resolve_club_entry.dart';
 import 'package:socios_idefic/application/club/select_active_club.dart';
@@ -17,6 +18,8 @@ import 'package:socios_idefic/application/season/season_use_cases.dart';
 import 'package:socios_idefic/domain/auth/auth_failures.dart';
 import 'package:socios_idefic/domain/auth/auth_repository.dart';
 import 'package:socios_idefic/domain/auth/auth_user.dart';
+import 'package:socios_idefic/domain/card/card_repository.dart';
+import 'package:socios_idefic/domain/card/membership_card.dart';
 import 'package:socios_idefic/domain/club/active_club_store.dart';
 import 'package:socios_idefic/domain/club/club_branding.dart';
 import 'package:socios_idefic/domain/club/club_branding_repository.dart';
@@ -832,6 +835,22 @@ class FakeSeasonRepository implements SeasonRepository {
   }
 }
 
+/// Cards by email of the signed-in member.
+class FakeCardRepository implements CardRepository {
+  FakeCardRepository([Map<String, MembershipCard>? cards])
+    : cards = cards ?? {};
+
+  final Map<String, MembershipCard> cards;
+  FakeAuthRepository? auth;
+
+  @override
+  Future<MembershipCard> getMyCard(String clubId) async {
+    final card = cards[auth?.currentUser?.email];
+    if (card == null) throw const NotAMemberFailure();
+    return card;
+  }
+}
+
 AppUseCases buildUseCases({
   required FakeAuthRepository auth,
   required FakeClubRepository clubs,
@@ -842,12 +861,14 @@ AppUseCases buildUseCases({
   FakeOnboardingRepository? onboarding,
   FakeProfileRepository? profile,
   FakeSeasonRepository? seasons,
+  FakeCardRepository? cards,
 }) {
   final activeClubStore = store ?? InMemoryActiveClubStore();
   final platformRepository = platform ?? FakePlatformRepository();
   final brandingRepository = branding ?? FakeClubBrandingRepository(clubs);
   final profileRepository = (profile ?? FakeProfileRepository())..auth = auth;
   final seasonRepository = (seasons ?? FakeSeasonRepository())..clubs = clubs;
+  final cardRepository = (cards ?? FakeCardRepository())..auth = auth;
   final onboardingRepository = (onboarding ?? FakeOnboardingRepository())
     ..auth = auth
     ..clubs = clubs;
@@ -894,6 +915,7 @@ AppUseCases buildUseCases({
     setSeasonMembershipPaid: SetSeasonMembershipPaid(seasonRepository),
     getRenewalCandidates: GetRenewalCandidates(seasonRepository),
     bulkRenew: BulkRenew(seasonRepository),
+    getMyCard: GetMyCard(cardRepository),
     getClubBranding: GetClubBranding(brandingRepository),
     saveClubBranding: SaveClubBranding(brandingRepository),
     uploadClubAsset: UploadClubAsset(brandingRepository),
