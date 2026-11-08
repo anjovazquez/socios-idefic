@@ -1,3 +1,4 @@
+import 'my_subscription.dart';
 import 'payment.dart';
 
 abstract interface class PaymentsRepository {
@@ -19,4 +20,10 @@ abstract interface class PaymentsRepository {
   Future<String?> getPaymentInstructions(String clubId);
 
   Future<void> setPaymentInstructions(String clubId, String instructions);
+
+  /// Subscription of the signed-in member in [clubId].
+  Future<MySubscription> getMySubscription(String clubId);
+
+  /// Payments of the signed-in member in [clubId], newest first.
+  Future<List<MyPayment>> getMyPayments(String clubId);
 }

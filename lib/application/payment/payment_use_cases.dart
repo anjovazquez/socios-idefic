@@ -1,3 +1,4 @@
+import '../../domain/payment/my_subscription.dart';
 import '../../domain/payment/payment.dart';
 import '../../domain/payment/payment_gateway.dart';
 import '../../domain/payment/payments_repository.dart';
@@ -85,4 +86,22 @@ class StartPayment {
     required String clubId,
     required String seasonMembershipId,
   }) => _gateway.start(clubId: clubId, seasonMembershipId: seasonMembershipId);
+}
+
+class GetMySubscription {
+  const GetMySubscription(this._repository);
+
+  final PaymentsRepository _repository;
+
+  Future<MySubscription> call(String clubId) =>
+      _repository.getMySubscription(clubId);
+}
+
+class GetMyPayments {
+  const GetMyPayments(this._repository);
+
+  final PaymentsRepository _repository;
+
+  Future<List<MyPayment>> call(String clubId) =>
+      _repository.getMyPayments(clubId);
 }

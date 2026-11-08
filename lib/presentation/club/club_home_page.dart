@@ -101,6 +101,13 @@ class ClubHomePage extends StatelessWidget {
               icon: const Icon(Icons.badge_outlined),
               label: const Text('Mi carnet'),
             ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              key: const Key('open-subscription'),
+              onPressed: () => context.go('/club/subscription'),
+              icon: const Icon(Icons.receipt_long_outlined),
+              label: const Text('Mi suscripción'),
+            ),
           ],
         ),
       ),

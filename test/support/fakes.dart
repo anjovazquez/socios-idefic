@@ -31,6 +31,7 @@ import 'package:socios_idefic/domain/member/club_member.dart';
 import 'package:socios_idefic/domain/member/members_repository.dart';
 import 'package:socios_idefic/domain/onboarding/onboarding.dart';
 import 'package:socios_idefic/domain/onboarding/onboarding_repository.dart';
+import 'package:socios_idefic/domain/payment/my_subscription.dart';
 import 'package:socios_idefic/domain/payment/payment.dart';
 import 'package:socios_idefic/domain/payment/payments_repository.dart';
 import 'package:socios_idefic/infrastructure/payment/manual_payment_gateway.dart';
@@ -961,6 +962,18 @@ class FakePaymentsRepository implements PaymentsRepository {
   @override
   Future<void> setPaymentInstructions(String clubId, String text) async =>
       instructions[clubId] = text.trim();
+
+  /// «Mi suscripción» and history, per club (signed-in member).
+  final Map<String, MySubscription> subscriptions = {};
+  final Map<String, List<MyPayment>> myPayments = {};
+
+  @override
+  Future<MySubscription> getMySubscription(String clubId) async =>
+      subscriptions[clubId] ?? const MySubscription();
+
+  @override
+  Future<List<MyPayment>> getMyPayments(String clubId) async =>
+      myPayments[clubId] ?? const [];
 }
 
 AppUseCases buildUseCases({
@@ -1038,6 +1051,8 @@ AppUseCases buildUseCases({
     getPaymentInstructions: GetPaymentInstructions(paymentsRepository),
     setPaymentInstructions: SetPaymentInstructions(paymentsRepository),
     startPayment: StartPayment(ManualPaymentGateway(paymentsRepository)),
+    getMySubscription: GetMySubscription(paymentsRepository),
+    getMyPayments: GetMyPayments(paymentsRepository),
     getClubBranding: GetClubBranding(brandingRepository),
     saveClubBranding: SaveClubBranding(brandingRepository),
     uploadClubAsset: UploadClubAsset(brandingRepository),

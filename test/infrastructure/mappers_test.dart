@@ -2,10 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:socios_idefic/domain/auth/auth_failures.dart';
 import 'package:socios_idefic/domain/club/club_branding.dart';
 import 'package:socios_idefic/domain/club/my_club.dart';
+import 'package:socios_idefic/domain/payment/payment.dart';
 import 'package:socios_idefic/domain/platform/platform_failures.dart';
+import 'package:socios_idefic/domain/season/season_membership.dart';
 import 'package:socios_idefic/infrastructure/auth/supabase_auth_repository.dart';
 import 'package:socios_idefic/infrastructure/club/my_club_mapper.dart';
 import 'package:socios_idefic/infrastructure/club/supabase_club_branding_repository.dart';
+import 'package:socios_idefic/infrastructure/payment/supabase_payments_repository.dart';
 import 'package:socios_idefic/infrastructure/platform/supabase_platform_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -229,5 +232,44 @@ void main() {
     expect(entry.asPlatformAdmin, isTrue);
     expect(entry.payload['name'], 'IDEFIC');
     expect(entry.createdAt.isUtc, isTrue);
+  });
+
+  test('maps get_my_subscription and get_my_payments rows', () {
+    final subscription = mySubscriptionFromRow({
+      'season_name': '2026/2027',
+      'season_membership_id': 'sm1',
+      'fee_cents': 5000,
+      'status': 'pending_payment',
+      'payment_provider': null,
+      'payment_method': null,
+      'next_charge_cents': null,
+      'next_charge_on': null,
+    });
+    expect(subscription.status, SeasonMembershipStatus.pendingPayment);
+    expect(subscription.canPay, isTrue);
+    expect(subscription.lastMethod, isNull);
+
+    final empty = mySubscriptionFromRow({
+      'season_name': null,
+      'season_membership_id': null,
+      'fee_cents': null,
+      'status': null,
+    });
+    expect(empty.hasSeason, isFalse);
+    expect(empty.status, isNull);
+
+    final payment = myPaymentFromRow({
+      'payment_id': 'p1',
+      'season_name': '2025/2026',
+      'concept': 'Cuota de socio 2025/2026',
+      'amount_cents': 4500,
+      'payment_date': '2025-09-10T00:00:00+00:00',
+      'status': 'paid',
+      'provider': 'manual',
+      'method': 'cash',
+    });
+    expect(payment.method, PaymentMethod.cash);
+    expect(payment.status, PaymentStatus.paid);
+    expect(payment.amountCents, 4500);
   });
 }

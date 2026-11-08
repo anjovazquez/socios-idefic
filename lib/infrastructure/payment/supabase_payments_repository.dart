@@ -1,6 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../domain/payment/my_subscription.dart';
 import '../../domain/payment/payment.dart';
+import '../../domain/season/season_membership.dart';
 import '../../domain/payment/payments_repository.dart';
 
 class SupabasePaymentsRepository implements PaymentsRepository {
@@ -67,6 +69,26 @@ class SupabasePaymentsRepository implements PaymentsRepository {
         ),
       );
 
+  @override
+  Future<MySubscription> getMySubscription(String clubId) => _guard(() async {
+    final rows = await _client.rpc<List<dynamic>>(
+      'get_my_subscription',
+      params: {'p_club_id': clubId},
+    );
+    return rows.isEmpty
+        ? const MySubscription()
+        : mySubscriptionFromRow(rows.first as Map<String, dynamic>);
+  });
+
+  @override
+  Future<List<MyPayment>> getMyPayments(String clubId) => _guard(() async {
+    final rows = await _client.rpc<List<dynamic>>(
+      'get_my_payments',
+      params: {'p_club_id': clubId},
+    );
+    return rows.cast<Map<String, dynamic>>().map(myPaymentFromRow).toList();
+  });
+
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
       return await action();
@@ -110,3 +132,35 @@ PaymentFailure mapPaymentError(String? code, String message, String? hint) =>
         const InvalidPaymentTransitionFailure(),
       _ => PaymentUnavailableFailure('$code $message'),
     };
+
+PaymentMethod? _methodOf(Object? name) => switch (name) {
+  final String value => PaymentMethod.values.byName(value),
+  _ => null,
+};
+
+MySubscription mySubscriptionFromRow(Map<String, dynamic> row) =>
+    MySubscription(
+      seasonName: row['season_name'] as String?,
+      seasonMembershipId: row['season_membership_id'] as String?,
+      feeCents: row['fee_cents'] as int?,
+      status: switch (row['status']) {
+        final String name => seasonMembershipStatusFromName(name),
+        _ => null,
+      },
+      lastMethod: _methodOf(row['payment_method']),
+      nextChargeCents: row['next_charge_cents'] as int?,
+      nextChargeOn: switch (row['next_charge_on']) {
+        final String value => DateTime.parse(value),
+        _ => null,
+      },
+    );
+
+MyPayment myPaymentFromRow(Map<String, dynamic> row) => MyPayment(
+  id: row['payment_id'] as String,
+  seasonName: row['season_name'] as String,
+  concept: row['concept'] as String,
+  amountCents: row['amount_cents'] as int,
+  date: DateTime.parse(row['payment_date'] as String),
+  status: PaymentStatus.values.byName(row['status'] as String),
+  method: _methodOf(row['method']),
+);

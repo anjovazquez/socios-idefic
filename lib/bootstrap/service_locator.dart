@@ -138,6 +138,8 @@ void configureDependencies() {
         getPaymentInstructions: GetPaymentInstructions(serviceLocator()),
         setPaymentInstructions: SetPaymentInstructions(serviceLocator()),
         startPayment: StartPayment(serviceLocator()),
+        getMySubscription: GetMySubscription(serviceLocator()),
+        getMyPayments: GetMyPayments(serviceLocator()),
       ),
     );
 }

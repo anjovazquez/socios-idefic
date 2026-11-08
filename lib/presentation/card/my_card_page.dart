@@ -4,8 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../application/app_use_cases.dart';
 import '../../domain/card/membership_card.dart';
-import '../../domain/payment/payment_gateway.dart';
-import '../format/money.dart';
+import '../payment/how_to_pay_sheet.dart';
 import '../session/session_view_model.dart';
 import 'card_qr.dart';
 import 'membership_card_view.dart';
@@ -26,52 +25,13 @@ class _MyCardPageState extends State<MyCardPage> {
   Widget? _qrOf(MembershipCard card) =>
       card.cardToken == null ? null : CardQr(token: card.cardToken!);
 
-  Future<void> _howToPay(MembershipCard card) async {
-    final start = await context.read<AppUseCases>().startPayment(
-      clubId: context.read<SessionViewModel>().activeClub!.id,
-      seasonMembershipId: card.seasonMembershipId!,
-    );
-    if (!mounted) return;
-    switch (start) {
-      case ManualPaymentStart(:final instructions):
-        await showModalBottomSheet<void>(
-          context: context,
-          builder: (context) => SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Cómo pagar tu cuota'
-                    '${card.feeCents == null ? '' : ' de ${formatCents(card.feeCents!)}'}',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    instructions ??
-                        'Tu club todavía no ha indicado cómo pagar. Ponte en '
-                            'contacto con él.',
-                    key: const Key('payment-instructions-text'),
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Cuando el club registre tu pago, tu carnet se activará '
-                    'solo.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      case RedirectPaymentStart():
-        // Online payment arrives with the real provider (VS-021).
-        break;
-    }
-  }
+  Future<void> _howToPay(MembershipCard card) => startFeePayment(
+    context,
+    useCases: context.read<AppUseCases>(),
+    clubId: context.read<SessionViewModel>().activeClub!.id,
+    seasonMembershipId: card.seasonMembershipId!,
+    feeCents: card.feeCents,
+  );
 
   void _showFullScreen(MembershipCard card) {
     Navigator.of(context).push(
