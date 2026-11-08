@@ -6,8 +6,8 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 - Fase actual: **1 — Acceso multi-club (0.1)**.
 - Tarea activa: ninguna.
-- Última tarea completada: `VS-001 — Login email/contraseña y selector de club` (2026-11-08).
-- Siguiente tarea READY: `VS-002 — Login con Google` (después `VS-003`). VS-002 se implementa y testea con fakes; la prueba OAuth real necesita un client ID de Google (lo configura el usuario).
+- Última tarea completada: `VS-002 — Login con Google` (2026-11-08). Prueba OAuth real pendiente de client ID (checklist en `docs/AUTH_GOOGLE.md`).
+- Siguiente tarea READY: `VS-003 — Superadmin: alta, edición y desactivación de clubes`.
 - Bloqueos globales: ninguno.
 
 ## Milestones
@@ -15,7 +15,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 | Milestone | Estado |
 |---|---|
 | Bootstrap | DONE |
-| 0.1 Acceso multi-club | IN_PROGRESS (VS-001 DONE; VS-002, VS-003 READY) |
+| 0.1 Acceso multi-club | IN_PROGRESS (VS-001, VS-002 DONE; VS-003 READY) |
 | 0.2 Socios | TODO |
 | 0.3 Temporadas y cuotas | TODO |
 | 0.4 Carnet digital | TODO |

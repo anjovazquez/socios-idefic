@@ -10,7 +10,7 @@ dependencias ya estén todas `DONE` (salvo bloqueo explícito por decisión).
 |---|---|---|---|---|---|
 | BOOTSTRAP-000 | Bootstrap Flutter + Supabase local + CI | DONE | - | 0 Bootstrap | - |
 | VS-001 | Login email/contraseña y selector de club | DONE | BOOTSTRAP-000 | 1 · 0.1 Acceso | RF-001, RF-030, RN-001 |
-| VS-002 | Login con Google | READY | VS-001 | 1 · 0.1 Acceso | RF-001 |
+| VS-002 | Login con Google | DONE | VS-001 | 1 · 0.1 Acceso | RF-001 |
 | VS-003 | Superadmin: alta, edición y desactivación de clubes | READY | VS-001 | 1 · 0.1 Acceso | §3.1, §17 |
 | VS-004 | Identidad visual por club + DESIGN.md | TODO | VS-003 | 1 · 0.1 Acceso | §20, RF-030 |
 | VS-005 | Suplantación funcional auditada | TODO | VS-003 | 1 · 0.1 Acceso | §17 |

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../application/app_use_cases.dart';
 import '../../application/club/resolve_club_entry.dart';
+import '../../domain/auth/auth_failures.dart';
 import '../../domain/auth/auth_user.dart';
 import '../../domain/club/my_club.dart';
 
@@ -29,9 +30,21 @@ class SessionViewModel extends ChangeNotifier {
 
   String? _userId;
 
+  /// Failure raised while a provider (Google) sends the user back.
+  AuthFailure? _signInFailure;
+  AuthFailure? get signInFailure => _signInFailure;
+
   void start() {
     _onUser(_useCases.watchSession.currentUser);
-    _subscription = _useCases.watchSession().listen(_onUser);
+    _subscription = _useCases.watchSession().listen(
+      _onUser,
+      onError: (Object error) {
+        _signInFailure = error is AuthFailure
+            ? error
+            : AuthUnavailableFailure(error);
+        notifyListeners();
+      },
+    );
   }
 
   void _onUser(AuthUser? user) {
@@ -44,6 +57,7 @@ class SessionViewModel extends ChangeNotifier {
     }
     if (user.id == _userId) return;
     _userId = user.id;
+    _signInFailure = null;
     unawaited(loadClubs());
   }
 
@@ -77,6 +91,12 @@ class SessionViewModel extends ChangeNotifier {
   void openClubSelector() => _setStatus(SessionStatus.choosingClub);
 
   Future<void> signOut() => _useCases.signOut();
+
+  void clearSignInFailure() {
+    if (_signInFailure == null) return;
+    _signInFailure = null;
+    notifyListeners();
+  }
 
   void _setStatus(SessionStatus status) {
     _status = status;

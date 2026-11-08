@@ -56,6 +56,7 @@ Memoria estable. Solo hechos válidos durante muchas tareas (ver `MEMORY_POLICY.
 ## Conocimiento técnico estable
 
 - Supabase Auth: el registro público se cierra con `auth.enable_signup = false`; `[auth.email].enable_signup` debe seguir en `true` porque en GoTrue activa el proveedor email (si es `false`, no se puede iniciar sesión con contraseña).
+- Google: proveedor activo con secretos por env; GoTrue rechaza cuentas nuevas (`signup_disabled`) y vincula por email verificado. Los fallos del retorno OAuth llegan como errores del stream de sesión (`AuthFailure`). Deep link móvil `es.idefic.socios://login-callback`.
 - Cliente: `Supabase.initialize(publishableKey: ...)` (`anonKey` está deprecado).
 - Navegación: cada `SessionStatus` tiene una ruta; `go_router` redirige con `refreshListenable` = `SessionViewModel`.
 - Club activo recordado por dispositivo (`ActiveClubStore`, shared_preferences) y olvidado al cerrar sesión.

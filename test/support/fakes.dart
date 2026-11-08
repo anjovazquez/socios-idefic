@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:socios_idefic/application/app_use_cases.dart';
+import 'package:socios_idefic/application/auth/sign_in_with_google.dart';
 import 'package:socios_idefic/application/auth/sign_in_with_password.dart';
 import 'package:socios_idefic/application/auth/sign_out.dart';
 import 'package:socios_idefic/application/auth/watch_session.dart';
@@ -42,6 +43,10 @@ class FakeAuthRepository implements AuthRepository {
   String? lastEmail;
   Object? failure;
 
+  /// Google account picked on the provider screen; null cancels.
+  String? googleEmail;
+  int googleAttempts = 0;
+
   @override
   AuthUser? get currentUser => _current;
 
@@ -62,6 +67,23 @@ class FakeAuthRepository implements AuthRepository {
     _current = user;
     _changes.add(user);
     return user;
+  }
+
+  /// Mimics Supabase: the session (or the rejection) arrives later through
+  /// the auth stream after the provider redirects back. Accounts that exist
+  /// (here: have a password) are linked by email; others are rejected.
+  @override
+  Future<void> signInWithGoogle() async {
+    googleAttempts++;
+    final email = googleEmail;
+    if (email == null) throw const SignInCancelledFailure();
+    if (!_passwords.containsKey(email)) {
+      _changes.addError(const UnregisteredAccountFailure());
+      return;
+    }
+    final user = AuthUser(id: 'user-$email', email: email);
+    _current = user;
+    _changes.add(user);
   }
 
   @override
@@ -110,6 +132,7 @@ AppUseCases buildUseCases({
   return AppUseCases(
     watchSession: WatchSession(auth),
     signInWithPassword: SignInWithPassword(auth),
+    signInWithGoogle: SignInWithGoogle(auth),
     signOut: SignOut(auth, activeClubStore),
     resolveClubEntry: ResolveClubEntry(clubs, activeClubStore),
     selectActiveClub: SelectActiveClub(activeClubStore),

@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../application/app_use_cases.dart';
+import '../application/auth/sign_in_with_google.dart';
 import '../application/auth/sign_in_with_password.dart';
 import '../application/auth/sign_out.dart';
 import '../application/auth/watch_session.dart';
@@ -17,12 +19,18 @@ import '../infrastructure/club/supabase_club_repository.dart';
 /// Composition root. Only this layer knows about GetIt.
 final GetIt serviceLocator = GetIt.instance;
 
+/// Deep link registered in Android/iOS and in Supabase redirect URLs.
+const mobileAuthRedirectUrl = 'es.idefic.socios://login-callback';
+
 void configureDependencies() {
   final client = Supabase.instance.client;
 
   serviceLocator
     ..registerLazySingleton<AuthRepository>(
-      () => SupabaseAuthRepository(client),
+      () => SupabaseAuthRepository(
+        client,
+        oauthRedirectUrl: kIsWeb ? null : mobileAuthRedirectUrl,
+      ),
     )
     ..registerLazySingleton<ClubRepository>(
       () => SupabaseClubRepository(client),
@@ -34,6 +42,7 @@ void configureDependencies() {
       () => AppUseCases(
         watchSession: WatchSession(serviceLocator()),
         signInWithPassword: SignInWithPassword(serviceLocator()),
+        signInWithGoogle: SignInWithGoogle(serviceLocator()),
         signOut: SignOut(serviceLocator(), serviceLocator()),
         resolveClubEntry: ResolveClubEntry(serviceLocator(), serviceLocator()),
         selectActiveClub: SelectActiveClub(serviceLocator()),

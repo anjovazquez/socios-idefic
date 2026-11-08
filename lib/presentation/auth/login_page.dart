@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../session/session_view_model.dart';
 import 'login_view_model.dart';
 
 class LoginPage extends StatefulWidget {
@@ -21,14 +22,28 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _submit() => context.read<LoginViewModel>().submit(
-    email: _email.text,
-    password: _password.text,
-  );
+  void _submit() {
+    context.read<SessionViewModel>().clearSignInFailure();
+    context.read<LoginViewModel>().submit(
+      email: _email.text,
+      password: _password.text,
+    );
+  }
+
+  void _signInWithGoogle() {
+    context.read<SessionViewModel>().clearSignInFailure();
+    context.read<LoginViewModel>().signInWithGoogle();
+  }
 
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<LoginViewModel>();
+    final redirectFailure = context.watch<SessionViewModel>().signInFailure;
+    final errorMessage =
+        viewModel.errorMessage ??
+        (redirectFailure == null
+            ? null
+            : LoginViewModel.messageFor(redirectFailure));
     final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
@@ -67,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                         labelText: 'Contraseña',
                       ),
                     ),
-                    if (viewModel.errorMessage case final message?) ...[
+                    if (errorMessage case final message?) ...[
                       const SizedBox(height: 12),
                       Text(
                         message,
@@ -86,6 +101,15 @@ class _LoginPageState extends State<LoginPage> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Text('Entrar'),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      key: const Key('login-google'),
+                      onPressed: viewModel.isSubmitting
+                          ? null
+                          : _signInWithGoogle,
+                      icon: const Icon(Icons.account_circle_outlined),
+                      label: const Text('Continuar con Google'),
                     ),
                     const SizedBox(height: 16),
                     Text(

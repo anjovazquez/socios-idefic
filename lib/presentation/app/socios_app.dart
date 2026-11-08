@@ -40,7 +40,10 @@ class _SociosAppState extends State<SociosApp> {
       providers: [
         ChangeNotifierProvider.value(value: _session),
         ChangeNotifierProvider(
-          create: (_) => LoginViewModel(widget.useCases.signInWithPassword),
+          create: (_) => LoginViewModel(
+            widget.useCases.signInWithPassword,
+            widget.useCases.signInWithGoogle,
+          ),
         ),
       ],
       child: MaterialApp.router(

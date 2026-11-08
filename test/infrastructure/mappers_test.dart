@@ -49,6 +49,25 @@ void main() {
     );
   });
 
+  test('maps a rejected Google sign up to an unregistered account', () {
+    expect(
+      mapAuthException(
+        const AuthException(
+          'Signups not allowed for this instance',
+          statusCode: '422',
+          code: 'signup_disabled',
+        ),
+      ),
+      isA<UnregisteredAccountFailure>(),
+    );
+    expect(
+      mapAuthException(
+        const AuthException('Signups not allowed for this instance'),
+      ),
+      isA<UnregisteredAccountFailure>(),
+    );
+  });
+
   test('maps other auth errors to unavailable', () {
     expect(
       mapAuthException(const AuthException('boom', statusCode: '500')),

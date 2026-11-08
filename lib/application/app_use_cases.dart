@@ -1,3 +1,4 @@
+import 'auth/sign_in_with_google.dart';
 import 'auth/sign_in_with_password.dart';
 import 'auth/sign_out.dart';
 import 'auth/watch_session.dart';
@@ -9,6 +10,7 @@ class AppUseCases {
   const AppUseCases({
     required this.watchSession,
     required this.signInWithPassword,
+    required this.signInWithGoogle,
     required this.signOut,
     required this.resolveClubEntry,
     required this.selectActiveClub,
@@ -16,6 +18,7 @@ class AppUseCases {
 
   final WatchSession watchSession;
   final SignInWithPassword signInWithPassword;
+  final SignInWithGoogle signInWithGoogle;
   final SignOut signOut;
   final ResolveClubEntry resolveClubEntry;
   final SelectActiveClub selectActiveClub;
