@@ -1,4 +1,5 @@
 import 'auth/sign_in_with_google.dart';
+import 'blog/blog_use_cases.dart';
 import 'auth/sign_in_with_password.dart';
 import 'auth/sign_out.dart';
 import 'auth/watch_session.dart';
@@ -74,6 +75,11 @@ class AppUseCases {
     required this.startPaymentMethodSetup,
     required this.removePaymentMethod,
     required this.cancelRenewal,
+    required this.getClubPosts,
+    required this.savePost,
+    required this.setPostStatus,
+    required this.uploadPostImage,
+    required this.getPostImageUrl,
   });
 
   final WatchSession watchSession;
@@ -136,4 +142,9 @@ class AppUseCases {
   final StartPaymentMethodSetup startPaymentMethodSetup;
   final RemovePaymentMethod removePaymentMethod;
   final CancelRenewal cancelRenewal;
+  final GetClubPosts getClubPosts;
+  final SavePost savePost;
+  final SetPostStatus setPostStatus;
+  final UploadPostImage uploadPostImage;
+  final GetPostImageUrl getPostImageUrl;
 }

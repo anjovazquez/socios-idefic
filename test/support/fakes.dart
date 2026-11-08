@@ -12,6 +12,7 @@ import 'package:socios_idefic/application/club/resolve_club_entry.dart';
 import 'package:socios_idefic/application/club/select_active_club.dart';
 import 'package:socios_idefic/application/member/member_use_cases.dart';
 import 'package:socios_idefic/application/onboarding/onboarding_use_cases.dart';
+import 'package:socios_idefic/application/blog/blog_use_cases.dart';
 import 'package:socios_idefic/application/payment/payment_use_cases.dart';
 import 'package:socios_idefic/application/platform/platform_use_cases.dart';
 import 'package:socios_idefic/application/profile/profile_use_cases.dart';
@@ -31,6 +32,8 @@ import 'package:socios_idefic/domain/member/club_member.dart';
 import 'package:socios_idefic/domain/member/members_repository.dart';
 import 'package:socios_idefic/domain/onboarding/onboarding.dart';
 import 'package:socios_idefic/domain/onboarding/onboarding_repository.dart';
+import 'package:socios_idefic/domain/blog/blog_repository.dart';
+import 'package:socios_idefic/domain/blog/post.dart';
 import 'package:socios_idefic/domain/payment/club_payments.dart';
 import 'package:socios_idefic/domain/payment/my_subscription.dart';
 import 'package:socios_idefic/domain/payment/online_payments.dart';
@@ -1133,6 +1136,91 @@ class FakeReceiptRenderer implements ReceiptRenderer {
   Future<void> deliver(Receipt receipt) async => delivered.add(receipt);
 }
 
+/// Posts per club; [now] decides what a scheduled post shows.
+class FakeBlogRepository implements BlogRepository {
+  FakeBlogRepository({DateTime? now}) : now = now ?? DateTime(2026, 11, 9, 12);
+
+  DateTime now;
+  final Map<String, List<Post>> posts = {};
+  int uploads = 0;
+  int _ids = 0;
+
+  Post _withVisibility(Post p) => Post(
+    id: p.id,
+    title: p.title,
+    body: p.body,
+    imagePath: p.imagePath,
+    status: p.status,
+    publishedAt: p.publishedAt,
+    visible:
+        p.status == PostStatus.published &&
+        p.publishedAt != null &&
+        !p.publishedAt!.isAfter(now),
+  );
+
+  @override
+  Future<List<Post>> getClubPosts(String clubId) async =>
+      [...?posts[clubId]].map(_withVisibility).toList()..sort(
+        (a, b) => (b.publishedAt ?? now).compareTo(a.publishedAt ?? now),
+      );
+
+  @override
+  Future<String> savePost({
+    String? postId,
+    required String clubId,
+    required String title,
+    required String body,
+    String? imagePath,
+    required bool publish,
+    DateTime? publishedAt,
+  }) async {
+    final list = posts.putIfAbsent(clubId, () => []);
+    final id = postId ?? 'post-${++_ids}';
+    final post = Post(
+      id: id,
+      title: title,
+      body: body,
+      imagePath: imagePath,
+      status: publish ? PostStatus.published : PostStatus.draft,
+      publishedAt: publish ? (publishedAt ?? now) : publishedAt,
+    );
+    final i = list.indexWhere((p) => p.id == id);
+    if (i >= 0) {
+      list[i] = post;
+    } else {
+      list.add(post);
+    }
+    return id;
+  }
+
+  @override
+  Future<void> setStatus(String postId, PostStatus status) async {
+    for (final list in posts.values) {
+      final i = list.indexWhere((p) => p.id == postId);
+      if (i < 0) continue;
+      final p = list[i];
+      list[i] = Post(
+        id: p.id,
+        title: p.title,
+        body: p.body,
+        imagePath: p.imagePath,
+        status: status,
+        publishedAt: p.publishedAt,
+      );
+    }
+  }
+
+  @override
+  Future<String> uploadImage({
+    required String clubId,
+    required Uint8List bytes,
+    required String contentType,
+  }) async => '$clubId/post-${++uploads}.png';
+
+  @override
+  Future<String?> imageUrl(String path) async => null;
+}
+
 AppUseCases buildUseCases({
   required FakeAuthRepository auth,
   required FakeClubRepository clubs,
@@ -1146,7 +1234,9 @@ AppUseCases buildUseCases({
   FakeCardRepository? cards,
   FakePaymentsRepository? payments,
   FakeReceiptRenderer? receiptRenderer,
+  FakeBlogRepository? blog,
 }) {
+  final blogRepository = blog ?? FakeBlogRepository();
   final activeClubStore = store ?? InMemoryActiveClubStore();
   final platformRepository = platform ?? FakePlatformRepository();
   final brandingRepository = branding ?? FakeClubBrandingRepository(clubs);
@@ -1225,6 +1315,11 @@ AppUseCases buildUseCases({
     startPaymentMethodSetup: StartPaymentMethodSetup(paymentsRepository),
     removePaymentMethod: RemovePaymentMethod(paymentsRepository),
     cancelRenewal: CancelRenewal(paymentsRepository),
+    getClubPosts: GetClubPosts(blogRepository),
+    savePost: SavePost(blogRepository),
+    setPostStatus: SetPostStatus(blogRepository),
+    uploadPostImage: UploadPostImage(blogRepository),
+    getPostImageUrl: GetPostImageUrl(blogRepository),
     downloadReceipt: DownloadReceipt(
       paymentsRepository,
       receiptRenderer ?? FakeReceiptRenderer(),

@@ -99,6 +99,8 @@ icono + texto, nunca solo color.
 | `PaymentStatusChip` | `presentation/payment/payment_labels.dart` | Estado del pago con icono + texto: Pagado, Pendiente, Fallido, Anulado |
 | Recibo PDF | `presentation/receipt/pdf_receipt_renderer.dart` | A4: cabecera del color del club (texto con `readableOn`), logo si existe, nombre y «Recibo de pago», nº `CODIGO-0001`; filas etiqueta/valor; importe en negrita; pie legal. Fuente Roboto incluida |
 | Pago online | `presentation/payment/my_subscription_page.dart`, `online_payments_section.dart` | Con cuota pendiente y club con Stripe: botón principal «Pagar ahora con tarjeta o domiciliación» y secundario «Otras formas de pago». Al volver del Checkout, aviso en `secondaryContainer` («Estamos confirmando tu pago…» / «No se ha completado el pago…»). En Configuración, «Pagos online» con estado (icono + frase) y «Conectar con Stripe» / «Completar verificación» / «Comprobar estado» |
+| `PostStatusChip` | `presentation/blog/blog_messages.dart` | Estado de una noticia con icono + texto: Publicada, Programada, Borrador, Archivada |
+| Editor de noticia | `presentation/blog/post_editor_page.dart` | Título (140), texto (párrafos), imagen opcional con vista previa, `SegmentedButton` Ahora/Programar con fecha y hora, «Guardar borrador» + acción principal «Publicar»/«Programar»; error inline |
 | Estado de mensaje (`_MessagePage`) | `presentation/session/session_status_pages.dart` | Pantalla vacía/error: título, explicación, acción |
 
 Patrones:

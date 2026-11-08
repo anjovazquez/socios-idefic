@@ -41,6 +41,13 @@ class ClubHomePage extends StatelessWidget {
             ),
           if (club.canAdminister)
             IconButton(
+              key: const Key('open-news-admin'),
+              tooltip: 'Noticias',
+              icon: const Icon(Icons.campaign_outlined),
+              onPressed: () => context.go('/club/news'),
+            ),
+          if (club.canAdminister)
+            IconButton(
               key: const Key('open-payments'),
               tooltip: 'Pagos',
               icon: const Icon(Icons.payments_outlined),
