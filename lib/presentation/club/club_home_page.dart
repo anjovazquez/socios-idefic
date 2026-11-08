@@ -18,6 +18,13 @@ class ClubHomePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(club.name),
         actions: [
+          if (session.isPlatformAdmin)
+            IconButton(
+              key: const Key('open-platform'),
+              tooltip: 'Plataforma',
+              icon: const Icon(Icons.admin_panel_settings_outlined),
+              onPressed: session.openPlatform,
+            ),
           if (session.canSwitchClub)
             IconButton(
               key: const Key('switch-club'),

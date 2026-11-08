@@ -38,6 +38,7 @@ class _SociosAppState extends State<SociosApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider<AppUseCases>.value(value: widget.useCases),
         ChangeNotifierProvider.value(value: _session),
         ChangeNotifierProvider(
           create: (_) => LoginViewModel(

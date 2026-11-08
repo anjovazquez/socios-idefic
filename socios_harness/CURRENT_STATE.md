@@ -6,8 +6,8 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 - Fase actual: **1 — Acceso multi-club (0.1)**.
 - Tarea activa: ninguna.
-- Última tarea completada: `VS-002 — Login con Google` (2026-11-08). Prueba OAuth real pendiente de client ID (checklist en `docs/AUTH_GOOGLE.md`).
-- Siguiente tarea READY: `VS-003 — Superadmin: alta, edición y desactivación de clubes`.
+- Última tarea completada: `VS-003 — Superadmin: alta, edición y desactivación de clubes` (2026-11-08).
+- Siguiente tarea READY: `VS-004 — Identidad visual por club + DESIGN.md` (también READY: VS-005, VS-006).
 - Bloqueos globales: ninguno.
 
 ## Milestones
@@ -15,8 +15,8 @@ Snapshot operativo. Se actualiza al final de cada loop.
 | Milestone | Estado |
 |---|---|
 | Bootstrap | DONE |
-| 0.1 Acceso multi-club | IN_PROGRESS (VS-001, VS-002 DONE; VS-003 READY) |
-| 0.2 Socios | TODO |
+| 0.1 Acceso multi-club | IN_PROGRESS (VS-001…VS-003 DONE; VS-004, VS-005 READY) |
+| 0.2 Socios | READY (VS-006) |
 | 0.3 Temporadas y cuotas | TODO |
 | 0.4 Carnet digital | TODO |
 | 0.5 Pagos | TODO |
@@ -37,5 +37,6 @@ Snapshot operativo. Se actualiza al final de cada loop.
 - Config cliente: `--dart-define=SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` (ver `.env.example`).
 - Supabase CLI 2.122 (devDependency npm); signup deshabilitado; Google declarado y desactivado.
 - CI: `.github/workflows/ci.yml` con `quality` y `sql-tests` (aún sin ejecución en GitHub: el workflow corre en PR/main).
-- Esquema: `profiles`, `clubs`, `club_memberships` + RPC `get_my_clubs` (VS-001). Seed local: `admin@`, `ana@`, `luis@example.com` (contraseña `<nombre>-password`).
+- Esquema: `profiles`, `clubs`, `club_memberships` + RPC `get_my_clubs` (VS-001). Seed local: `admin@`, `ana@`, `luis@`, `root@example.com` (superadmin) con contraseña `<nombre>-password`.
+- Plataforma (VS-003): `platform_admins`, `is_platform_admin()`, `audit_log` + `audit()`, `club_invitations` mínima, RPC `create_club`/`update_club`/`set_club_active`/`assign_club_admin`/`get_platform_clubs`.
 - Sesión cloud: Flutter en `$HOME/flutter/bin`; Docker requiere arrancar `dockerd` en segundo plano (ver `QUALITY_GATES.md`).

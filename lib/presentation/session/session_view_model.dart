@@ -8,7 +8,15 @@ import '../../domain/auth/auth_failures.dart';
 import '../../domain/auth/auth_user.dart';
 import '../../domain/club/my_club.dart';
 
-enum SessionStatus { loading, signedOut, noClubs, choosingClub, inClub, error }
+enum SessionStatus {
+  loading,
+  signedOut,
+  noClubs,
+  choosingClub,
+  inClub,
+  platform,
+  error,
+}
 
 /// Presentation state of the session: who is signed in and which club is open.
 class SessionViewModel extends ChangeNotifier {
@@ -27,6 +35,11 @@ class SessionViewModel extends ChangeNotifier {
   MyClub? get activeClub => _activeClub;
 
   bool get canSwitchClub => _clubs.length > 1;
+
+  bool _isPlatformAdmin = false;
+
+  /// Shows the platform administration entry (§3.1).
+  bool get isPlatformAdmin => _isPlatformAdmin;
 
   String? _userId;
 
@@ -50,6 +63,7 @@ class SessionViewModel extends ChangeNotifier {
   void _onUser(AuthUser? user) {
     if (user == null) {
       _userId = null;
+      _isPlatformAdmin = false;
       _clubs = const [];
       _activeClub = null;
       _setStatus(SessionStatus.signedOut);
@@ -64,12 +78,18 @@ class SessionViewModel extends ChangeNotifier {
   Future<void> loadClubs() async {
     _setStatus(SessionStatus.loading);
     try {
-      final entry = await _useCases.resolveClubEntry();
+      final (entry, isPlatformAdmin) = await (
+        _useCases.resolveClubEntry(),
+        _useCases.isPlatformAdmin(),
+      ).wait;
+      _isPlatformAdmin = isPlatformAdmin;
       _clubs = entry.clubs;
       switch (entry) {
         case NoClubEntry():
           _activeClub = null;
-          _setStatus(SessionStatus.noClubs);
+          _setStatus(
+            isPlatformAdmin ? SessionStatus.platform : SessionStatus.noClubs,
+          );
         case ChooseClubEntry():
           _activeClub = null;
           _setStatus(SessionStatus.choosingClub);
@@ -89,6 +109,31 @@ class SessionViewModel extends ChangeNotifier {
 
   /// Opens the selector while keeping the session (RF-030).
   void openClubSelector() => _setStatus(SessionStatus.choosingClub);
+
+  void openPlatform() {
+    if (_isPlatformAdmin) _setStatus(SessionStatus.platform);
+  }
+
+  /// Leaves the platform administration back to the club or the selector.
+  void closePlatform() {
+    if (_activeClub != null) {
+      _setStatus(SessionStatus.inClub);
+    } else if (_clubs.isNotEmpty) {
+      _setStatus(SessionStatus.choosingClub);
+    }
+  }
+
+  /// Reloads the clubs the user can enter without leaving the current screen
+  /// (e.g. after the platform admin creates or deactivates a club).
+  Future<void> refreshClubs() async {
+    final entry = await _useCases.resolveClubEntry();
+    _clubs = entry.clubs;
+    if (_activeClub case final active?
+        when !_clubs.any((club) => club.id == active.id)) {
+      _activeClub = null;
+    }
+    notifyListeners();
+  }
 
   Future<void> signOut() => _useCases.signOut();
 

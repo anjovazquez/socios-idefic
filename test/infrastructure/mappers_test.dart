@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:socios_idefic/domain/auth/auth_failures.dart';
 import 'package:socios_idefic/domain/club/my_club.dart';
+import 'package:socios_idefic/domain/platform/platform_failures.dart';
 import 'package:socios_idefic/infrastructure/auth/supabase_auth_repository.dart';
 import 'package:socios_idefic/infrastructure/club/my_club_mapper.dart';
+import 'package:socios_idefic/infrastructure/platform/supabase_platform_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
@@ -73,5 +75,92 @@ void main() {
       mapAuthException(const AuthException('boom', statusCode: '500')),
       isA<AuthUnavailableFailure>(),
     );
+  });
+
+  test('platform admins enter clubs without membership', () {
+    final club = myClubFromRow({
+      'club_id': 'c1',
+      'name': 'IDEFIC',
+      'code': 'IDEFIC',
+      'role': 'platform_admin',
+    });
+
+    expect(club.role, ClubRole.platformAdmin);
+  });
+
+  test('maps a get_platform_clubs row', () {
+    final club = platformClubFromRow({
+      'club_id': 'c1',
+      'name': 'Club Nuevo',
+      'code': 'NUEVO',
+      'is_active': false,
+      'member_count': 0,
+      'admin_email': null,
+      'pending_admin_email': 'nadie@test.com',
+    });
+
+    expect(club.isActive, isFalse);
+    expect(club.pendingAdminEmail, 'nadie@test.com');
+  });
+
+  group('mapPlatformError', () {
+    PlatformFailure map(String code, String message, {String? hint}) =>
+        mapPlatformError(
+          PostgrestException(message: message, code: code, hint: hint),
+        );
+
+    test('duplicate club code', () {
+      expect(
+        map(
+          '23505',
+          'duplicate key value violates unique constraint "clubs_code_key"',
+        ),
+        isA<DuplicateClubCodeFailure>(),
+      );
+    });
+
+    test('second admin', () {
+      expect(
+        map(
+          'P0001',
+          'club already has an admin',
+          hint: 'club_already_has_admin',
+        ),
+        isA<ClubAlreadyHasAdminFailure>(),
+      );
+      expect(
+        map(
+          '23505',
+          'duplicate key value violates unique constraint "club_memberships_one_admin_idx"',
+        ),
+        isA<ClubAlreadyHasAdminFailure>(),
+      );
+    });
+
+    test('permission', () {
+      expect(
+        map('42501', 'platform admin required'),
+        isA<NotPlatformAdminFailure>(),
+      );
+    });
+
+    test('invalid data', () {
+      expect(
+        map('22023', 'invalid admin email'),
+        isA<InvalidClubDataFailure>().having(
+          (f) => f.field,
+          'field',
+          ClubField.adminEmail,
+        ),
+      );
+      expect(
+        map('22023', 'invalid club code'),
+        isA<InvalidClubDataFailure>().having(
+          (f) => f.field,
+          'field',
+          ClubField.code,
+        ),
+      );
+    });
   });
 }

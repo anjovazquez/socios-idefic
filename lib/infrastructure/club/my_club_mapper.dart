@@ -7,6 +7,7 @@ MyClub myClubFromRow(Map<String, dynamic> row) => MyClub(
   code: row['code'] as String,
   role: switch (row['role']) {
     'club_admin' => ClubRole.clubAdmin,
+    'platform_admin' => ClubRole.platformAdmin,
     _ => ClubRole.member,
   },
   logoPath: row['logo_path'] as String?,

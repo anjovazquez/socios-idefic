@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../auth/login_page.dart';
 import '../club/club_home_page.dart';
 import '../club/club_selector_page.dart';
+import '../platform/platform_clubs_page.dart';
 import '../session/session_status_pages.dart';
 import '../session/session_view_model.dart';
 
@@ -12,6 +13,7 @@ abstract final class AppRoutes {
   static const clubs = '/clubs';
   static const club = '/club';
   static const noClubs = '/no-clubs';
+  static const platform = '/platform';
   static const error = '/error';
 }
 
@@ -23,6 +25,7 @@ String routeFor(SessionStatus status) => switch (status) {
   SessionStatus.noClubs => AppRoutes.noClubs,
   SessionStatus.choosingClub => AppRoutes.clubs,
   SessionStatus.inClub => AppRoutes.club,
+  SessionStatus.platform => AppRoutes.platform,
   SessionStatus.error => AppRoutes.error,
 };
 
@@ -54,6 +57,10 @@ GoRouter createRouter(SessionViewModel session, {String? initialLocation}) =>
         GoRoute(
           path: AppRoutes.noClubs,
           builder: (context, state) => const NoClubsPage(),
+        ),
+        GoRoute(
+          path: AppRoutes.platform,
+          builder: (context, state) => const PlatformClubsPage(),
         ),
         GoRoute(
           path: AppRoutes.error,

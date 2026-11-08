@@ -4,6 +4,7 @@ import 'auth/sign_out.dart';
 import 'auth/watch_session.dart';
 import 'club/resolve_club_entry.dart';
 import 'club/select_active_club.dart';
+import 'platform/platform_use_cases.dart';
 
 /// Use cases the presentation layer needs, built by the composition root.
 class AppUseCases {
@@ -14,6 +15,11 @@ class AppUseCases {
     required this.signOut,
     required this.resolveClubEntry,
     required this.selectActiveClub,
+    required this.isPlatformAdmin,
+    required this.getPlatformClubs,
+    required this.createClub,
+    required this.updateClub,
+    required this.setClubActive,
   });
 
   final WatchSession watchSession;
@@ -22,4 +28,9 @@ class AppUseCases {
   final SignOut signOut;
   final ResolveClubEntry resolveClubEntry;
   final SelectActiveClub selectActiveClub;
+  final IsPlatformAdmin isPlatformAdmin;
+  final GetPlatformClubs getPlatformClubs;
+  final CreateClub createClub;
+  final UpdateClub updateClub;
+  final SetClubActive setClubActive;
 }

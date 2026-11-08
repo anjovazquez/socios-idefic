@@ -33,6 +33,7 @@ $$;
 select pg_temp.seed_user('10000000-0000-0000-0000-000000000001', 'admin@example.com', 'admin-password');
 select pg_temp.seed_user('10000000-0000-0000-0000-000000000002', 'ana@example.com', 'ana-password');
 select pg_temp.seed_user('10000000-0000-0000-0000-000000000003', 'luis@example.com', 'luis-password');
+select pg_temp.seed_user('10000000-0000-0000-0000-000000000099', 'root@example.com', 'root-password');
 
 update public.profiles set first_name = 'Admin', last_name = 'IDEFIC'
 where id = '10000000-0000-0000-0000-000000000001';
@@ -54,3 +55,8 @@ insert into public.club_memberships (user_id, club_id, role, member_number, stat
   ('10000000-0000-0000-0000-000000000003', '20000000-0000-0000-0000-000000000002', 'member', 1, 'active'),
   ('10000000-0000-0000-0000-000000000003', '20000000-0000-0000-0000-000000000003', 'member', 1, 'active')
 on conflict (user_id, club_id) do nothing;
+
+-- Platform administrator (VS-003): no club membership of their own.
+insert into public.platform_admins (user_id)
+values ('10000000-0000-0000-0000-000000000099')
+on conflict do nothing;

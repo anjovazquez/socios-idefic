@@ -1,4 +1,6 @@
-enum ClubRole { clubAdmin, member }
+/// How the current user relates to a club. [platformAdmin] means access
+/// through the platform administration, without a membership (§17).
+enum ClubRole { clubAdmin, member, platformAdmin }
 
 /// A club the current user can enter, seen through their membership.
 class MyClub {

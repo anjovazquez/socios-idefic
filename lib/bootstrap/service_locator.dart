@@ -9,12 +9,15 @@ import '../application/auth/sign_out.dart';
 import '../application/auth/watch_session.dart';
 import '../application/club/resolve_club_entry.dart';
 import '../application/club/select_active_club.dart';
+import '../application/platform/platform_use_cases.dart';
 import '../domain/auth/auth_repository.dart';
 import '../domain/club/active_club_store.dart';
 import '../domain/club/club_repository.dart';
+import '../domain/platform/platform_repository.dart';
 import '../infrastructure/auth/supabase_auth_repository.dart';
 import '../infrastructure/club/shared_preferences_active_club_store.dart';
 import '../infrastructure/club/supabase_club_repository.dart';
+import '../infrastructure/platform/supabase_platform_repository.dart';
 
 /// Composition root. Only this layer knows about GetIt.
 final GetIt serviceLocator = GetIt.instance;
@@ -35,6 +38,9 @@ void configureDependencies() {
     ..registerLazySingleton<ClubRepository>(
       () => SupabaseClubRepository(client),
     )
+    ..registerLazySingleton<PlatformRepository>(
+      () => SupabasePlatformRepository(client),
+    )
     ..registerLazySingleton<ActiveClubStore>(
       SharedPreferencesActiveClubStore.new,
     )
@@ -46,6 +52,11 @@ void configureDependencies() {
         signOut: SignOut(serviceLocator(), serviceLocator()),
         resolveClubEntry: ResolveClubEntry(serviceLocator(), serviceLocator()),
         selectActiveClub: SelectActiveClub(serviceLocator()),
+        isPlatformAdmin: IsPlatformAdmin(serviceLocator()),
+        getPlatformClubs: GetPlatformClubs(serviceLocator()),
+        createClub: CreateClub(serviceLocator()),
+        updateClub: UpdateClub(serviceLocator()),
+        setClubActive: SetClubActive(serviceLocator()),
       ),
     );
 }

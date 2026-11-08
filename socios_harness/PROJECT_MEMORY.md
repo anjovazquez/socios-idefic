@@ -62,6 +62,10 @@ Memoria estable. Solo hechos válidos durante muchas tareas (ver `MEMORY_POLICY.
 - Club activo recordado por dispositivo (`ActiveClubStore`, shared_preferences) y olvidado al cerrar sesión.
 - Pruebas web en el sandbox: `flutter build web --no-web-resources-cdn` (gstatic bloqueado); los campos de Flutter web se rellenan haciendo clic por coordenadas y escribiendo con el teclado.
 
+- Administración: toda RPC de gestión es `security definer`, valida el rol con `require_platform_admin()` (o `can_admin_club` desde VS-005) y registra `audit(club_id, action, payload)`, que guarda el actor real y si actuó como plataforma.
+- Errores de RPC → SQLSTATE: `42501` permiso, `22023` dato inválido, `23505` duplicado, `P0001` regla de negocio (con `hint`), `P0002` no encontrado. Los adapters los mapean a fallos de dominio.
+- Un único admin por club (índices parciales en `club_memberships` y `club_invitations`); el superadmin ve todos los clubes activos en el selector con rol `platform_admin` y tiene el estado de sesión `platform`.
+
 ## Producto / UX
 
 - Socio: navegación Inicio/Blog · Mi carnet · Mis ventajas · Mi suscripción · Mis datos.

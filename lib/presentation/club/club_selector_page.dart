@@ -14,6 +14,13 @@ class ClubSelectorPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Elige tu club'),
         actions: [
+          if (session.isPlatformAdmin)
+            IconButton(
+              key: const Key('open-platform'),
+              tooltip: 'Plataforma',
+              icon: const Icon(Icons.admin_panel_settings_outlined),
+              onPressed: session.openPlatform,
+            ),
           IconButton(
             tooltip: 'Cerrar sesión',
             icon: const Icon(Icons.logout),
