@@ -60,6 +60,16 @@ Flutter fijado: **3.35.1** (`.fvmrc`).
 ./scripts/flutter-test.sh     # flutter test
 ```
 
+## Gate 5.1 — Edge Functions
+
+Si el slice toca `supabase/functions/`:
+
+```bash
+cd supabase/functions && npx -y deno@2 lint && npx -y deno@2 test --allow-env
+```
+
+y una llamada real a la función contra Supabase local (con `edge-runtime`).
+
 ## Gate 6 — Base de datos / Supabase local
 Si el slice toca schema, RLS, RPC, triggers o migraciones:
 ```bash

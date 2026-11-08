@@ -22,6 +22,7 @@ Resumen de decisiones. Las de impacto fuerte tienen ADR en `adr/`.
 | D-017 | ACCEPTED | Logos e imágenes de club en el bucket **público** `club-assets/<club_id>/` (PNG/JPG/WebP ≤ 2 MB): son marca y aparecen en la validación pública del QR y en emails. Escritura solo `can_admin_club`; lectura de filas para autenticados (el upsert de Storage la necesita). Las fotos de socios irán en un bucket privado (VS-009). |
 | D-018 | ACCEPTED | `can_admin_club(club_id)` = admin activo del club o superadmin; toda RPC/policy de administración de club la usa. |
 | D-019 | ACCEPTED | `audit_log.as_platform_admin` es verdadero solo cuando un superadmin actúa sobre un club del que no es admin. Mientras lo hace, la app muestra un banner persistente con salida. La auditoría completa solo la ve el superadmin (`get_audit_log`). |
+| D-020 | ACCEPTED | Invitaciones: la Edge Function `invite-member` crea la cuenta con GoTrue `generate_link` (invite, o magiclink si ya existía sin activar) y envía su propio email con la marca del club por el puerto `Mailer`. Cada envío genera un enlace nuevo que invalida el anterior; caducan a las 24 h. Si el email ya tiene cuenta activa, entra directamente en el club (RF-004). Las Edge Functions no usan paquetes npm: hablan con PostgREST y GoTrue por `fetch`. |
 | D-016 | PROPOSED | Nombre comercial del producto y bundle id (pendiente de usuario). |
 
 ## Cuándo crear un ADR

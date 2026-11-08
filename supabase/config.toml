@@ -233,7 +233,7 @@ max_frequency = "1s"
 # Number of characters used in the email OTP.
 otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
-otp_expiry = 3600
+otp_expiry = 86400
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
@@ -397,8 +397,15 @@ inspector_port = 8083
 # The Deno major version to use.
 deno_version = 2
 
-# [edge_runtime.secrets]
-# secret_key = "env(SECRET_VALUE)"
+# Local-only values for Edge Functions (staging/production use
+# `supabase secrets set`, see DEPLOYMENT notes in socios_harness).
+[edge_runtime.secrets]
+APP_URL = "http://localhost:3000"
+PUBLIC_SUPABASE_URL = "http://127.0.0.1:54321"
+# Local emails go to Mailpit (http://127.0.0.1:54324). Resend is used when
+# RESEND_API_KEY is set as a function secret (D-013).
+MAILPIT_URL = "http://supabase_inbucket_socios-idefic:8025"
+MAIL_FROM = "Socios <no-reply@socios.local>"
 
 [analytics]
 enabled = true

@@ -9,6 +9,7 @@ import 'package:socios_idefic/application/auth/watch_session.dart';
 import 'package:socios_idefic/application/club/club_branding_use_cases.dart';
 import 'package:socios_idefic/application/club/resolve_club_entry.dart';
 import 'package:socios_idefic/application/club/select_active_club.dart';
+import 'package:socios_idefic/application/member/member_use_cases.dart';
 import 'package:socios_idefic/application/platform/platform_use_cases.dart';
 import 'package:socios_idefic/domain/auth/auth_failures.dart';
 import 'package:socios_idefic/domain/auth/auth_repository.dart';
@@ -18,6 +19,8 @@ import 'package:socios_idefic/domain/club/club_branding.dart';
 import 'package:socios_idefic/domain/club/club_branding_repository.dart';
 import 'package:socios_idefic/domain/club/club_repository.dart';
 import 'package:socios_idefic/domain/club/my_club.dart';
+import 'package:socios_idefic/domain/member/club_member.dart';
+import 'package:socios_idefic/domain/member/members_repository.dart';
 import 'package:socios_idefic/domain/platform/audit_entry.dart';
 import 'package:socios_idefic/domain/platform/club_data.dart';
 import 'package:socios_idefic/domain/platform/platform_club.dart';
@@ -361,16 +364,91 @@ class FakeClubBrandingRepository implements ClubBrandingRepository {
   String publicUrl(String path) => 'https://cdn.test/$path';
 }
 
+/// Members per club mirroring the server rules of VS-006.
+class FakeMembersRepository implements MembersRepository {
+  FakeMembersRepository({Map<String, List<ClubMember>>? members, this.auth})
+    : members = members ?? {};
+
+  final Map<String, List<ClubMember>> members;
+  FakeAuthRepository? auth;
+  FakeClubRepository? clubs;
+
+  /// Emails with an account somewhere on the platform.
+  Set<String> existingAccounts = {};
+  final List<String> sentEmails = [];
+
+  bool _isAdmin(String clubId) =>
+      clubs?.clubsByEmail[auth?.currentUser?.email]?.any(
+        (c) => c.id == clubId && c.canAdminister,
+      ) ??
+      false;
+
+  @override
+  Future<List<ClubMember>> getMembers(String clubId) async {
+    if (!_isAdmin(clubId)) throw const MemberPermissionFailure();
+    return members[clubId] ?? const [];
+  }
+
+  @override
+  Future<InvitationOutcome> invite({
+    required String clubId,
+    required String email,
+    required String firstName,
+  }) async {
+    if (!_isAdmin(clubId)) throw const MemberPermissionFailure();
+    final list = members.putIfAbsent(clubId, () => []);
+    if (list.any((m) => m.email == email && m.status == MemberStatus.active)) {
+      throw const AlreadyMemberFailure();
+    }
+    final existing = existingAccounts.contains(email);
+    final next =
+        list.fold<int>(
+          0,
+          (max, m) => (m.memberNumber ?? 0) > max ? m.memberNumber! : max,
+        ) +
+        1;
+    list.add(
+      ClubMember(
+        membershipId: 'm-$email',
+        email: email,
+        firstName: firstName,
+        memberNumber: next,
+        isClubAdmin: false,
+        status: existing ? MemberStatus.active : MemberStatus.invited,
+      ),
+    );
+    sentEmails.add(email);
+    return existing
+        ? InvitationOutcome.addedExistingAccount
+        : InvitationOutcome.invited;
+  }
+
+  @override
+  Future<void> resendInvitation(String membershipId) async {
+    final member = members.values
+        .expand((list) => list)
+        .firstWhere((m) => m.membershipId == membershipId);
+    if (member.status != MemberStatus.invited) {
+      throw const InvitationNotPendingFailure();
+    }
+    sentEmails.add(member.email);
+  }
+}
+
 AppUseCases buildUseCases({
   required FakeAuthRepository auth,
   required FakeClubRepository clubs,
   InMemoryActiveClubStore? store,
   FakePlatformRepository? platform,
   FakeClubBrandingRepository? branding,
+  FakeMembersRepository? members,
 }) {
   final activeClubStore = store ?? InMemoryActiveClubStore();
   final platformRepository = platform ?? FakePlatformRepository();
   final brandingRepository = branding ?? FakeClubBrandingRepository(clubs);
+  final membersRepository = (members ?? FakeMembersRepository())
+    ..auth = auth
+    ..clubs = clubs;
   platformRepository.auth = auth;
   clubs
     ..auth = auth
@@ -388,6 +466,9 @@ AppUseCases buildUseCases({
     updateClub: UpdateClub(platformRepository),
     setClubActive: SetClubActive(platformRepository),
     getAuditLog: GetAuditLog(platformRepository),
+    getClubMembers: GetClubMembers(membersRepository),
+    inviteMember: InviteMember(membersRepository),
+    resendInvitation: ResendInvitation(membersRepository),
     getClubBranding: GetClubBranding(brandingRepository),
     saveClubBranding: SaveClubBranding(brandingRepository),
     uploadClubAsset: UploadClubAsset(brandingRepository),

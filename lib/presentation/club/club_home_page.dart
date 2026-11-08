@@ -28,6 +28,13 @@ class ClubHomePage extends StatelessWidget {
             ),
           if (club.canAdminister)
             IconButton(
+              key: const Key('open-members'),
+              tooltip: 'Socios',
+              icon: const Icon(Icons.people_outline),
+              onPressed: () => context.go('/club/members'),
+            ),
+          if (club.canAdminister)
+            IconButton(
               key: const Key('open-settings'),
               tooltip: 'Configuración del club',
               icon: const Icon(Icons.settings_outlined),

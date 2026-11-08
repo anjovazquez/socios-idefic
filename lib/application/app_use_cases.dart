@@ -5,6 +5,7 @@ import 'auth/watch_session.dart';
 import 'club/club_branding_use_cases.dart';
 import 'club/resolve_club_entry.dart';
 import 'club/select_active_club.dart';
+import 'member/member_use_cases.dart';
 import 'platform/platform_use_cases.dart';
 
 /// Use cases the presentation layer needs, built by the composition root.
@@ -25,6 +26,9 @@ class AppUseCases {
     required this.saveClubBranding,
     required this.uploadClubAsset,
     required this.getAuditLog,
+    required this.getClubMembers,
+    required this.inviteMember,
+    required this.resendInvitation,
   });
 
   final WatchSession watchSession;
@@ -42,4 +46,7 @@ class AppUseCases {
   final SaveClubBranding saveClubBranding;
   final UploadClubAsset uploadClubAsset;
   final GetAuditLog getAuditLog;
+  final GetClubMembers getClubMembers;
+  final InviteMember inviteMember;
+  final ResendInvitation resendInvitation;
 }

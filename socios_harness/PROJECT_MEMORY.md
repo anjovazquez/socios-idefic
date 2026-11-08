@@ -68,6 +68,9 @@ Memoria estable. Solo hechos válidos durante muchas tareas (ver `MEMORY_POLICY.
 - Errores de RPC → SQLSTATE: `42501` permiso, `22023` dato inválido, `23505` duplicado, `P0001` regla de negocio (con `hint`), `P0002` no encontrado. Los adapters los mapean a fallos de dominio.
 - Un único admin por club (índices parciales en `club_memberships` y `club_invitations`); el superadmin ve todos los clubes activos en el selector con rol `platform_admin` y tiene el estado de sesión `platform`.
 
+- Edge Functions: Deno 2, sin dependencias npm en runtime (`supabase/functions/deno.json` con `lock: false` y `nodeModulesDir: none`); el acceso a Supabase va por `_shared/supabase_rest.ts`; la lógica se prueba con una interfaz `Backend` falsa (`deno test`, job `edge-functions` en CI). Los errores de RPC se traducen a HTTP (`403 forbidden`, `400 invalid_*`, `409 <hint>`), y la app los mapea a fallos de dominio.
+- Los enlaces de invitación de GoTrue vuelven a `APP_URL` con tokens en el fragmento (`#access_token=...`, o `#error_code=otp_expired`): VS-007 debe procesarlos.
+
 ## Producto / UX
 
 - Socio: navegación Inicio/Blog · Mi carnet · Mis ventajas · Mi suscripción · Mis datos.

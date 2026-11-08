@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../auth/login_page.dart';
 import '../club/club_home_page.dart';
 import '../club/club_settings_page.dart';
+import '../member/members_page.dart';
 import '../club/club_selector_page.dart';
 import '../platform/audit_log_page.dart';
 import '../platform/platform_clubs_page.dart';
@@ -68,6 +69,10 @@ GoRouter createRouter(SessionViewModel session, {String? initialLocation}) =>
             GoRoute(
               path: 'settings',
               builder: (context, state) => const ClubSettingsPage(),
+            ),
+            GoRoute(
+              path: 'members',
+              builder: (context, state) => const MembersPage(),
             ),
           ],
         ),

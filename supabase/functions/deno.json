@@ -1,0 +1,14 @@
+{
+  "lock": false,
+  "nodeModulesDir": "none",
+  "lint": {
+    "rules": {
+      "tags": [
+        "recommended"
+      ]
+    }
+  },
+  "fmt": {
+    "lineWidth": 110
+  }
+}
