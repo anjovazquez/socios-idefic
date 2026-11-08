@@ -76,6 +76,44 @@ class SupabaseBlogRepository implements BlogRepository {
     return path;
   });
 
+  static const _columns = 'id, title, body, image_path, status, published_at';
+
+  @override
+  Future<PostsPage> getFeed(
+    String clubId, {
+    int offset = 0,
+    int limit = 10,
+  }) => _guard(() async {
+    // RLS keeps out drafts, scheduled posts and other clubs; the filters make
+    // the admin see the same feed as their members.
+    final rows = await _client
+        .from('posts')
+        .select(_columns)
+        .eq('club_id', clubId)
+        .eq('status', 'published')
+        .lte('published_at', DateTime.now().toUtc().toIso8601String())
+        .order('published_at', ascending: false)
+        .range(offset, offset + limit);
+    final posts = rows
+        .map((row) => postFromRow({...row, 'visible': true}))
+        .toList();
+    return PostsPage(
+      posts: posts.take(limit).toList(),
+      hasMore: posts.length > limit,
+    );
+  });
+
+  @override
+  Future<Post?> getPost(String postId) => _guard(() async {
+    final row = await _client
+        .from('posts')
+        .select(_columns)
+        .eq('id', postId)
+        .eq('status', 'published')
+        .maybeSingle();
+    return row == null ? null : postFromRow({...row, 'visible': true});
+  });
+
   @override
   Future<String?> imageUrl(String path) async {
     try {

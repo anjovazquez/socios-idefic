@@ -1218,6 +1218,32 @@ class FakeBlogRepository implements BlogRepository {
   }) async => '$clubId/post-${++uploads}.png';
 
   @override
+  Future<PostsPage> getFeed(
+    String clubId, {
+    int offset = 0,
+    int limit = 10,
+  }) async {
+    final visible = (await getClubPosts(
+      clubId,
+    )).where((p) => p.visible).toList();
+    return PostsPage(
+      posts: visible.skip(offset).take(limit).toList(),
+      hasMore: visible.length > offset + limit,
+    );
+  }
+
+  @override
+  Future<Post?> getPost(String postId) async {
+    for (final clubId in posts.keys) {
+      final post = (await getClubPosts(
+        clubId,
+      )).where((p) => p.id == postId && p.visible).firstOrNull;
+      if (post != null) return post;
+    }
+    return null;
+  }
+
+  @override
   Future<String?> imageUrl(String path) async => null;
 }
 
@@ -1320,6 +1346,8 @@ AppUseCases buildUseCases({
     setPostStatus: SetPostStatus(blogRepository),
     uploadPostImage: UploadPostImage(blogRepository),
     getPostImageUrl: GetPostImageUrl(blogRepository),
+    getClubFeed: GetClubFeed(blogRepository),
+    getPost: GetPost(blogRepository),
     downloadReceipt: DownloadReceipt(
       paymentsRepository,
       receiptRenderer ?? FakeReceiptRenderer(),

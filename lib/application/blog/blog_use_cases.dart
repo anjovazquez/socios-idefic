@@ -92,3 +92,20 @@ class GetPostImageUrl {
 
   Future<String?> call(String path) => _repository.imageUrl(path);
 }
+
+class GetClubFeed {
+  const GetClubFeed(this._repository);
+
+  final BlogRepository _repository;
+
+  Future<PostsPage> call(String clubId, {int offset = 0}) =>
+      _repository.getFeed(clubId, offset: offset);
+}
+
+class GetPost {
+  const GetPost(this._repository);
+
+  final BlogRepository _repository;
+
+  Future<Post?> call(String postId) => _repository.getPost(postId);
+}

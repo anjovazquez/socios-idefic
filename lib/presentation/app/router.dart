@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import '../auth/login_page.dart';
 import '../blog/news_admin_page.dart';
+import '../blog/post_detail_page.dart';
 import '../blog/post_editor_page.dart';
 import '../card/card_validation_page.dart';
 import '../card/my_card_page.dart';
@@ -149,6 +150,11 @@ GoRouter _createRouter(
         ),
         GoRoute(path: 'card', builder: (context, state) => const MyCardPage()),
         GoRoute(path: 'me', builder: (context, state) => const MyDataPage()),
+        GoRoute(
+          path: 'post',
+          builder: (context, state) =>
+              PostDetailPage(postId: state.uri.queryParameters['id'] ?? ''),
+        ),
         GoRoute(
           path: 'news',
           builder: (context, state) => const NewsAdminPage(),

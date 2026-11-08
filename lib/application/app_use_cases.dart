@@ -80,6 +80,8 @@ class AppUseCases {
     required this.setPostStatus,
     required this.uploadPostImage,
     required this.getPostImageUrl,
+    required this.getClubFeed,
+    required this.getPost,
   });
 
   final WatchSession watchSession;
@@ -147,4 +149,6 @@ class AppUseCases {
   final SetPostStatus setPostStatus;
   final UploadPostImage uploadPostImage;
   final GetPostImageUrl getPostImageUrl;
+  final GetClubFeed getClubFeed;
+  final GetPost getPost;
 }

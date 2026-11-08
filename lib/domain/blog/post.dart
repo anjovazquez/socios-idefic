@@ -24,6 +24,20 @@ class Post {
   /// Published and its date arrived: members can read it.
   final bool visible;
 
+  /// First paragraph, shortened for lists.
+  String get excerpt {
+    final first = body.split(RegExp(r'\n\s*\n')).first.trim();
+    return first.length <= 160
+        ? first
+        : '${first.substring(0, 157).trimRight()}…';
+  }
+
+  List<String> get paragraphs => body
+      .split(RegExp(r'\n\s*\n'))
+      .map((p) => p.trim())
+      .where((p) => p.isNotEmpty)
+      .toList();
+
   bool get isScheduled =>
       status == PostStatus.published && !visible && publishedAt != null;
 }
@@ -52,4 +66,12 @@ final class BlogUnavailableFailure extends BlogFailure {
   const BlogUnavailableFailure([this.cause]);
 
   final Object? cause;
+}
+
+/// A page of the members' news feed.
+class PostsPage {
+  const PostsPage({required this.posts, required this.hasMore});
+
+  final List<Post> posts;
+  final bool hasMore;
 }

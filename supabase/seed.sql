@@ -111,3 +111,17 @@ join public.seasons s on s.id = sm.season_id
 where sm.status = 'active' and sm.fee_cents > 0
   and s.club_id = '20000000-0000-0000-0000-000000000001'
   and not exists (select 1 from public.payments p where p.season_membership_id = sm.id);
+
+-- VS-026: IDEFIC news for the members' home (no images: local seeds only).
+insert into public.posts (club_id, title, body, status, published_at, author_id) values
+  ('20000000-0000-0000-0000-000000000001', 'Arranca la temporada 2026/2027',
+   E'Ya está abierta la nueva temporada. Renueva tu cuota desde Mi suscripción y descarga tu carnet.\n\nGracias por seguir con nosotros un año más.',
+   'published', now() - interval '20 days', '10000000-0000-0000-0000-000000000001'),
+  ('20000000-0000-0000-0000-000000000001', 'Horarios de entrenamiento',
+   E'Los entrenamientos de los equipos de base serán de lunes a jueves de 17:30 a 20:30 en el pabellón municipal.\n\nLos horarios de cada equipo están en el tablón del club.',
+   'published', now() - interval '6 days', '10000000-0000-0000-0000-000000000001'),
+  ('20000000-0000-0000-0000-000000000001', 'Asamblea de socios',
+   E'Te convocamos a la asamblea ordinaria el viernes a las 20:00 en el pabellón.\n\nOrden del día: memoria de la temporada, cuentas y ruegos y preguntas.',
+   'published', now() - interval '1 day', '10000000-0000-0000-0000-000000000001'),
+  ('20000000-0000-0000-0000-000000000001', 'Cena de Navidad',
+   'Estamos cerrando fecha y restaurante.', 'draft', null, '10000000-0000-0000-0000-000000000001');

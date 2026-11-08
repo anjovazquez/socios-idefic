@@ -172,6 +172,8 @@ void configureDependencies() {
         setPostStatus: SetPostStatus(serviceLocator()),
         uploadPostImage: UploadPostImage(serviceLocator()),
         getPostImageUrl: GetPostImageUrl(serviceLocator()),
+        getClubFeed: GetClubFeed(serviceLocator()),
+        getPost: GetPost(serviceLocator()),
       ),
     );
 }

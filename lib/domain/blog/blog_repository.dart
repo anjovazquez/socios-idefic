@@ -29,6 +29,12 @@ abstract interface class BlogRepository {
     required String contentType,
   });
 
+  /// Member: published posts of the club whose date arrived, newest first.
+  Future<PostsPage> getFeed(String clubId, {int offset = 0, int limit = 10});
+
+  /// Member: one published post (null when not visible to them).
+  Future<Post?> getPost(String postId);
+
   /// Temporary URL of a private post image (members of the club).
   Future<String?> imageUrl(String path);
 }
