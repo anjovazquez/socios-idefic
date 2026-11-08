@@ -6,8 +6,8 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 - Fase actual: **2 — Socios (0.2)**.
 - Tarea activa: ninguna.
-- Última tarea completada: `VS-006 — Alta de socio e invitación por email` (2026-11-08).
-- Siguiente tarea READY: `VS-007 — Activación de cuenta en el primer acceso` (también READY: VS-010, VS-025).
+- Última tarea completada: `VS-007 — Activación de cuenta en el primer acceso` (2026-11-08).
+- Siguiente tarea READY: `VS-008 — Alta de un usuario existente en otro club` (también READY: VS-009, VS-010, VS-025).
 - Bloqueos globales: ninguno.
 
 ## Milestones
@@ -16,7 +16,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 |---|---|
 | Bootstrap | DONE |
 | 0.1 Acceso multi-club | DONE |
-| 0.2 Socios | IN_PROGRESS (VS-006 DONE; VS-007, VS-010 READY) |
+| 0.2 Socios | IN_PROGRESS (VS-006, VS-007 DONE; VS-008, VS-009, VS-010 READY) |
 | 0.3 Temporadas y cuotas | TODO |
 | 0.4 Carnet digital | TODO |
 | 0.5 Pagos | TODO |
@@ -42,4 +42,5 @@ Snapshot operativo. Se actualiza al final de cada loop.
 - Identidad (VS-004): `can_admin_club()`, `update_club_branding`, `get_club_branding`, bucket público `club-assets`; tema por club en `presentation/theme/club_theme.dart`; `DESIGN.md` creado.
 - Suplantación (VS-005): banner `ImpersonationBanner` en el `builder` de `MaterialApp`, `get_audit_log` + pantalla `/platform/audit`.
 - Socios (VS-006): `prepare_member_invitation`, `attach_invited_member` (service role), `get_club_members`, `prepare_invitation_resend`; Edge Function `invite-member` (`_shared/mailer.ts`, `_shared/emails.ts`, `_shared/supabase_rest.ts`); pantalla `/club/members`. Secretos en `DEPLOYMENT.md`.
+- Primer acceso (VS-007): `profiles.onboarded_at`, `terms_acceptances`, `current_terms_version()`, `get_my_onboarding_status`, `complete_onboarding`; rutas `/activar` y `/primer-acceso`. El texto de condiciones es PROVISIONAL (revisión legal antes del piloto).
 - Sesión cloud: Flutter en `$HOME/flutter/bin`; Docker requiere arrancar `dockerd` en segundo plano (ver `QUALITY_GATES.md`). Para probar Edge Functions arrancar sin excluir `edge-runtime`; emails locales en Mailpit `http://127.0.0.1:54324`. El edge-runtime del sandbox no puede descargar de npm (CA del proxy): las funciones no usan npm.

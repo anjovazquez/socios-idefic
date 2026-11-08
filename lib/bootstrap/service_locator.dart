@@ -11,18 +11,21 @@ import '../application/club/club_branding_use_cases.dart';
 import '../application/club/resolve_club_entry.dart';
 import '../application/club/select_active_club.dart';
 import '../application/member/member_use_cases.dart';
+import '../application/onboarding/onboarding_use_cases.dart';
 import '../application/platform/platform_use_cases.dart';
 import '../domain/auth/auth_repository.dart';
 import '../domain/club/active_club_store.dart';
 import '../domain/club/club_branding_repository.dart';
 import '../domain/club/club_repository.dart';
 import '../domain/member/members_repository.dart';
+import '../domain/onboarding/onboarding_repository.dart';
 import '../domain/platform/platform_repository.dart';
 import '../infrastructure/auth/supabase_auth_repository.dart';
 import '../infrastructure/club/shared_preferences_active_club_store.dart';
 import '../infrastructure/club/supabase_club_branding_repository.dart';
 import '../infrastructure/club/supabase_club_repository.dart';
 import '../infrastructure/member/supabase_members_repository.dart';
+import '../infrastructure/onboarding/supabase_onboarding_repository.dart';
 import '../infrastructure/platform/supabase_platform_repository.dart';
 
 /// Composition root. Only this layer knows about GetIt.
@@ -46,6 +49,9 @@ void configureDependencies() {
     )
     ..registerLazySingleton<ClubBrandingRepository>(
       () => SupabaseClubBrandingRepository(client),
+    )
+    ..registerLazySingleton<OnboardingRepository>(
+      () => SupabaseOnboardingRepository(client),
     )
     ..registerLazySingleton<MembersRepository>(
       () => SupabaseMembersRepository(client),
@@ -76,6 +82,10 @@ void configureDependencies() {
         getClubMembers: GetClubMembers(serviceLocator()),
         inviteMember: InviteMember(serviceLocator()),
         resendInvitation: ResendInvitation(serviceLocator()),
+        getOnboardingStatus: GetOnboardingStatus(serviceLocator()),
+        verifyInvitationLink: VerifyInvitationLink(serviceLocator()),
+        setNewPassword: SetNewPassword(serviceLocator()),
+        completeOnboarding: CompleteOnboarding(serviceLocator()),
       ),
     );
 }

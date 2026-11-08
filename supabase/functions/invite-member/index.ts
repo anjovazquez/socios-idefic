@@ -27,8 +27,11 @@ export interface Backend {
   userRpc(fn: string, params: Row): Promise<Row[]>;
   /** RPC with the service role (server-only steps). */
   serviceRpc<T>(fn: string, params: Row): Promise<T>;
-  /** Creates or refreshes the auth user and returns a new sign-in link. */
-  accessLink(email: string, firstName: string, redirectTo: string): Promise<{ userId: string; link: string }>;
+  /**
+   * Creates or refreshes the auth user and returns a new one-time token.
+   * A new token replaces the previous one, so older links stop working.
+   */
+  accessToken(email: string, firstName: string): Promise<{ userId: string; tokenHash: string; type: string }>;
 }
 
 export interface Deps {
@@ -56,6 +59,12 @@ export function rpcError(error: RpcError): HttpError {
     default:
       return new HttpError(500, "unavailable");
   }
+}
+
+/** Link to the app activation screen (VS-007), which verifies the token. */
+export function activationLink(appUrl: string, tokenHash: string, type: string): string {
+  const query = new URLSearchParams({ token_hash: tokenHash, type });
+  return `${appUrl.replace(/\/$/, "")}/#/activar?${query}`;
 }
 
 async function guard<T>(action: () => Promise<T>): Promise<T> {
@@ -89,14 +98,14 @@ async function attach(deps: Deps, invitationId: string, userId: string, status: 
 async function sendAccess(deps: Deps, row: Row) {
   const email = row.email as string;
   const firstName = (row.first_name as string | null) ?? "";
-  const access = await deps.backend.accessLink(email, firstName, deps.appUrl);
+  const access = await deps.backend.accessToken(email, firstName);
   const membershipId = await attach(deps, row.invitation_id as string, access.userId, "invited");
   await deps.mailer.send(
     invitationEmail({
       kind: "new_account",
       club: clubOf(deps, row),
       to: { email, name: firstName || undefined },
-      link: access.link,
+      link: activationLink(deps.appUrl, access.tokenHash, access.type),
     }),
   );
   return { status: "invited", membershipId };
@@ -150,18 +159,16 @@ export function httpBackend(env: (key: string) => string | undefined, authorizat
   return {
     userRpc: (fn, params) => rpc<Row[]>({ url, apiKey: anonKey, bearer: authorization }, fn, params),
     serviceRpc: (fn, params) => rpc({ url, apiKey: serviceKey, bearer: `Bearer ${serviceKey}` }, fn, params),
-    async accessLink(email, firstName, redirectTo) {
+    async accessToken(email, firstName) {
       try {
         return await generateLink({ url, serviceKey }, {
           type: "invite",
           email,
           data: { first_name: firstName },
-          redirectTo,
         });
       } catch {
-        // Already registered but never activated: a new magic link replaces
-        // the previous one, so older links stop working.
-        return await generateLink({ url, serviceKey }, { type: "magiclink", email, redirectTo });
+        // Already registered but never activated: a magic link token.
+        return await generateLink({ url, serviceKey }, { type: "magiclink", email });
       }
     },
   };

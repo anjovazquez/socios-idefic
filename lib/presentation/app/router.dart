@@ -4,6 +4,8 @@ import '../auth/login_page.dart';
 import '../club/club_home_page.dart';
 import '../club/club_settings_page.dart';
 import '../member/members_page.dart';
+import '../onboarding/activation_page.dart';
+import '../onboarding/onboarding_page.dart';
 import '../club/club_selector_page.dart';
 import '../platform/audit_log_page.dart';
 import '../platform/platform_clubs_page.dart';
@@ -17,6 +19,10 @@ abstract final class AppRoutes {
   static const club = '/club';
   static const noClubs = '/no-clubs';
   static const platform = '/platform';
+  static const onboarding = '/primer-acceso';
+
+  /// Target of the invitation emails: `/activar?token_hash=…&type=…`.
+  static const activation = '/activar';
   static const error = '/error';
 }
 
@@ -29,6 +35,7 @@ String routeFor(SessionStatus status) => switch (status) {
   SessionStatus.choosingClub => AppRoutes.clubs,
   SessionStatus.inClub => AppRoutes.club,
   SessionStatus.platform => AppRoutes.platform,
+  SessionStatus.onboarding => AppRoutes.onboarding,
   SessionStatus.error => AppRoutes.error,
 };
 
@@ -37,6 +44,11 @@ String routeFor(SessionStatus status) => switch (status) {
 String? redirectFor(SessionStatus status, String location) {
   final target = routeFor(status);
   if (location == target) return null;
+  // The invitation link must be opened without a session (it creates one).
+  if (location == AppRoutes.activation &&
+      (status == SessionStatus.signedOut || status == SessionStatus.loading)) {
+    return null;
+  }
   if (target != AppRoutes.loading && location.startsWith('$target/')) {
     return null;
   }
@@ -53,6 +65,17 @@ GoRouter createRouter(SessionViewModel session, {String? initialLocation}) =>
         GoRoute(
           path: AppRoutes.loading,
           builder: (context, state) => const LoadingPage(),
+        ),
+        GoRoute(
+          path: AppRoutes.activation,
+          builder: (context, state) => ActivationPage(
+            tokenHash: state.uri.queryParameters['token_hash'],
+            type: state.uri.queryParameters['type'],
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.onboarding,
+          builder: (context, state) => const OnboardingPage(),
         ),
         GoRoute(
           path: AppRoutes.login,

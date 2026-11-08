@@ -36,13 +36,15 @@ export async function rpc<T>(
 
 export interface GeneratedLink {
   userId: string;
-  link: string;
+  /** Hash the app verifies with `verifyOTP(tokenHash, type)` (PKCE-safe). */
+  tokenHash: string;
+  type: string;
 }
 
 /** GoTrue admin `generate_link` (service role only). */
 export async function generateLink(
   options: { url: string; serviceKey: string; fetcher?: Fetch },
-  params: { type: "invite" | "magiclink"; email: string; data?: Record<string, unknown>; redirectTo: string },
+  params: { type: "invite" | "magiclink"; email: string; data?: Record<string, unknown> },
 ): Promise<GeneratedLink> {
   const response = await (options.fetcher ?? fetch)(`${options.url}/auth/v1/admin/generate_link`, {
     method: "POST",
@@ -55,7 +57,6 @@ export async function generateLink(
       type: params.type,
       email: params.email,
       data: params.data,
-      redirect_to: params.redirectTo,
     }),
   });
   const payload = await response.json().catch(() => ({}));
@@ -63,5 +64,9 @@ export async function generateLink(
     throw new Error(`generate_link ${response.status}: ${JSON.stringify(payload)}`);
   }
   const user = payload.user ?? payload;
-  return { userId: user.id as string, link: payload.action_link as string };
+  return {
+    userId: user.id as string,
+    tokenHash: payload.hashed_token as string,
+    type: (payload.verification_type as string) ?? params.type,
+  };
 }

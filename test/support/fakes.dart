@@ -10,6 +10,7 @@ import 'package:socios_idefic/application/club/club_branding_use_cases.dart';
 import 'package:socios_idefic/application/club/resolve_club_entry.dart';
 import 'package:socios_idefic/application/club/select_active_club.dart';
 import 'package:socios_idefic/application/member/member_use_cases.dart';
+import 'package:socios_idefic/application/onboarding/onboarding_use_cases.dart';
 import 'package:socios_idefic/application/platform/platform_use_cases.dart';
 import 'package:socios_idefic/domain/auth/auth_failures.dart';
 import 'package:socios_idefic/domain/auth/auth_repository.dart';
@@ -21,6 +22,8 @@ import 'package:socios_idefic/domain/club/club_repository.dart';
 import 'package:socios_idefic/domain/club/my_club.dart';
 import 'package:socios_idefic/domain/member/club_member.dart';
 import 'package:socios_idefic/domain/member/members_repository.dart';
+import 'package:socios_idefic/domain/onboarding/onboarding.dart';
+import 'package:socios_idefic/domain/onboarding/onboarding_repository.dart';
 import 'package:socios_idefic/domain/platform/audit_entry.dart';
 import 'package:socios_idefic/domain/platform/club_data.dart';
 import 'package:socios_idefic/domain/platform/platform_club.dart';
@@ -103,6 +106,13 @@ class FakeAuthRepository implements AuthRepository {
       _changes.addError(const UnregisteredAccountFailure());
       return;
     }
+    final user = AuthUser(id: 'user-$email', email: email);
+    _current = user;
+    _changes.add(user);
+  }
+
+  /// Session created by an invitation link (VS-007).
+  void signInFromLink(String email) {
     final user = AuthUser(id: 'user-$email', email: email);
     _current = user;
     _changes.add(user);
@@ -435,6 +445,68 @@ class FakeMembersRepository implements MembersRepository {
   }
 }
 
+/// First-access state per email. Unknown emails have finished it.
+class FakeOnboardingRepository implements OnboardingRepository {
+  FakeOnboardingRepository({
+    Map<String, OnboardingStatus>? pending,
+    Map<String, String>? linkTokens,
+    Map<String, List<MyClub>>? clubsOnCompletion,
+  }) : pending = pending ?? {},
+       linkTokens = linkTokens ?? {},
+       clubsOnCompletion = clubsOnCompletion ?? {};
+
+  /// Emails that have not finished the first access.
+  final Map<String, OnboardingStatus> pending;
+
+  /// Valid one-time tokens → email.
+  final Map<String, String> linkTokens;
+
+  /// Clubs that become reachable when the first access is completed.
+  final Map<String, List<MyClub>> clubsOnCompletion;
+
+  FakeAuthRepository? auth;
+  FakeClubRepository? clubs;
+  final Map<String, String> passwords = {};
+  PersonalData? completedWith;
+
+  String get _email => auth!.currentUser!.email;
+
+  @override
+  Future<OnboardingStatus> getStatus() async =>
+      pending[_email] ??
+      OnboardingStatus(
+        completed: true,
+        needsPassword: false,
+        termsVersion: 'v1',
+        email: _email,
+      );
+
+  @override
+  Future<void> verifyInvitation({
+    required String tokenHash,
+    required String type,
+  }) async {
+    final email = linkTokens.remove(tokenHash);
+    if (email == null) throw const InvitationLinkExpiredFailure();
+    auth!.signInFromLink(email);
+  }
+
+  @override
+  Future<void> setPassword(String password) async =>
+      passwords[_email] = password;
+
+  @override
+  Future<void> complete({
+    required PersonalData data,
+    required String termsVersion,
+  }) async {
+    final email = _email;
+    pending.remove(email);
+    completedWith = data;
+    clubs?.clubsByEmail[email] = clubsOnCompletion[email] ?? const [];
+  }
+}
+
 AppUseCases buildUseCases({
   required FakeAuthRepository auth,
   required FakeClubRepository clubs,
@@ -442,10 +514,14 @@ AppUseCases buildUseCases({
   FakePlatformRepository? platform,
   FakeClubBrandingRepository? branding,
   FakeMembersRepository? members,
+  FakeOnboardingRepository? onboarding,
 }) {
   final activeClubStore = store ?? InMemoryActiveClubStore();
   final platformRepository = platform ?? FakePlatformRepository();
   final brandingRepository = branding ?? FakeClubBrandingRepository(clubs);
+  final onboardingRepository = (onboarding ?? FakeOnboardingRepository())
+    ..auth = auth
+    ..clubs = clubs;
   final membersRepository = (members ?? FakeMembersRepository())
     ..auth = auth
     ..clubs = clubs;
@@ -469,6 +545,10 @@ AppUseCases buildUseCases({
     getClubMembers: GetClubMembers(membersRepository),
     inviteMember: InviteMember(membersRepository),
     resendInvitation: ResendInvitation(membersRepository),
+    getOnboardingStatus: GetOnboardingStatus(onboardingRepository),
+    verifyInvitationLink: VerifyInvitationLink(onboardingRepository),
+    setNewPassword: SetNewPassword(onboardingRepository),
+    completeOnboarding: CompleteOnboarding(onboardingRepository),
     getClubBranding: GetClubBranding(brandingRepository),
     saveClubBranding: SaveClubBranding(brandingRepository),
     uploadClubAsset: UploadClubAsset(brandingRepository),

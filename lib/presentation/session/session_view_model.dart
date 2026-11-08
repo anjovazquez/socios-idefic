@@ -7,6 +7,7 @@ import '../../application/club/resolve_club_entry.dart';
 import '../../domain/auth/auth_failures.dart';
 import '../../domain/auth/auth_user.dart';
 import '../../domain/club/my_club.dart';
+import '../../domain/onboarding/onboarding.dart';
 
 enum SessionStatus {
   loading,
@@ -15,6 +16,9 @@ enum SessionStatus {
   choosingClub,
   inClub,
   platform,
+
+  /// First access not finished: nothing else is reachable (RF-003).
+  onboarding,
   error,
 }
 
@@ -35,6 +39,11 @@ class SessionViewModel extends ChangeNotifier {
   MyClub? get activeClub => _activeClub;
 
   bool get canSwitchClub => _clubs.length > 1;
+
+  OnboardingStatus? _onboarding;
+
+  /// Pending first-access data, while [status] is `onboarding`.
+  OnboardingStatus? get onboarding => _onboarding;
 
   bool _isPlatformAdmin = false;
 
@@ -83,6 +92,15 @@ class SessionViewModel extends ChangeNotifier {
   Future<void> loadClubs() async {
     _setStatus(SessionStatus.loading);
     try {
+      final onboarding = await _useCases.getOnboardingStatus();
+      if (!onboarding.completed) {
+        _onboarding = onboarding;
+        _clubs = const [];
+        _activeClub = null;
+        _setStatus(SessionStatus.onboarding);
+        return;
+      }
+      _onboarding = null;
       final (entry, isPlatformAdmin) = await (
         _useCases.resolveClubEntry(),
         _useCases.isPlatformAdmin(),

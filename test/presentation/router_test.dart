@@ -19,4 +19,16 @@ void main() {
     expect(redirectFor(SessionStatus.choosingClub, '/club/settings'), '/clubs');
     expect(redirectFor(SessionStatus.loading, '/club'), '/');
   });
+
+  test('the first access cannot be skipped', () {
+    expect(routeFor(SessionStatus.onboarding), '/primer-acceso');
+    expect(redirectFor(SessionStatus.onboarding, '/club'), '/primer-acceso');
+    expect(redirectFor(SessionStatus.onboarding, '/clubs'), '/primer-acceso');
+  });
+
+  test('invitation links open without a session', () {
+    expect(redirectFor(SessionStatus.signedOut, '/activar'), isNull);
+    expect(redirectFor(SessionStatus.loading, '/activar'), isNull);
+    expect(redirectFor(SessionStatus.onboarding, '/activar'), '/primer-acceso');
+  });
 }

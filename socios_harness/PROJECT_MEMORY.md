@@ -69,7 +69,9 @@ Memoria estable. Solo hechos válidos durante muchas tareas (ver `MEMORY_POLICY.
 - Un único admin por club (índices parciales en `club_memberships` y `club_invitations`); el superadmin ve todos los clubes activos en el selector con rol `platform_admin` y tiene el estado de sesión `platform`.
 
 - Edge Functions: Deno 2, sin dependencias npm en runtime (`supabase/functions/deno.json` con `lock: false` y `nodeModulesDir: none`); el acceso a Supabase va por `_shared/supabase_rest.ts`; la lógica se prueba con una interfaz `Backend` falsa (`deno test`, job `edge-functions` en CI). Los errores de RPC se traducen a HTTP (`403 forbidden`, `400 invalid_*`, `409 <hint>`), y la app los mapea a fallos de dominio.
-- Los enlaces de invitación de GoTrue vuelven a `APP_URL` con tokens en el fragmento (`#access_token=...`, o `#error_code=otp_expired`): VS-007 debe procesarlos.
+- Enlaces de email: nunca el `action_link` de GoTrue (tokens implícitos incompatibles con PKCE), sino `APP_URL/#/activar?token_hash=…&type=…` + `verifyOTP` en la app. Los tokens son de un solo uso.
+- GoTrue pone un hash aleatorio de contraseña a los invitados: «necesita contraseña» se deduce de no haber completado el primer acceso y no tener identidad Google. Volver a poner la misma contraseña devuelve `same_password` (se trata como éxito).
+- Cualquier usuario autenticado pasa primero por `get_my_onboarding_status`; las cuentas de la seed ya lo tienen completado.
 
 ## Producto / UX
 

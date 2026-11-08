@@ -60,3 +60,16 @@ on conflict (user_id, club_id) do nothing;
 insert into public.platform_admins (user_id)
 values ('10000000-0000-0000-0000-000000000099')
 on conflict do nothing;
+
+-- Demo accounts have already completed their first access (VS-007).
+update public.profiles set onboarded_at = now()
+where id in (
+  '10000000-0000-0000-0000-000000000001',
+  '10000000-0000-0000-0000-000000000002',
+  '10000000-0000-0000-0000-000000000003',
+  '10000000-0000-0000-0000-000000000099'
+);
+insert into public.terms_acceptances (user_id, version)
+select id, public.current_terms_version() from public.profiles
+where onboarded_at is not null
+on conflict do nothing;

@@ -90,6 +90,10 @@ Patrones:
 - **Confirmación destructiva** (desactivar, dar de baja): diálogo con
   consecuencia explicada («No se borra ningún dato») y botón con el verbo.
 - **Confirmación de éxito:** `SnackBar` con frase corta («Cambios guardados»).
+- **Flujo por pasos** (primer acceso): «Paso N de M» + `LinearProgressIndicator`,
+  un título por paso, el botón principal «Continuar» y la última acción con
+  el verbo final («Aceptar y entrar»). Los datos ya conocidos se precargan.
+  Los textos legales van en un contenedor con scroll y una casilla explícita.
 
 ## 7. Identidad del club en pantallas
 

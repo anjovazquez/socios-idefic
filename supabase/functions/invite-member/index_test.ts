@@ -2,7 +2,7 @@ import { assertEquals, assertRejects, assertStringIncludes } from "jsr:@std/asse
 
 import { ConsoleMailer } from "../_shared/mailer.ts";
 import { RpcFailure } from "../_shared/supabase_rest.ts";
-import { type Backend, type Deps, handle, HttpError, rpcError } from "./index.ts";
+import { activationLink, type Backend, type Deps, handle, HttpError, rpcError } from "./index.ts";
 
 function fakeDeps(rows: Record<string, Record<string, unknown>[]>, failure?: RpcFailure) {
   const calls: string[] = [];
@@ -17,9 +17,9 @@ function fakeDeps(rows: Record<string, Record<string, unknown>[]>, failure?: Rpc
       calls.push(`${fn}:${params.p_status}`);
       return Promise.resolve("membership-1" as T);
     },
-    accessLink(email) {
+    accessToken(email) {
       calls.push(`link:${email}`);
-      return Promise.resolve({ userId: "user-new", link: "http://auth/verify?token=t1" });
+      return Promise.resolve({ userId: "user-new", tokenHash: "hash1", type: "invite" });
     },
   };
   const deps: Deps = {
@@ -53,7 +53,7 @@ Deno.test("a new person gets an account, an invited membership and the email", a
   assertEquals(result, { status: "invited", membershipId: "membership-1" });
   assertEquals(calls, ["prepare_member_invitation", "link:marta@example.com", "attach_invited_member:invited"]);
   assertEquals(mailer.sent[0].to.email, "marta@example.com");
-  assertStringIncludes(mailer.sent[0].html, "http://auth/verify?token=t1");
+  assertStringIncludes(mailer.sent[0].text, "http://app/#/activar?token_hash=hash1&type=invite");
   assertStringIncludes(mailer.sent[0].html, "http://sb/storage/v1/object/public/club-assets/c1/logo.png");
 });
 
@@ -107,4 +107,11 @@ Deno.test("maps RPC errors to HTTP errors", () => {
   assertEquals(rpcError({ code: "22023", message: "member name required" }).code, "invalid_name");
   assertEquals(rpcError({ code: "P0001", hint: "already_member" }).code, "already_member");
   assertEquals(rpcError({ code: "XX000" }).status, 500);
+});
+
+Deno.test("activation links point to the app screen", () => {
+  assertEquals(
+    activationLink("https://socios.es/", "a+b/c", "magiclink"),
+    "https://socios.es/#/activar?token_hash=a%2Bb%2Fc&type=magiclink",
+  );
 });
