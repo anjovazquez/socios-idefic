@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../application/app_use_cases.dart';
 import '../../domain/member/club_member.dart';
 import '../session/session_view_model.dart';
+import 'member_number_dialog.dart';
 import 'members_view_model.dart';
 import 'new_member_dialog.dart';
 
@@ -42,6 +43,21 @@ class _MembersView extends StatelessWidget {
       builder: (_) => NewMemberDialog(
         onSubmit: (name, email) =>
             viewModel.invite(firstName: name, email: email),
+      ),
+    );
+    if (confirmation != null) {
+      messenger.showSnackBar(SnackBar(content: Text(confirmation)));
+    }
+  }
+
+  Future<void> _editNumber(BuildContext context, ClubMember member) async {
+    final viewModel = context.read<MembersViewModel>();
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmation = await showDialog<String>(
+      context: context,
+      builder: (_) => MemberNumberDialog(
+        member: member,
+        onSubmit: (number) => viewModel.changeNumber(member, number),
       ),
     );
     if (confirmation != null) {
@@ -90,6 +106,7 @@ class _MembersView extends StatelessWidget {
               _MemberTile(
                 member: member,
                 onResend: () => _resend(context, member),
+                onEditNumber: () => _editNumber(context, member),
               ),
           ],
         ),
@@ -99,10 +116,15 @@ class _MembersView extends StatelessWidget {
 }
 
 class _MemberTile extends StatelessWidget {
-  const _MemberTile({required this.member, required this.onResend});
+  const _MemberTile({
+    required this.member,
+    required this.onResend,
+    required this.onEditNumber,
+  });
 
   final ClubMember member;
   final VoidCallback onResend;
+  final VoidCallback onEditNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -126,8 +148,16 @@ class _MemberTile extends StatelessWidget {
     };
     return ListTile(
       key: Key('member-${member.email}'),
-      leading: CircleAvatar(
-        child: Text(member.memberNumber?.toString() ?? '–'),
+      leading: Tooltip(
+        message: 'Cambiar número de socio',
+        child: InkWell(
+          key: Key('member-number-${member.email}'),
+          customBorder: const CircleBorder(),
+          onTap: onEditNumber,
+          child: CircleAvatar(
+            child: Text(member.memberNumber?.toString() ?? '–'),
+          ),
+        ),
       ),
       title: Text(member.displayName),
       subtitle: Text(

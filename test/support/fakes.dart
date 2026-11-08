@@ -454,6 +454,33 @@ class FakeMembersRepository implements MembersRepository {
   }
 
   @override
+  Future<void> setMemberNumber(String membershipId, int number) async {
+    for (final entry in members.entries) {
+      final index = entry.value.indexWhere(
+        (m) => m.membershipId == membershipId,
+      );
+      if (index < 0) continue;
+      if (!_isAdmin(entry.key)) throw const MemberPermissionFailure();
+      if (entry.value.any(
+        (m) => m.memberNumber == number && m.membershipId != membershipId,
+      )) {
+        throw const MemberNumberTakenFailure();
+      }
+      final m = entry.value[index];
+      entry.value[index] = ClubMember(
+        membershipId: m.membershipId,
+        email: m.email,
+        status: m.status,
+        isClubAdmin: m.isClubAdmin,
+        firstName: m.firstName,
+        lastName: m.lastName,
+        memberNumber: number,
+      );
+      return;
+    }
+  }
+
+  @override
   Future<void> resendInvitation(String membershipId) async {
     final member = members.values
         .expand((list) => list)
@@ -611,6 +638,7 @@ AppUseCases buildUseCases({
     getClubMembers: GetClubMembers(membersRepository),
     inviteMember: InviteMember(membersRepository),
     resendInvitation: ResendInvitation(membersRepository),
+    setMemberNumber: SetMemberNumber(membersRepository),
     getOnboardingStatus: GetOnboardingStatus(onboardingRepository),
     verifyInvitationLink: VerifyInvitationLink(onboardingRepository),
     setNewPassword: SetNewPassword(onboardingRepository),

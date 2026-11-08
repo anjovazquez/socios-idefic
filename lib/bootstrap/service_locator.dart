@@ -88,6 +88,7 @@ void configureDependencies() {
         getClubMembers: GetClubMembers(serviceLocator()),
         inviteMember: InviteMember(serviceLocator()),
         resendInvitation: ResendInvitation(serviceLocator()),
+        setMemberNumber: SetMemberNumber(serviceLocator()),
         getOnboardingStatus: GetOnboardingStatus(serviceLocator()),
         verifyInvitationLink: VerifyInvitationLink(serviceLocator()),
         setNewPassword: SetNewPassword(serviceLocator()),

@@ -143,4 +143,46 @@ void main() {
     expect(find.byKey(const Key('open-members')), findsNothing);
     expect(find.byKey(const Key('new-member')), findsNothing);
   });
+
+  Future<void> changeNumber(
+    WidgetTester tester,
+    String email,
+    String number,
+  ) async {
+    await tester.tap(find.byKey(Key('member-number-$email')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('member-number-field')),
+      number,
+    );
+    await tester.tap(find.byKey(const Key('member-number-save')));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('the admin changes a member number', (tester) async {
+    await openMembersAs(tester, 'admin@example.com');
+
+    await changeNumber(tester, 'ana@example.com', '57');
+
+    expect(find.text('Número de socio actualizado'), findsOneWidget);
+    expect(inRow('ana@example.com', find.text('57')), findsOneWidget);
+  });
+
+  testWidgets('a number already taken is explained', (tester) async {
+    await openMembersAs(tester, 'admin@example.com');
+
+    await changeNumber(tester, 'ana@example.com', '1');
+
+    expect(find.text('Ese número ya está asignado'), findsOneWidget);
+    expect(find.byKey(const Key('member-number-save')), findsOneWidget);
+  });
+
+  testWidgets('a member does not see the number editor', (tester) async {
+    await openMembersAs(tester, 'ana@example.com');
+
+    expect(
+      find.byKey(const Key('member-number-ana@example.com')),
+      findsNothing,
+    );
+  });
 }

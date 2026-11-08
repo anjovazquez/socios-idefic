@@ -41,7 +41,7 @@ enum InvitationOutcome {
   addedExistingAccount,
 }
 
-enum MemberField { name, email }
+enum MemberField { name, email, memberNumber }
 
 sealed class MemberFailure implements Exception {
   const MemberFailure();
@@ -55,6 +55,11 @@ final class InvalidMemberDataFailure extends MemberFailure {
 
 final class AlreadyMemberFailure extends MemberFailure {
   const AlreadyMemberFailure();
+}
+
+/// Another member of the club already has that number (RF-006).
+final class MemberNumberTakenFailure extends MemberFailure {
+  const MemberNumberTakenFailure();
 }
 
 final class InvitationNotPendingFailure extends MemberFailure {

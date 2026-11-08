@@ -10,6 +10,9 @@ abstract interface class MembersRepository {
     required String firstName,
   });
 
+  /// Only the club admin can change it; unique inside the club.
+  Future<void> setMemberNumber(String membershipId, int number);
+
   /// Sends a new link; the previous one stops working.
   Future<void> resendInvitation(String membershipId);
 }

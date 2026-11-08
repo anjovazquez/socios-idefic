@@ -46,3 +46,18 @@ class ResendInvitation {
   Future<void> call(String membershipId) =>
       _repository.resendInvitation(membershipId);
 }
+
+class SetMemberNumber {
+  const SetMemberNumber(this._repository);
+
+  final MembersRepository _repository;
+
+  /// [number] as typed by the admin.
+  Future<void> call({required String membershipId, required String number}) {
+    final parsed = int.tryParse(number.trim());
+    if (parsed == null || parsed <= 0) {
+      throw const InvalidMemberDataFailure(MemberField.memberNumber);
+    }
+    return _repository.setMemberNumber(membershipId, parsed);
+  }
+}

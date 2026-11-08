@@ -55,6 +55,17 @@ class MembersViewModel extends ChangeNotifier {
     };
   }
 
+  Future<String> changeNumber(ClubMember member, String number) async {
+    await _guard(
+      () => _useCases.setMemberNumber(
+        membershipId: member.membershipId,
+        number: number,
+      ),
+    );
+    await load();
+    return 'Número de socio actualizado';
+  }
+
   Future<String> resend(ClubMember member) async {
     await _guard(() => _useCases.resendInvitation(member.membershipId));
     await load();
@@ -77,7 +88,10 @@ class MembersViewModel extends ChangeNotifier {
       'Escribe el nombre del socio',
     InvalidMemberDataFailure(field: MemberField.email) =>
       'Escribe un email válido',
+    InvalidMemberDataFailure(field: MemberField.memberNumber) =>
+      'Escribe un número mayor que 0',
     AlreadyMemberFailure() => 'Esta persona ya es socia del club',
+    MemberNumberTakenFailure() => 'Ese número ya está asignado',
     InvitationNotPendingFailure() =>
       'Esta persona ya activó su cuenta; no hace falta reenviar',
     MemberPermissionFailure() =>

@@ -43,6 +43,20 @@ class SupabaseMembersRepository implements MembersRepository {
   }
 
   @override
+  Future<void> setMemberNumber(String membershipId, int number) async {
+    try {
+      await _client.rpc<void>(
+        'set_member_number',
+        params: {'p_membership_id': membershipId, 'p_number': number},
+      );
+    } on PostgrestException catch (error) {
+      throw mapMemberNumberError(error.code, error.hint);
+    } catch (error) {
+      throw MemberUnavailableFailure(error);
+    }
+  }
+
+  @override
   Future<void> resendInvitation(String membershipId) =>
       _invoke({'action': 'resend', 'membershipId': membershipId});
 
@@ -90,3 +104,12 @@ MemberFailure mapInvitationError(int status, String? code) => switch (code) {
   _ when status == 401 || status == 403 => const MemberPermissionFailure(),
   _ => MemberUnavailableFailure('$status $code'),
 };
+
+MemberFailure mapMemberNumberError(String? code, String? hint) =>
+    switch (code) {
+      '42501' => const MemberPermissionFailure(),
+      '22023' => const InvalidMemberDataFailure(MemberField.memberNumber),
+      // Our check (P0001) or the unique index under a race (23505).
+      'P0001' || '23505' => const MemberNumberTakenFailure(),
+      _ => MemberUnavailableFailure('$code $hint'),
+    };

@@ -31,6 +31,7 @@ class AppUseCases {
     required this.getClubMembers,
     required this.inviteMember,
     required this.resendInvitation,
+    required this.setMemberNumber,
     required this.getOnboardingStatus,
     required this.verifyInvitationLink,
     required this.setNewPassword,
@@ -58,6 +59,7 @@ class AppUseCases {
   final GetClubMembers getClubMembers;
   final InviteMember inviteMember;
   final ResendInvitation resendInvitation;
+  final SetMemberNumber setMemberNumber;
   final GetOnboardingStatus getOnboardingStatus;
   final VerifyInvitationLink verifyInvitationLink;
   final SetNewPassword setNewPassword;

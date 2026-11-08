@@ -96,4 +96,35 @@ void main() {
       isA<MemberUnavailableFailure>(),
     );
   });
+
+  test('SetMemberNumber requires a positive whole number', () {
+    for (final value in ['', '0', '-3', 'abc', '1.5']) {
+      expect(
+        () => SetMemberNumber(repository)(membershipId: 'm', number: value),
+        throwsA(
+          isA<InvalidMemberDataFailure>().having(
+            (f) => f.field,
+            'field',
+            MemberField.memberNumber,
+          ),
+        ),
+      );
+    }
+  });
+
+  test('maps member number errors', () {
+    expect(
+      mapMemberNumberError('P0001', 'number_taken'),
+      isA<MemberNumberTakenFailure>(),
+    );
+    expect(
+      mapMemberNumberError('23505', null),
+      isA<MemberNumberTakenFailure>(),
+    );
+    expect(mapMemberNumberError('42501', null), isA<MemberPermissionFailure>());
+    expect(
+      mapMemberNumberError('22023', null),
+      isA<InvalidMemberDataFailure>(),
+    );
+  });
 }
