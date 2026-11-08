@@ -4,6 +4,7 @@ import '../../domain/payment/my_subscription.dart';
 import '../../domain/payment/payment.dart';
 import '../../domain/season/season_membership.dart';
 import '../../domain/payment/payments_repository.dart';
+import '../../domain/payment/receipt.dart';
 
 class SupabasePaymentsRepository implements PaymentsRepository {
   const SupabasePaymentsRepository(this._client);
@@ -89,6 +90,23 @@ class SupabasePaymentsRepository implements PaymentsRepository {
     return rows.cast<Map<String, dynamic>>().map(myPaymentFromRow).toList();
   });
 
+  @override
+  Future<Receipt> getReceipt(String paymentId) => _guard(() async {
+    final rows = await _client.rpc<List<dynamic>>(
+      'get_receipt',
+      params: {'p_payment_id': paymentId},
+    );
+    if (rows.isEmpty) throw const NoReceiptFailure();
+    final row = rows.first as Map<String, dynamic>;
+    final logoPath = row['club_logo_path'] as String?;
+    return receiptFromRow(
+      row,
+      logoUrl: logoPath == null
+          ? null
+          : _client.storage.from('club-assets').getPublicUrl(logoPath),
+    );
+  });
+
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
       return await action();
@@ -128,6 +146,8 @@ PaymentFailure mapPaymentError(String? code, String message, String? hint) =>
         const InvalidPaymentAmountFailure(),
       'P0001' when hint == 'already_paid' => const AlreadyPaidFailure(),
       'P0001' when hint == 'not_payable' => const NotPayableFailure(),
+      'P0001' when hint == 'no_receipt' => const NoReceiptFailure(),
+      'P0002' => const NoReceiptFailure(),
       'P0001' when hint == 'invalid_transition' =>
         const InvalidPaymentTransitionFailure(),
       _ => PaymentUnavailableFailure('$code $message'),
@@ -163,4 +183,27 @@ MyPayment myPaymentFromRow(Map<String, dynamic> row) => MyPayment(
   date: DateTime.parse(row['payment_date'] as String),
   status: PaymentStatus.values.byName(row['status'] as String),
   method: _methodOf(row['method']),
+  receiptNumber: row['receipt_number'] as int?,
 );
+
+Receipt receiptFromRow(Map<String, dynamic> row, {String? logoUrl}) {
+  final name = [
+    row['member_first_name'] as String?,
+    row['member_last_name'] as String?,
+  ].whereType<String>().where((part) => part.trim().isNotEmpty).join(' ');
+  return Receipt(
+    paymentId: row['payment_id'] as String,
+    number: row['receipt_number'] as int,
+    clubName: row['club_name'] as String,
+    clubCode: row['club_code'] as String,
+    clubPrimaryColor: row['club_primary_color'] as String?,
+    clubLogoUrl: logoUrl,
+    memberName: name.isEmpty ? (row['member_email'] as String? ?? '') : name,
+    memberNumber: row['member_number'] as int?,
+    seasonName: row['season_name'] as String,
+    concept: row['concept'] as String,
+    amountCents: row['amount_cents'] as int,
+    method: _methodOf(row['method']),
+    paidAt: DateTime.parse(row['paid_at'] as String),
+  );
+}

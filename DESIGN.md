@@ -97,6 +97,7 @@ icono + texto, nunca solo color.
 | `ClubFormDialog` | `presentation/platform/club_form_dialog.dart` | Patrón de formulario en diálogo: error inline, botón principal a la derecha |
 | `startFeePayment` | `presentation/payment/how_to_pay_sheet.dart` | Hoja «Cómo pagar tu cuota de X €» con las instrucciones del club (carnet y Mi suscripción) |
 | `PaymentStatusChip` | `presentation/payment/payment_labels.dart` | Estado del pago con icono + texto: Pagado, Pendiente, Fallido, Anulado |
+| Recibo PDF | `presentation/receipt/pdf_receipt_renderer.dart` | A4: cabecera del color del club (texto con `readableOn`), logo si existe, nombre y «Recibo de pago», nº `CODIGO-0001`; filas etiqueta/valor; importe en negrita; pie legal. Fuente Roboto incluida |
 | Estado de mensaje (`_MessagePage`) | `presentation/session/session_status_pages.dart` | Pantalla vacía/error: título, explicación, acción |
 
 Patrones:
@@ -124,7 +125,7 @@ Patrones:
 | Selector de club | `ClubAvatar` (logo/iniciales), nombre, nº de socio |
 | Portada del club | Cabecera con color del club, `ClubAvatar` grande |
 | Configuración | Vista previa en vivo de cabecera, avatar, botón principal y acento |
-| Carnet (VS-015), recibos (VS-019), emails (VS-006/032) | Logo y colores del club |
+| Carnet (VS-015), recibos (VS-019, PDF), emails (VS-006/032) | Logo y colores del club |
 
 Assets del club en el bucket público `club-assets/<club_id>/` (PNG, JPG o
 WebP, ≤ 2 MB). El logo se muestra con `BoxFit.contain` sobre `surface`.

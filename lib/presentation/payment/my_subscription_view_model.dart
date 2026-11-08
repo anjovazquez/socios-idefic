@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 
 import '../../application/app_use_cases.dart';
 import '../../domain/payment/my_subscription.dart';
+import '../../domain/payment/payment.dart';
+import 'payment_labels.dart';
 
 /// «Mi suscripción»: current season and payment history (RF-011, RF-016).
 class MySubscriptionViewModel extends ChangeNotifier {
@@ -39,6 +41,29 @@ class MySubscriptionViewModel extends ChangeNotifier {
           'momento';
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  String? _downloadingId;
+
+  /// Payment whose receipt is being prepared, to show progress.
+  String? get downloadingId => _downloadingId;
+
+  /// Returns the confirmation, or throws the error message.
+  Future<String> downloadReceipt(MyPayment payment) async {
+    _downloadingId = payment.id;
+    notifyListeners();
+    try {
+      final receipt = await _useCases.downloadReceipt(payment.id);
+      return 'Recibo ${receipt.code} listo';
+    } on PaymentFailure catch (failure) {
+      throw paymentFailureMessage(failure);
+    } catch (_) {
+      throw 'No hemos podido preparar el recibo. Inténtalo de nuevo en un '
+          'momento';
+    } finally {
+      _downloadingId = null;
       notifyListeners();
     }
   }

@@ -26,6 +26,7 @@ import '../domain/member/members_repository.dart';
 import '../domain/onboarding/onboarding_repository.dart';
 import '../domain/payment/payment_gateway.dart';
 import '../domain/payment/payments_repository.dart';
+import '../domain/payment/receipt.dart';
 import '../domain/platform/platform_repository.dart';
 import '../domain/profile/profile_repository.dart';
 import '../domain/season/season_repository.dart';
@@ -38,6 +39,7 @@ import '../infrastructure/member/supabase_members_repository.dart';
 import '../infrastructure/onboarding/supabase_onboarding_repository.dart';
 import '../infrastructure/payment/manual_payment_gateway.dart';
 import '../infrastructure/payment/supabase_payments_repository.dart';
+import '../presentation/receipt/pdf_receipt_renderer.dart';
 import '../infrastructure/platform/supabase_platform_repository.dart';
 import '../infrastructure/profile/supabase_profile_repository.dart';
 import '../infrastructure/season/supabase_season_repository.dart';
@@ -67,6 +69,7 @@ void configureDependencies() {
     ..registerLazySingleton<PaymentsRepository>(
       () => SupabasePaymentsRepository(client),
     )
+    ..registerLazySingleton<ReceiptRenderer>(PdfReceiptRenderer.new)
     ..registerLazySingleton<PaymentGateway>(
       () => ManualPaymentGateway(serviceLocator()),
     )
@@ -140,6 +143,7 @@ void configureDependencies() {
         startPayment: StartPayment(serviceLocator()),
         getMySubscription: GetMySubscription(serviceLocator()),
         getMyPayments: GetMyPayments(serviceLocator()),
+        downloadReceipt: DownloadReceipt(serviceLocator(), serviceLocator()),
       ),
     );
 }

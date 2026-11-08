@@ -6,8 +6,8 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 - Fase actual: **5 — Pagos (0.5)**.
 - Tarea activa: ninguna.
-- Última tarea completada: `VS-018 — Mi suscripción e histórico de pagos` (2026-11-09).
-- Siguiente tarea READY: `VS-019 — Recibo descargable` (también READY: VS-025, VS-027).
+- Última tarea completada: `VS-019 — Recibo descargable` (2026-11-09).
+- Siguiente tarea READY: `VS-020 — Pagos del club para el admin (filtros y recibos)` (también READY: VS-025, VS-027).
 - Bloqueos globales: ninguno. VS-033 (staging) BLOCKED a la espera de credenciales del usuario.
 
 ## Milestones
@@ -19,7 +19,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 | 0.2 Socios | DONE |
 | 0.3 Temporadas y cuotas | DONE |
 | 0.4 Carnet digital | DONE |
-| 0.5 Pagos | IN_PROGRESS (VS-017, VS-018 DONE; VS-019 READY) |
+| 0.5 Pagos | IN_PROGRESS (VS-017…VS-019 DONE; VS-020 READY) |
 | 0.6 Pago real y renovación automática | TODO |
 | 0.7 Comunidad | READY (VS-025, VS-027) |
 | 0.8 Piloto IDEFIC | TODO (VS-033 adelantada, BLOCKED por credenciales) |
@@ -33,7 +33,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 ## Infraestructura
 
-- Flutter 173.35.1 (`.fvmrc`); proyecto `socios_idefic`, plataformas web/android/ios.
+- Flutter 179.35.1 (`.fvmrc`); proyecto `socios_idefic`, plataformas web/android/ios.
 - Config cliente: `--dart-define=SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` (ver `.env.example`).
 - Supabase CLI 2.122 (devDependency npm); signup deshabilitado; Google declarado y desactivado.
 - CI/CD: `.github/workflows/ci.yml` con `quality`, `edge-functions`, `sql-tests` y despliegue manual a staging (`deploy-migrations`, `deploy-functions`, `deploy-hosting`). Aún sin ejecutar en GitHub.
@@ -51,4 +51,5 @@ Snapshot operativo. Se actualiza al final de cada loop.
 - Validación QR (VS-016): `validate_card` (service role), Edge Function pública `validate-card`, `regenerate_card_token`; ruta pública `/v/:token`; `qr_flutter` 4.1.0; `PUBLIC_APP_URL` (dart-define) para la URL del QR fuera de la web.
 - Pagos (VS-017): `payments` + triggers de transición y sincronía, `record_manual_payment`, `set_payment_status`, instrucciones de pago del club; `PaymentGateway` (manual); `get_my_card` devuelve `season_membership_id` y `fee_cents`.
 - Mi suscripción (VS-018): RPC `get_my_subscription` y `get_my_payments` (solo el propio socio, 42501 si no es socio activo); pantalla `/club/subscription`; hoja «Cómo pagar» compartida (`startFeePayment`).
+- Recibos (VS-019): número correlativo por club + snapshot inmutable al pagar (trigger), RPC `get_receipt` (dueño o admin), `ReceiptRenderer` → PDF (`pdf` + `printing`, Roboto incluida); «Descargar recibo» en el histórico.
 - Sesión cloud: Flutter en `$HOME/flutter/bin`; Docker requiere arrancar `dockerd` en segundo plano (ver `QUALITY_GATES.md`). Para probar Edge Functions arrancar sin excluir `edge-runtime`; emails locales en Mailpit `http://127.0.0.1:54324`. El edge-runtime del sandbox no puede descargar de npm (CA del proxy): las funciones no usan npm.

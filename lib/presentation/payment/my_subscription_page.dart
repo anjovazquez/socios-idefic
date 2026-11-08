@@ -211,7 +211,14 @@ class _PaymentTile extends StatelessWidget {
             ].join(' · '),
           ),
           const SizedBox(height: 4),
-          PaymentStatusChip(status: payment.status),
+          Wrap(
+            spacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              PaymentStatusChip(status: payment.status),
+              if (payment.hasReceipt) _ReceiptButton(payment: payment),
+            ],
+          ),
         ],
       ),
       trailing: Text(
@@ -220,4 +227,41 @@ class _PaymentTile extends StatelessWidget {
       ),
     ),
   );
+}
+
+class _ReceiptButton extends StatelessWidget {
+  const _ReceiptButton({required this.payment});
+
+  final MyPayment payment;
+
+  Future<void> _download(BuildContext context) async {
+    final viewModel = context.read<MySubscriptionViewModel>();
+    final messenger = ScaffoldMessenger.of(context);
+    String message;
+    try {
+      message = await viewModel.downloadReceipt(payment);
+    } on String catch (error) {
+      message = error;
+    }
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final busy =
+        context.watch<MySubscriptionViewModel>().downloadingId == payment.id;
+    return TextButton.icon(
+      key: Key('receipt-${payment.id}'),
+      onPressed: busy ? null : () => _download(context),
+      icon: busy
+          ? const SizedBox.square(
+              dimension: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.download_outlined),
+      label: const Text('Descargar recibo'),
+    );
+  }
 }

@@ -63,6 +63,7 @@ class AppUseCases {
     required this.startPayment,
     required this.getMySubscription,
     required this.getMyPayments,
+    required this.downloadReceipt,
   });
 
   final WatchSession watchSession;
@@ -112,4 +113,5 @@ class AppUseCases {
   final StartPayment startPayment;
   final GetMySubscription getMySubscription;
   final GetMyPayments getMyPayments;
+  final DownloadReceipt downloadReceipt;
 }

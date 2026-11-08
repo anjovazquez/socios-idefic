@@ -34,6 +34,7 @@ import 'package:socios_idefic/domain/onboarding/onboarding_repository.dart';
 import 'package:socios_idefic/domain/payment/my_subscription.dart';
 import 'package:socios_idefic/domain/payment/payment.dart';
 import 'package:socios_idefic/domain/payment/payments_repository.dart';
+import 'package:socios_idefic/domain/payment/receipt.dart';
 import 'package:socios_idefic/infrastructure/payment/manual_payment_gateway.dart';
 import 'package:socios_idefic/domain/platform/audit_entry.dart';
 import 'package:socios_idefic/domain/profile/my_profile.dart';
@@ -974,6 +975,24 @@ class FakePaymentsRepository implements PaymentsRepository {
   @override
   Future<List<MyPayment>> getMyPayments(String clubId) async =>
       myPayments[clubId] ?? const [];
+
+  /// Receipts by payment id; missing = not paid.
+  final Map<String, Receipt> receipts = {};
+
+  @override
+  Future<Receipt> getReceipt(String paymentId) async {
+    final receipt = receipts[paymentId];
+    if (receipt == null) throw const NoReceiptFailure();
+    return receipt;
+  }
+}
+
+/// Records the receipts handed to the user instead of building PDFs.
+class FakeReceiptRenderer implements ReceiptRenderer {
+  final List<Receipt> delivered = [];
+
+  @override
+  Future<void> deliver(Receipt receipt) async => delivered.add(receipt);
 }
 
 AppUseCases buildUseCases({
@@ -988,6 +1007,7 @@ AppUseCases buildUseCases({
   FakeSeasonRepository? seasons,
   FakeCardRepository? cards,
   FakePaymentsRepository? payments,
+  FakeReceiptRenderer? receiptRenderer,
 }) {
   final activeClubStore = store ?? InMemoryActiveClubStore();
   final platformRepository = platform ?? FakePlatformRepository();
@@ -1053,6 +1073,10 @@ AppUseCases buildUseCases({
     startPayment: StartPayment(ManualPaymentGateway(paymentsRepository)),
     getMySubscription: GetMySubscription(paymentsRepository),
     getMyPayments: GetMyPayments(paymentsRepository),
+    downloadReceipt: DownloadReceipt(
+      paymentsRepository,
+      receiptRenderer ?? FakeReceiptRenderer(),
+    ),
     getClubBranding: GetClubBranding(brandingRepository),
     saveClubBranding: SaveClubBranding(brandingRepository),
     uploadClubAsset: UploadClubAsset(brandingRepository),

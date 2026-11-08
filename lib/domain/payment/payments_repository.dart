@@ -1,5 +1,6 @@
 import 'my_subscription.dart';
 import 'payment.dart';
+import 'receipt.dart';
 
 abstract interface class PaymentsRepository {
   /// Payments of one member in one season, newest first.
@@ -26,4 +27,7 @@ abstract interface class PaymentsRepository {
 
   /// Payments of the signed-in member in [clubId], newest first.
   Future<List<MyPayment>> getMyPayments(String clubId);
+
+  /// Receipt of a paid payment (owner or club admin).
+  Future<Receipt> getReceipt(String paymentId);
 }

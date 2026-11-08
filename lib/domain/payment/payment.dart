@@ -67,6 +67,11 @@ final class NotPayableFailure extends PaymentFailure {
   const NotPayableFailure();
 }
 
+/// Only paid payments have a receipt.
+final class NoReceiptFailure extends PaymentFailure {
+  const NoReceiptFailure();
+}
+
 final class PaymentPermissionFailure extends PaymentFailure {
   const PaymentPermissionFailure();
 }

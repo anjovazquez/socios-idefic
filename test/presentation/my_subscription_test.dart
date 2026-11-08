@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:socios_idefic/domain/payment/my_subscription.dart';
 import 'package:socios_idefic/domain/payment/payment.dart';
+import 'package:socios_idefic/domain/payment/receipt.dart';
 import 'package:socios_idefic/domain/season/season_membership.dart';
 import 'package:socios_idefic/presentation/app/socios_app.dart';
 
@@ -11,8 +12,9 @@ import '../support/fakes.dart';
 void main() {
   Future<void> openSubscription(
     WidgetTester tester,
-    FakePaymentsRepository payments,
-  ) async {
+    FakePaymentsRepository payments, {
+    FakeReceiptRenderer? renderer,
+  }) async {
     tester.view.physicalSize = const Size(900, 1600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -25,6 +27,7 @@ void main() {
             'ana@example.com': [idefic],
           }),
           payments: payments,
+          receiptRenderer: renderer,
         ),
       ),
     );
@@ -127,5 +130,84 @@ void main() {
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('open-subscription')), findsOneWidget);
+  });
+
+  // BDD: tasks/VS-019.md — Recibo.
+  testWidgets('a paid payment offers its receipt; a pending one does not', (
+    tester,
+  ) async {
+    final renderer = FakeReceiptRenderer();
+    final payments = FakePaymentsRepository()
+      ..subscriptions[idefic.id] = const MySubscription(
+        seasonName: '2026/2027',
+        seasonMembershipId: 'sm-ana',
+        feeCents: 5000,
+        status: SeasonMembershipStatus.active,
+      )
+      ..myPayments[idefic.id] = [
+        MyPayment(
+          id: 'p-pending',
+          seasonName: '2026/2027',
+          concept: 'Cuota de socio 2026/2027',
+          amountCents: 5000,
+          date: DateTime(2026, 9, 1),
+          status: PaymentStatus.pending,
+        ),
+        MyPayment(
+          id: 'p-paid',
+          seasonName: '2026/2027',
+          concept: 'Cuota de socio 2026/2027',
+          amountCents: 5000,
+          date: DateTime(2026, 9, 10),
+          status: PaymentStatus.paid,
+          method: PaymentMethod.bizum,
+          receiptNumber: 2,
+        ),
+      ]
+      ..receipts['p-paid'] = Receipt(
+        paymentId: 'p-paid',
+        number: 2,
+        clubName: 'IDEFIC',
+        clubCode: 'IDEFIC',
+        memberName: 'Ana Pérez',
+        memberNumber: 2,
+        seasonName: '2026/2027',
+        concept: 'Cuota de socio 2026/2027',
+        amountCents: 5000,
+        paidAt: DateTime(2026, 9, 10),
+      );
+    await openSubscription(tester, payments, renderer: renderer);
+
+    expect(find.byKey(const Key('receipt-p-pending')), findsNothing);
+    await tester.tap(find.byKey(const Key('receipt-p-paid')));
+    await tester.pumpAndSettle();
+
+    expect(renderer.delivered.single.code, 'IDEFIC-0002');
+    expect(renderer.delivered.single.memberName, 'Ana Pérez');
+    expect(find.text('Recibo IDEFIC-0002 listo'), findsOneWidget);
+  });
+
+  testWidgets('a receipt the server refuses explains why', (tester) async {
+    final payments = FakePaymentsRepository()
+      ..subscriptions[idefic.id] = const MySubscription(
+        seasonName: '2026/2027',
+        status: SeasonMembershipStatus.active,
+      )
+      ..myPayments[idefic.id] = [
+        MyPayment(
+          id: 'p-gone',
+          seasonName: '2026/2027',
+          concept: 'Cuota de socio 2026/2027',
+          amountCents: 5000,
+          date: DateTime(2026, 9, 10),
+          status: PaymentStatus.paid,
+          receiptNumber: 1,
+        ),
+      ];
+    await openSubscription(tester, payments);
+
+    await tester.tap(find.byKey(const Key('receipt-p-gone')));
+    await tester.pumpAndSettle();
+    expect(find.text('Este pago no tiene recibo'), findsOneWidget);
   });
 }

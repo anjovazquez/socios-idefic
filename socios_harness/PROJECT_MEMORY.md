@@ -63,6 +63,7 @@ Memoria estable. Solo hechos válidos durante muchas tareas (ver `MEMORY_POLICY.
 - Storage: un upload con `upsert` exige política SELECT sobre `storage.objects` además de INSERT/UPDATE.
 - Rutas: cada estado de sesión tiene un área (`/club`, `/platform`…) y sus subrutas (`/club/settings`) se permiten con `redirectFor`.
 - Pruebas web en el sandbox: `flutter build web --no-web-resources-cdn` (gstatic bloqueado); los campos de Flutter web se rellenan haciendo clic por coordenadas y escribiendo con el teclado; para `image_picker` web se engancha `HTMLInputElement.prototype.click` e inyecta el fichero con `DataTransfer` (build `--profile` para trazas legibles).
+- Al añadir un plugin con soporte web, `flutter build web` puede reutilizar un `web_plugin_registrant.dart` antiguo de `.dart_tool/flutter_build` y el plugin queda sin registrar (la llamada se queda colgada sin error). Borrar `.dart_tool/flutter_build` y recompilar. Las descargas web (PDF) se capturan en Playwright con `acceptDownloads` y el evento `download`; el texto se verifica con `pdftotext`.
 
 - Administración: toda RPC de gestión es `security definer`, valida el rol con `require_platform_admin()` (o `can_admin_club` desde VS-005) y registra `audit(club_id, action, payload)`, que guarda el actor real y si actuó como plataforma.
 - Errores de RPC → SQLSTATE: `42501` permiso, `22023` dato inválido, `23505` duplicado, `P0001` regla de negocio (con `hint`), `P0002` no encontrado. Los adapters los mapean a fallos de dominio.

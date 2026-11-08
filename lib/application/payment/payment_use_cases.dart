@@ -2,6 +2,7 @@ import '../../domain/payment/my_subscription.dart';
 import '../../domain/payment/payment.dart';
 import '../../domain/payment/payment_gateway.dart';
 import '../../domain/payment/payments_repository.dart';
+import '../../domain/payment/receipt.dart';
 import '../../domain/season/season.dart';
 
 class GetSeasonPayments {
@@ -104,4 +105,17 @@ class GetMyPayments {
 
   Future<List<MyPayment>> call(String clubId) =>
       _repository.getMyPayments(clubId);
+}
+
+class DownloadReceipt {
+  const DownloadReceipt(this._repository, this._renderer);
+
+  final PaymentsRepository _repository;
+  final ReceiptRenderer _renderer;
+
+  Future<Receipt> call(String paymentId) async {
+    final receipt = await _repository.getReceipt(paymentId);
+    await _renderer.deliver(receipt);
+    return receipt;
+  }
 }

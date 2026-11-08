@@ -272,4 +272,41 @@ void main() {
     expect(payment.status, PaymentStatus.paid);
     expect(payment.amountCents, 4500);
   });
+
+  test('maps a get_receipt row with the member name or email', () {
+    final row = {
+      'payment_id': 'p1',
+      'receipt_number': 3,
+      'club_name': 'IDEFIC',
+      'club_code': 'IDEFIC',
+      'club_primary_color': '#0B3D91',
+      'club_logo_path': null,
+      'member_first_name': 'Ana',
+      'member_last_name': 'Pérez',
+      'member_email': 'ana@example.com',
+      'member_number': 2,
+      'season_name': '2026/2027',
+      'concept': 'Cuota de socio 2026/2027',
+      'amount_cents': 5000,
+      'currency': 'EUR',
+      'method': 'bizum',
+      'paid_at': '2026-09-10T00:00:00+00:00',
+    };
+    final receipt = receiptFromRow(row, logoUrl: 'https://x/logo.png');
+    expect(receipt.code, 'IDEFIC-0003');
+    expect(receipt.memberName, 'Ana Pérez');
+    expect(receipt.method, PaymentMethod.bizum);
+    expect(receipt.clubLogoUrl, 'https://x/logo.png');
+
+    final noName = receiptFromRow({
+      ...row,
+      'member_first_name': null,
+      'member_last_name': null,
+    });
+    expect(noName.memberName, 'ana@example.com');
+    expect(
+      mapPaymentError('P0001', 'no receipt', 'no_receipt'),
+      isA<NoReceiptFailure>(),
+    );
+  });
 }

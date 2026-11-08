@@ -45,6 +45,7 @@ class MyPayment {
     required this.date,
     required this.status,
     this.method,
+    this.receiptNumber,
   });
 
   final String id;
@@ -54,4 +55,9 @@ class MyPayment {
   final DateTime date;
   final PaymentStatus status;
   final PaymentMethod? method;
+
+  /// Only paid payments have a receipt (RF-017).
+  final int? receiptNumber;
+
+  bool get hasReceipt => status == PaymentStatus.paid && receiptNumber != null;
 }

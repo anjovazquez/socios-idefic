@@ -17,6 +17,7 @@ String paymentFailureMessage(PaymentFailure failure) => switch (failure) {
   NotPayableFailure() => 'Esta temporada no tiene cuota pendiente',
   InvalidPaymentTransitionFailure() =>
     'Este pago ya no se puede cambiar en ese sentido',
+  NoReceiptFailure() => 'Este pago no tiene recibo',
   PaymentPermissionFailure() =>
     'Solo el administrador del club puede registrar pagos',
   PaymentUnavailableFailure() =>
