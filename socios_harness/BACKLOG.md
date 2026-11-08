@@ -46,7 +46,7 @@ dependencias ya estén todas `DONE` (salvo bloqueo explícito por decisión).
 
 Notas:
 
-- VS-021…VS-024 requieren ADR-001 `ACCEPTED` y credenciales de prueba del
-  proveedor. Si no están, quedan `BLOCKED` y el loop continúa con la fase 7.
+- VS-021…VS-024 usan Stripe (ADR-001 `ACCEPTED`); necesitan claves de test
+  de Stripe. Sin ellas se implementan con fakes y la prueba real queda pendiente.
 - VS-006 usa el buzón local de Supabase (Inbucket/Mailpit) en desarrollo; el
-  proveedor real de email (D-013) solo se configura en VS-033.
+  proveedor real de email (Resend, D-013) solo se configura en VS-033.

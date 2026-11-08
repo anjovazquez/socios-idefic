@@ -1,6 +1,6 @@
 # ADR-001 — Proveedor de pagos
 
-Status: Proposed
+Status: Accepted (2026-11-08, confirmado por el usuario: Stripe)
 Date: 2026-11-08
 
 ## Context
@@ -10,7 +10,7 @@ facilidad de integración, renovación automática, bajo coste y mínima gestió
 para el club. La plataforma es multi-club: el dinero de cada club debe llegar
 a la cuenta de ese club. La integración debe quedar desacoplada.
 
-## Decision (propuesta)
+## Decision
 
 - **Stripe** con **Stripe Connect** (cuentas Express/Standard por club).
 - Métodos: tarjeta (Apple Pay / Google Pay incluidos) y **SEPA Direct Debit**.
@@ -41,7 +41,7 @@ a la cuenta de ese club. La integración debe quedar desacoplada.
 - **GoCardless**: excelente para SEPA recurrente, sin tarjeta.
 - **PayPal**: peor experiencia en España para cuotas recurrentes.
 
-## Open questions para el usuario
+## Open questions (no bloquean hasta VS-021; default: Connect por club, sin comisión)
 
 - ¿Cada club cobra en su propia cuenta (Connect) o IDEFIC centraliza al principio?
 - ¿Comisión de plataforma?

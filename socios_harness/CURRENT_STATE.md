@@ -20,14 +20,15 @@ Snapshot operativo. Se actualiza al final de cada loop.
 | 0.3 Temporadas y cuotas | TODO |
 | 0.4 Carnet digital | TODO |
 | 0.5 Pagos | TODO |
-| 0.6 Pago real y renovación automática | TODO (pendiente ADR-001) |
+| 0.6 Pago real y renovación automática | TODO |
 | 0.7 Comunidad | TODO |
 | 0.8 Piloto IDEFIC | TODO |
 
 ## Decisiones pendientes del usuario
 
-- ADR-001: proveedor de pagos y si cada club cobra en su cuenta (bloquea fase 6).
-- D-013: proveedor de email transaccional (necesario antes de staging).
+- ADR-001 aceptado (Stripe). Abierto sin bloquear: confirmar Connect por club y comisión de plataforma (default: Connect, sin comisión) antes de VS-021.
+- D-013 aceptado (Resend).
+- Credenciales que configurará el usuario: Google OAuth (VS-002), claves test de Stripe (VS-021), `RESEND_API_KEY` (VS-033).
 - D-016: nombre comercial / bundle id (provisional `es.idefic.socios_idefic`).
 
 ## Infraestructura

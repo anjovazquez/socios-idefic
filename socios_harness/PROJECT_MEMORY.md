@@ -16,8 +16,8 @@ Memoria estable. Solo hechos válidos durante muchas tareas (ver `MEMORY_POLICY.
 - Arquitectura hexagonal, vertical slices, BDD.
 - `get_it` (composition root), `provider`/`ChangeNotifier`, `go_router`.
 - Supabase: Auth (email+contraseña y Google), Postgres, RLS, RPC, Storage, Edge Functions, pg_cron.
-- Pagos detrás del puerto `PaymentGateway`; proveedor real según ADR-001.
-- Emails transaccionales detrás de un puerto `Mailer` en Edge Functions.
+- Pagos detrás del puerto `PaymentGateway`; proveedor real **Stripe** (Connect por club, tarjeta + SEPA; ADR-001).
+- Emails transaccionales con **Resend** detrás de un puerto `Mailer` en Edge Functions.
 
 ## Reglas arquitectónicas
 
