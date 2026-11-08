@@ -41,6 +41,13 @@ class ClubHomePage extends StatelessWidget {
             ),
           if (club.canAdminister)
             IconButton(
+              key: const Key('open-seasons'),
+              tooltip: 'Temporadas',
+              icon: const Icon(Icons.event_note_outlined),
+              onPressed: () => context.go('/club/seasons'),
+            ),
+          if (club.canAdminister)
+            IconButton(
               key: const Key('open-settings'),
               tooltip: 'Configuración del club',
               icon: const Icon(Icons.settings_outlined),
@@ -72,6 +79,14 @@ class ClubHomePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(club.name, style: theme.textTheme.headlineSmall),
+            if (club.activeSeasonName case final season?) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Temporada $season',
+                key: const Key('home-season'),
+                style: theme.textTheme.titleMedium,
+              ),
+            ],
             if (club.memberNumber != null) ...[
               const SizedBox(height: 4),
               Text(

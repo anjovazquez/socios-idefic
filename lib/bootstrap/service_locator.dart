@@ -14,6 +14,7 @@ import '../application/member/member_use_cases.dart';
 import '../application/onboarding/onboarding_use_cases.dart';
 import '../application/platform/platform_use_cases.dart';
 import '../application/profile/profile_use_cases.dart';
+import '../application/season/season_use_cases.dart';
 import '../domain/auth/auth_repository.dart';
 import '../domain/club/active_club_store.dart';
 import '../domain/club/club_branding_repository.dart';
@@ -22,6 +23,7 @@ import '../domain/member/members_repository.dart';
 import '../domain/onboarding/onboarding_repository.dart';
 import '../domain/platform/platform_repository.dart';
 import '../domain/profile/profile_repository.dart';
+import '../domain/season/season_repository.dart';
 import '../infrastructure/auth/supabase_auth_repository.dart';
 import '../infrastructure/club/shared_preferences_active_club_store.dart';
 import '../infrastructure/club/supabase_club_branding_repository.dart';
@@ -30,6 +32,7 @@ import '../infrastructure/member/supabase_members_repository.dart';
 import '../infrastructure/onboarding/supabase_onboarding_repository.dart';
 import '../infrastructure/platform/supabase_platform_repository.dart';
 import '../infrastructure/profile/supabase_profile_repository.dart';
+import '../infrastructure/season/supabase_season_repository.dart';
 
 /// Composition root. Only this layer knows about GetIt.
 final GetIt serviceLocator = GetIt.instance;
@@ -52,6 +55,9 @@ void configureDependencies() {
     )
     ..registerLazySingleton<ClubBrandingRepository>(
       () => SupabaseClubBrandingRepository(client),
+    )
+    ..registerLazySingleton<SeasonRepository>(
+      () => SupabaseSeasonRepository(client),
     )
     ..registerLazySingleton<ProfileRepository>(
       () => SupabaseProfileRepository(client),
@@ -99,6 +105,9 @@ void configureDependencies() {
         getMyProfile: GetMyProfile(serviceLocator()),
         updateMyProfile: UpdateMyProfile(serviceLocator()),
         uploadProfilePhoto: UploadProfilePhoto(serviceLocator()),
+        getSeasons: GetSeasons(serviceLocator()),
+        createSeason: CreateSeason(serviceLocator()),
+        activateSeason: ActivateSeason(serviceLocator()),
       ),
     );
 }

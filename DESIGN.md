@@ -47,6 +47,14 @@ Hasta que existan estados de pago/carnet (VS-015, VS-017) solo se usa
 fallido, cancelado) se añadirán aquí como tokens semánticos, siempre con
 icono + texto, nunca solo color.
 
+### 2.3 Importes y fechas
+
+- Importes siempre en céntimos en datos y formateados con `formatCents`
+  (`presentation/format/money.dart`): `50,00 €`, `1.250,50 €`. Los campos de
+  importe aceptan `50`, `50,5`, `50.50` o `1.250,00` (`parseEurosToCents`).
+- Fechas `dd/MM/yyyy` (`formatDate`).
+- Estados de temporada con icono + texto: Activa, Preparada, Cerrada.
+
 ## 3. Tipografía
 
 - Siempre `Theme.of(context).textTheme.*` (Material 3). Nada de

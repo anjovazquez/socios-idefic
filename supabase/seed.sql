@@ -73,3 +73,9 @@ insert into public.terms_acceptances (user_id, version)
 select id, public.current_terms_version() from public.profiles
 where onboarded_at is not null
 on conflict do nothing;
+
+-- Seasons (VS-012): IDEFIC with 2025/2026 closed and 2026/2027 active at 50 €.
+insert into public.seasons (club_id, name, starts_on, ends_on, default_fee_cents, status, activated_at, closed_at) values
+  ('20000000-0000-0000-0000-000000000001', '2025/2026', '2025-09-01', '2026-08-31', 4500, 'closed', now() - interval '1 year', now()),
+  ('20000000-0000-0000-0000-000000000001', '2026/2027', '2026-09-01', '2027-08-31', 5000, 'active', now(), null)
+on conflict (club_id, name) do nothing;

@@ -13,6 +13,7 @@ import 'package:socios_idefic/application/member/member_use_cases.dart';
 import 'package:socios_idefic/application/onboarding/onboarding_use_cases.dart';
 import 'package:socios_idefic/application/platform/platform_use_cases.dart';
 import 'package:socios_idefic/application/profile/profile_use_cases.dart';
+import 'package:socios_idefic/application/season/season_use_cases.dart';
 import 'package:socios_idefic/domain/auth/auth_failures.dart';
 import 'package:socios_idefic/domain/auth/auth_repository.dart';
 import 'package:socios_idefic/domain/auth/auth_user.dart';
@@ -28,6 +29,8 @@ import 'package:socios_idefic/domain/onboarding/onboarding_repository.dart';
 import 'package:socios_idefic/domain/platform/audit_entry.dart';
 import 'package:socios_idefic/domain/profile/my_profile.dart';
 import 'package:socios_idefic/domain/profile/profile_repository.dart';
+import 'package:socios_idefic/domain/season/season.dart';
+import 'package:socios_idefic/domain/season/season_repository.dart';
 import 'package:socios_idefic/domain/platform/club_data.dart';
 import 'package:socios_idefic/domain/platform/platform_club.dart';
 import 'package:socios_idefic/domain/platform/platform_failures.dart';
@@ -643,6 +646,94 @@ class FakeProfileRepository implements ProfileRepository {
   Future<String> photoUrl(String path) async => 'https://signed.test/$path';
 }
 
+/// Seasons per club with the server rules; activation updates the active
+/// season shown by [FakeClubRepository].
+class FakeSeasonRepository implements SeasonRepository {
+  FakeSeasonRepository([Map<String, List<Season>>? seasons])
+    : seasons = seasons ?? {};
+
+  final Map<String, List<Season>> seasons;
+  FakeClubRepository? clubs;
+
+  @override
+  Future<List<Season>> getSeasons(String clubId) async =>
+      [...?seasons[clubId]]..sort((a, b) => b.name.compareTo(a.name));
+
+  @override
+  Future<void> createSeason({
+    required String clubId,
+    required String name,
+    DateTime? startsOn,
+    DateTime? endsOn,
+  }) async {
+    final list = seasons.putIfAbsent(clubId, () => []);
+    if (list.any((s) => s.name == name)) {
+      throw const SeasonAlreadyExistsFailure();
+    }
+    final year = int.parse(name.substring(0, 4));
+    list.add(
+      Season(
+        id: 'season-$name',
+        clubId: clubId,
+        name: name,
+        startsOn: startsOn ?? DateTime(year, 9),
+        endsOn: endsOn ?? DateTime(year + 1, 8, 31),
+        status: SeasonStatus.draft,
+      ),
+    );
+  }
+
+  @override
+  Future<void> activateSeason({
+    required String seasonId,
+    required int defaultFeeCents,
+  }) async {
+    for (final entry in seasons.entries) {
+      if (!entry.value.any((s) => s.id == seasonId)) continue;
+      entry.value.setAll(0, [
+        for (final s in entry.value)
+          Season(
+            id: s.id,
+            clubId: s.clubId,
+            name: s.name,
+            startsOn: s.startsOn,
+            endsOn: s.endsOn,
+            status: s.id == seasonId
+                ? SeasonStatus.active
+                : s.status == SeasonStatus.active
+                ? SeasonStatus.closed
+                : s.status,
+            defaultFeeCents: s.id == seasonId
+                ? defaultFeeCents
+                : s.defaultFeeCents,
+          ),
+      ]);
+      final name = entry.value.firstWhere((s) => s.id == seasonId).name;
+      final byEmail = clubs?.clubsByEmail;
+      if (byEmail == null) return;
+      for (final email in byEmail.keys.toList()) {
+        byEmail[email] = [
+          for (final c in byEmail[email]!)
+            c.id == entry.key
+                ? MyClub(
+                    id: c.id,
+                    name: c.name,
+                    code: c.code,
+                    role: c.role,
+                    logoUrl: c.logoUrl,
+                    imageUrl: c.imageUrl,
+                    primaryColor: c.primaryColor,
+                    secondaryColor: c.secondaryColor,
+                    memberNumber: c.memberNumber,
+                    activeSeasonName: name,
+                  )
+                : c,
+        ];
+      }
+    }
+  }
+}
+
 AppUseCases buildUseCases({
   required FakeAuthRepository auth,
   required FakeClubRepository clubs,
@@ -652,11 +743,13 @@ AppUseCases buildUseCases({
   FakeMembersRepository? members,
   FakeOnboardingRepository? onboarding,
   FakeProfileRepository? profile,
+  FakeSeasonRepository? seasons,
 }) {
   final activeClubStore = store ?? InMemoryActiveClubStore();
   final platformRepository = platform ?? FakePlatformRepository();
   final brandingRepository = branding ?? FakeClubBrandingRepository(clubs);
   final profileRepository = (profile ?? FakeProfileRepository())..auth = auth;
+  final seasonRepository = (seasons ?? FakeSeasonRepository())..clubs = clubs;
   final onboardingRepository = (onboarding ?? FakeOnboardingRepository())
     ..auth = auth
     ..clubs = clubs;
@@ -694,6 +787,9 @@ AppUseCases buildUseCases({
     getMyProfile: GetMyProfile(profileRepository),
     updateMyProfile: UpdateMyProfile(profileRepository),
     uploadProfilePhoto: UploadProfilePhoto(profileRepository),
+    getSeasons: GetSeasons(seasonRepository),
+    createSeason: CreateSeason(seasonRepository),
+    activateSeason: ActivateSeason(seasonRepository),
     getClubBranding: GetClubBranding(brandingRepository),
     saveClubBranding: SaveClubBranding(brandingRepository),
     uploadClubAsset: UploadClubAsset(brandingRepository),

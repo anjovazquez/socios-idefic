@@ -14,6 +14,7 @@ class MyClub {
     this.primaryColor,
     this.secondaryColor,
     this.memberNumber,
+    this.activeSeasonName,
   });
 
   final String id;
@@ -31,6 +32,9 @@ class MyClub {
 
   /// Per-club member number (RN-006).
   final int? memberNumber;
+
+  /// Name of the active season of the club, if any (RF-007).
+  final String? activeSeasonName;
 
   /// Club admins and platform admins manage the club (§16).
   bool get canAdminister =>

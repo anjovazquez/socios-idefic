@@ -9,6 +9,7 @@ import 'member/member_use_cases.dart';
 import 'onboarding/onboarding_use_cases.dart';
 import 'platform/platform_use_cases.dart';
 import 'profile/profile_use_cases.dart';
+import 'season/season_use_cases.dart';
 
 /// Use cases the presentation layer needs, built by the composition root.
 class AppUseCases {
@@ -42,6 +43,9 @@ class AppUseCases {
     required this.getMyProfile,
     required this.updateMyProfile,
     required this.uploadProfilePhoto,
+    required this.getSeasons,
+    required this.createSeason,
+    required this.activateSeason,
   });
 
   final WatchSession watchSession;
@@ -73,4 +77,7 @@ class AppUseCases {
   final GetMyProfile getMyProfile;
   final UpdateMyProfile updateMyProfile;
   final UploadProfilePhoto uploadProfilePhoto;
+  final GetSeasons getSeasons;
+  final CreateSeason createSeason;
+  final ActivateSeason activateSeason;
 }

@@ -21,5 +21,6 @@ MyClub myClubFromRow(
     primaryColor: row['primary_color'] as String?,
     secondaryColor: row['secondary_color'] as String?,
     memberNumber: row['member_number'] as int?,
+    activeSeasonName: row['active_season_name'] as String?,
   );
 }
