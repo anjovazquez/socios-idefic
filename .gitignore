@@ -1,0 +1,4 @@
+# Temporary until BOOTSTRAP-000 generates the Flutter .gitignore
+.env
+*.local
+node_modules/
