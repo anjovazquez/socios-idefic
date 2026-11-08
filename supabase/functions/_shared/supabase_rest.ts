@@ -70,3 +70,28 @@ export async function generateLink(
     type: (payload.verification_type as string) ?? params.type,
   };
 }
+
+/** Short-lived URL of a private Storage object (service role only). */
+export async function signStorageUrl(
+  options: { url: string; serviceKey: string; publicUrl: string; fetcher?: Fetch },
+  bucket: string,
+  path: string,
+  expiresIn: number,
+): Promise<string | null> {
+  const response = await (options.fetcher ?? fetch)(
+    `${options.url}/storage/v1/object/sign/${bucket}/${path}`,
+    {
+      method: "POST",
+      headers: {
+        apikey: options.serviceKey,
+        Authorization: `Bearer ${options.serviceKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ expiresIn }),
+    },
+  );
+  if (!response.ok) return null;
+  const payload = await response.json().catch(() => ({}));
+  const signed = (payload.signedURL ?? payload.signedUrl) as string | undefined;
+  return signed ? `${options.publicUrl}/storage/v1${signed}` : null;
+}

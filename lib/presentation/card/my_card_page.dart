@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../application/app_use_cases.dart';
 import '../../domain/card/membership_card.dart';
 import '../session/session_view_model.dart';
+import 'card_qr.dart';
 import 'membership_card_view.dart';
 
 /// «Mi carnet» (RF-019, RF-021).
@@ -19,6 +20,9 @@ class _MyCardPageState extends State<MyCardPage> {
   late final Future<MembershipCard> _card = context
       .read<AppUseCases>()
       .getMyCard(context.read<SessionViewModel>().activeClub!.id);
+
+  Widget? _qrOf(MembershipCard card) =>
+      card.cardToken == null ? null : CardQr(token: card.cardToken!);
 
   void _showFullScreen(MembershipCard card) {
     Navigator.of(context).push(
@@ -38,7 +42,7 @@ class _MyCardPageState extends State<MyCardPage> {
                     : 0,
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 720),
-                  child: MembershipCardView(card: card),
+                  child: MembershipCardView(card: card, qr: _qrOf(card)),
                 ),
               ),
             ),
@@ -77,7 +81,10 @@ class _MyCardPageState extends State<MyCardPage> {
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 520),
                 child: switch (card.state) {
-                  CardState.active => MembershipCardView(card: card),
+                  CardState.active => MembershipCardView(
+                    card: card,
+                    qr: _qrOf(card),
+                  ),
                   _ => Opacity(
                     opacity: 0.45,
                     child: ExcludeSemantics(

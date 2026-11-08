@@ -65,6 +65,34 @@ class MemberDetailSheet extends StatelessWidget {
     }
   }
 
+  Future<void> _regenerate(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('¿Regenerar el carnet?'),
+        content: Text(
+          'El QR actual de ${member.displayName} dejará de servir. Úsalo si '
+          'el carnet se ha compartido o perdido.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            key: const Key('confirm-regenerate-card'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Regenerar'),
+          ),
+        ],
+      ),
+    );
+    if (!(confirmed ?? false)) return;
+    await _run(navigator, messenger, () => viewModel.regenerateCard(member));
+  }
+
   Future<void> _changeFee(BuildContext context) async {
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
@@ -171,6 +199,11 @@ class MemberDetailSheet extends StatelessWidget {
                     key: const Key('member-change-fee'),
                     onPressed: () => _changeFee(context),
                     child: const Text('Cambiar cuota'),
+                  ),
+                  TextButton(
+                    key: const Key('member-regenerate-card'),
+                    onPressed: () => _regenerate(context),
+                    child: const Text('Regenerar carnet'),
                   ),
                   if (seasonStatus == SeasonMembershipStatus.pendingPayment)
                     TextButton(

@@ -22,6 +22,10 @@ abstract final class BrandTokens {
     '#111111',
   ];
 
+  /// Card validation result (DESIGN.md §2.2), always with icon + text.
+  static const valid = Color(0xFF1B5E20);
+  static const invalid = Color(0xFFB3261E);
+
   /// WCAG AA for normal text.
   static const minContrast = 4.5;
 }

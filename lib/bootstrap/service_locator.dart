@@ -120,6 +120,8 @@ void configureDependencies() {
         getRenewalCandidates: GetRenewalCandidates(serviceLocator()),
         bulkRenew: BulkRenew(serviceLocator()),
         getMyCard: GetMyCard(serviceLocator()),
+        validateCard: ValidateCard(serviceLocator()),
+        regenerateCard: RegenerateCard(serviceLocator()),
       ),
     );
 }

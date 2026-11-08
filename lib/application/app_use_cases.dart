@@ -53,6 +53,8 @@ class AppUseCases {
     required this.getRenewalCandidates,
     required this.bulkRenew,
     required this.getMyCard,
+    required this.validateCard,
+    required this.regenerateCard,
   });
 
   final WatchSession watchSession;
@@ -93,4 +95,6 @@ class AppUseCases {
   final GetRenewalCandidates getRenewalCandidates;
   final BulkRenew bulkRenew;
   final GetMyCard getMyCard;
+  final ValidateCard validateCard;
+  final RegenerateCard regenerateCard;
 }

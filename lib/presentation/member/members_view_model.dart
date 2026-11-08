@@ -156,6 +156,16 @@ class MembersViewModel extends ChangeNotifier {
         : '${member.displayName} vuelve a estar pendiente de pago';
   }
 
+  Future<String> regenerateCard(ClubMember member) async {
+    try {
+      await _useCases.regenerateCard(member.seasonMembershipId!);
+    } catch (_) {
+      throw messageFor(const MemberUnavailableFailure());
+    }
+    return 'Carnet de ${member.displayName} regenerado: el QR anterior ya no '
+        'sirve';
+  }
+
   Future<List<MemberSeason>> seasons(ClubMember member) =>
       _useCases.getMemberSeasons(member.membershipId);
 

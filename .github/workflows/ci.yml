@@ -114,8 +114,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Deploy invite-member
-        run: npx supabase functions deploy invite-member --project-ref "$SUPABASE_PROJECT_REF"
+      - name: Deploy functions
+        run: |
+          npx supabase functions deploy invite-member --project-ref "$SUPABASE_PROJECT_REF"
+          npx supabase functions deploy validate-card --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF_STAGING }}
@@ -139,6 +141,7 @@ jobs:
           flutter build web --release
           --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL_STAGING }}
           --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY_STAGING }}
+          --dart-define=PUBLIC_APP_URL=https://${{ secrets.FIREBASE_PROJECT_ID_STAGING }}.web.app
       - name: Firebase credentials
         run: echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-sa.json"
         env:

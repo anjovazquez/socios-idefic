@@ -19,6 +19,7 @@ import 'package:socios_idefic/domain/auth/auth_failures.dart';
 import 'package:socios_idefic/domain/auth/auth_repository.dart';
 import 'package:socios_idefic/domain/auth/auth_user.dart';
 import 'package:socios_idefic/domain/card/card_repository.dart';
+import 'package:socios_idefic/domain/card/card_validation.dart';
 import 'package:socios_idefic/domain/card/membership_card.dart';
 import 'package:socios_idefic/domain/club/active_club_store.dart';
 import 'package:socios_idefic/domain/club/club_branding.dart';
@@ -843,6 +844,23 @@ class FakeCardRepository implements CardRepository {
   final Map<String, MembershipCard> cards;
   FakeAuthRepository? auth;
 
+  /// Valid QR tokens and what they show.
+  final Map<String, CardValidation> validations = {};
+  final List<String> lookups = [];
+  final List<String> regenerated = [];
+
+  @override
+  Future<CardValidation> validate(String token) async {
+    lookups.add(token);
+    return validations[token] ?? const CardValidation.notFound();
+  }
+
+  @override
+  Future<void> regenerate(String seasonMembershipId) async {
+    regenerated.add(seasonMembershipId);
+    validations.clear();
+  }
+
   @override
   Future<MembershipCard> getMyCard(String clubId) async {
     final card = cards[auth?.currentUser?.email];
@@ -916,6 +934,8 @@ AppUseCases buildUseCases({
     getRenewalCandidates: GetRenewalCandidates(seasonRepository),
     bulkRenew: BulkRenew(seasonRepository),
     getMyCard: GetMyCard(cardRepository),
+    validateCard: ValidateCard(cardRepository),
+    regenerateCard: RegenerateCard(cardRepository),
     getClubBranding: GetClubBranding(brandingRepository),
     saveClubBranding: SaveClubBranding(brandingRepository),
     uploadClubAsset: UploadClubAsset(brandingRepository),

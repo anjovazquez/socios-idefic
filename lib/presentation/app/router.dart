@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../auth/login_page.dart';
+import '../card/card_validation_page.dart';
 import '../card/my_card_page.dart';
 import '../club/club_home_page.dart';
 import '../club/club_settings_page.dart';
@@ -48,6 +49,8 @@ String routeFor(SessionStatus status) => switch (status) {
 String? redirectFor(SessionStatus status, String location) {
   final target = routeFor(status);
   if (location == target) return null;
+  // Card validation (QR) is public, with or without a session (RF-020).
+  if (location.startsWith('/v/')) return null;
   // The invitation link must be opened without a session (it creates one).
   if (location == AppRoutes.activation &&
       (status == SessionStatus.signedOut || status == SessionStatus.loading)) {
@@ -78,6 +81,11 @@ GoRouter createRouter(
         tokenHash: state.uri.queryParameters['token_hash'],
         type: state.uri.queryParameters['type'],
       ),
+    ),
+    GoRoute(
+      path: '/v/:token',
+      builder: (context, state) =>
+          CardValidationPage(token: state.pathParameters['token'] ?? ''),
     ),
     GoRoute(
       path: AppRoutes.onboarding,

@@ -58,7 +58,7 @@ void main() {
     expect(find.text('Socio nº 2'), findsOneWidget);
     expect(find.text('Temporada 2026/2027'), findsOneWidget);
     expect(find.text('IDEFIC'), findsWidgets);
-    expect(find.byIcon(Icons.qr_code_2), findsOneWidget);
+    expect(find.byKey(const Key('card-qr')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('card-fullscreen')));
     await tester.pumpAndSettle();

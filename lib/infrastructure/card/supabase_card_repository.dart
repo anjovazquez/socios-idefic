@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/card/card_repository.dart';
+import '../../domain/card/card_validation.dart';
 import '../../domain/card/membership_card.dart';
 
 class SupabaseCardRepository implements CardRepository {
@@ -39,6 +40,55 @@ class SupabaseCardRepository implements CardRepository {
       throw CardUnavailableFailure(error);
     }
   }
+
+  @override
+  Future<CardValidation> validate(String token) async {
+    try {
+      final response = await _client.functions.invoke(
+        'validate-card',
+        body: {'token': token},
+      );
+      return cardValidationFromJson(
+        (response.data as Map).cast<String, dynamic>(),
+      );
+    } catch (error) {
+      throw CardUnavailableFailure(error);
+    }
+  }
+
+  @override
+  Future<void> regenerate(String seasonMembershipId) async {
+    try {
+      await _client.rpc<void>(
+        'regenerate_card_token',
+        params: {'p_season_membership_id': seasonMembershipId},
+      );
+    } on PostgrestException catch (error) {
+      throw error.code == '42501'
+          ? const NotAMemberFailure()
+          : CardUnavailableFailure(error);
+    }
+  }
+}
+
+CardValidation cardValidationFromJson(Map<String, dynamic> json) {
+  final club = (json['club'] as Map?)?.cast<String, dynamic>();
+  final member = (json['member'] as Map?)?.cast<String, dynamic>();
+  return CardValidation(
+    state: switch (json['state']) {
+      'active' => ValidationState.active,
+      'not_current' => ValidationState.notCurrent,
+      _ => ValidationState.notFound,
+    },
+    clubName: club?['name'] as String?,
+    clubLogoUrl: club?['logoUrl'] as String?,
+    primaryColor: club?['primaryColor'] as String?,
+    firstName: member?['firstName'] as String?,
+    lastName: member?['lastName'] as String?,
+    photoUrl: member?['photoUrl'] as String?,
+    memberNumber: member?['memberNumber'] as int?,
+    seasonName: json['seasonName'] as String?,
+  );
 }
 
 MembershipCard membershipCardFromRow(

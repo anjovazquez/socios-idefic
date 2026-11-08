@@ -6,6 +6,10 @@ abstract final class AppConfig {
     'SUPABASE_PUBLISHABLE_KEY',
   );
 
+  /// Public address of the web app, used in the card QR (VS-016). On the
+  /// web it defaults to the current origin.
+  static const publicAppUrl = String.fromEnvironment('PUBLIC_APP_URL');
+
   static void validate() {
     if (supabaseUrl.isEmpty || supabasePublishableKey.isEmpty) {
       throw StateError(

@@ -4,10 +4,10 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 ## Estado general
 
-- Fase actual: **4/5 — Carnet digital (0.4) y Pagos (0.5)**.
+- Fase actual: **5 — Pagos (0.5)**.
 - Tarea activa: ninguna.
-- Última tarea completada: `VS-015 — Mi carnet digital` (2026-11-09).
-- Siguiente tarea READY: `VS-016 — QR y página pública de validación` (también READY: VS-017, VS-025, VS-027).
+- Última tarea completada: `VS-016 — QR y página pública de validación` (2026-11-09). Milestone 0.4 completo.
+- Siguiente tarea READY: `VS-017 — Pagar la cuota (puerto de pagos + proveedor manual)` (también READY: VS-025, VS-027).
 - Bloqueos globales: ninguno. VS-033 (staging) BLOCKED a la espera de credenciales del usuario.
 
 ## Milestones
@@ -18,7 +18,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 | 0.1 Acceso multi-club | DONE |
 | 0.2 Socios | DONE |
 | 0.3 Temporadas y cuotas | DONE |
-| 0.4 Carnet digital | IN_PROGRESS (VS-015 DONE; VS-016 READY) |
+| 0.4 Carnet digital | DONE |
 | 0.5 Pagos | READY (VS-017) |
 | 0.6 Pago real y renovación automática | TODO |
 | 0.7 Comunidad | READY (VS-025, VS-027) |
@@ -48,4 +48,5 @@ Snapshot operativo. Se actualiza al final de cada loop.
 - Socio por temporada (VS-013): `season_memberships` (+ `card_token`), trigger `join_active_season`, `set_member_fee`, `set_season_membership_status` (provisional), `get_member_seasons`, `can_see_club_membership`; ficha con temporada actual e histórico.
 - Renovación (VS-014): `get_renewal_candidates`, `bulk_renew`, `previous_season_id`; pantalla `/club/seasons/renew?season=…`.
 - Carnet (VS-015): `get_my_card` (estado calculado en servidor; token solo si activo), `MembershipCardView`, pantalla `/club/card`.
+- Validación QR (VS-016): `validate_card` (service role), Edge Function pública `validate-card`, `regenerate_card_token`; ruta pública `/v/:token`; `qr_flutter` 4.1.0; `PUBLIC_APP_URL` (dart-define) para la URL del QR fuera de la web.
 - Sesión cloud: Flutter en `$HOME/flutter/bin`; Docker requiere arrancar `dockerd` en segundo plano (ver `QUALITY_GATES.md`). Para probar Edge Functions arrancar sin excluir `edge-runtime`; emails locales en Mailpit `http://127.0.0.1:54324`. El edge-runtime del sandbox no puede descargar de npm (CA del proxy): las funciones no usan npm.
