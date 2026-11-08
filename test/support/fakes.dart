@@ -31,6 +31,7 @@ import 'package:socios_idefic/domain/member/club_member.dart';
 import 'package:socios_idefic/domain/member/members_repository.dart';
 import 'package:socios_idefic/domain/onboarding/onboarding.dart';
 import 'package:socios_idefic/domain/onboarding/onboarding_repository.dart';
+import 'package:socios_idefic/domain/payment/club_payments.dart';
 import 'package:socios_idefic/domain/payment/my_subscription.dart';
 import 'package:socios_idefic/domain/payment/payment.dart';
 import 'package:socios_idefic/domain/payment/payments_repository.dart';
@@ -976,6 +977,41 @@ class FakePaymentsRepository implements PaymentsRepository {
   Future<List<MyPayment>> getMyPayments(String clubId) async =>
       myPayments[clubId] ?? const [];
 
+  /// Lines of the club payments screen, per club.
+  final Map<String, List<ClubPaymentLine>> clubLines = {};
+  final List<ClubPaymentsFilter> clubQueries = [];
+
+  @override
+  Future<ClubPaymentsPage> getClubPayments(
+    String clubId, {
+    ClubPaymentsFilter filter = const ClubPaymentsFilter(),
+    int offset = 0,
+    int limit = 50,
+  }) async {
+    clubQueries.add(filter);
+    final query = filter.query.trim().toLowerCase();
+    final all = [...?clubLines[clubId]]
+        .where(
+          (l) =>
+              (filter.seasonId == null || l.seasonId == filter.seasonId) &&
+              (filter.status == null || l.status == filter.status) &&
+              (query.isEmpty ||
+                  l.memberName.toLowerCase().contains(query) ||
+                  l.memberEmail.contains(query) ||
+                  '${l.memberNumber}' == query),
+        )
+        .toList();
+    int sum(PaymentStatus status) => all
+        .where((l) => l.status == status)
+        .fold(0, (total, l) => total + l.amountCents);
+    return ClubPaymentsPage(
+      lines: all.skip(offset).take(limit).toList(),
+      total: all.length,
+      paidCents: sum(PaymentStatus.paid),
+      pendingCents: sum(PaymentStatus.pending),
+    );
+  }
+
   /// Receipts by payment id; missing = not paid.
   final Map<String, Receipt> receipts = {};
 
@@ -1073,6 +1109,7 @@ AppUseCases buildUseCases({
     startPayment: StartPayment(ManualPaymentGateway(paymentsRepository)),
     getMySubscription: GetMySubscription(paymentsRepository),
     getMyPayments: GetMyPayments(paymentsRepository),
+    getClubPayments: GetClubPayments(paymentsRepository),
     downloadReceipt: DownloadReceipt(
       paymentsRepository,
       receiptRenderer ?? FakeReceiptRenderer(),

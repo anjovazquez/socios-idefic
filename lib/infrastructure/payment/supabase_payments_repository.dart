@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../domain/payment/club_payments.dart';
 import '../../domain/payment/my_subscription.dart';
 import '../../domain/payment/payment.dart';
 import '../../domain/season/season_membership.dart';
@@ -88,6 +89,27 @@ class SupabasePaymentsRepository implements PaymentsRepository {
       params: {'p_club_id': clubId},
     );
     return rows.cast<Map<String, dynamic>>().map(myPaymentFromRow).toList();
+  });
+
+  @override
+  Future<ClubPaymentsPage> getClubPayments(
+    String clubId, {
+    ClubPaymentsFilter filter = const ClubPaymentsFilter(),
+    int offset = 0,
+    int limit = 50,
+  }) => _guard(() async {
+    final rows = await _client.rpc<List<dynamic>>(
+      'get_club_payments',
+      params: {
+        'p_club_id': clubId,
+        'p_season_id': filter.seasonId,
+        'p_query': filter.query.trim().isEmpty ? null : filter.query.trim(),
+        'p_status': filter.status?.name,
+        'p_limit': limit,
+        'p_offset': offset,
+      },
+    );
+    return clubPaymentsPageFromRows(rows.cast<Map<String, dynamic>>());
   });
 
   @override
@@ -205,5 +227,46 @@ Receipt receiptFromRow(Map<String, dynamic> row, {String? logoUrl}) {
     amountCents: row['amount_cents'] as int,
     method: _methodOf(row['method']),
     paidAt: DateTime.parse(row['paid_at'] as String),
+  );
+}
+
+ClubPaymentsPage clubPaymentsPageFromRows(List<Map<String, dynamic>> rows) {
+  if (rows.isEmpty) return ClubPaymentsPage.empty;
+  final first = rows.first;
+  return ClubPaymentsPage(
+    lines: rows.map(clubPaymentLineFromRow).toList(),
+    total: first['total_count'] as int,
+    paidCents: first['paid_cents'] as int,
+    pendingCents: first['pending_cents'] as int,
+  );
+}
+
+ClubPaymentLine clubPaymentLineFromRow(Map<String, dynamic> row) {
+  final email = row['member_email'] as String;
+  final name = [
+    row['member_first_name'] as String?,
+    row['member_last_name'] as String?,
+  ].whereType<String>().where((part) => part.trim().isNotEmpty).join(' ');
+  return ClubPaymentLine(
+    paymentId: row['payment_id'] as String?,
+    seasonMembershipId: row['season_membership_id'] as String,
+    seasonId: row['season_id'] as String,
+    seasonName: row['season_name'] as String,
+    memberName: name.isEmpty ? email : name,
+    memberEmail: email,
+    memberNumber: row['member_number'] as int?,
+    concept: row['concept'] as String,
+    amountCents: row['amount_cents'] as int,
+    date: switch (row['payment_date']) {
+      final String value => DateTime.parse(value),
+      _ => null,
+    },
+    status: PaymentStatus.values.byName(row['status'] as String),
+    provider: switch (row['provider']) {
+      final String value => PaymentProvider.values.byName(value),
+      _ => null,
+    },
+    method: _methodOf(row['method']),
+    receiptNumber: row['receipt_number'] as int?,
   );
 }

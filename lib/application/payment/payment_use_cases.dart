@@ -1,3 +1,4 @@
+import '../../domain/payment/club_payments.dart';
 import '../../domain/payment/my_subscription.dart';
 import '../../domain/payment/payment.dart';
 import '../../domain/payment/payment_gateway.dart';
@@ -118,4 +119,16 @@ class DownloadReceipt {
     await _renderer.deliver(receipt);
     return receipt;
   }
+}
+
+class GetClubPayments {
+  const GetClubPayments(this._repository);
+
+  final PaymentsRepository _repository;
+
+  Future<ClubPaymentsPage> call(
+    String clubId, {
+    ClubPaymentsFilter filter = const ClubPaymentsFilter(),
+    int offset = 0,
+  }) => _repository.getClubPayments(clubId, filter: filter, offset: offset);
 }

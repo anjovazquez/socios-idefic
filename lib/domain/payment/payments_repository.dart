@@ -1,3 +1,4 @@
+import 'club_payments.dart';
 import 'my_subscription.dart';
 import 'payment.dart';
 import 'receipt.dart';
@@ -30,4 +31,12 @@ abstract interface class PaymentsRepository {
 
   /// Receipt of a paid payment (owner or club admin).
   Future<Receipt> getReceipt(String paymentId);
+
+  /// Payments and pending fees of the club for its admin.
+  Future<ClubPaymentsPage> getClubPayments(
+    String clubId, {
+    ClubPaymentsFilter filter = const ClubPaymentsFilter(),
+    int offset = 0,
+    int limit = 50,
+  });
 }

@@ -144,6 +144,7 @@ void configureDependencies() {
         getMySubscription: GetMySubscription(serviceLocator()),
         getMyPayments: GetMyPayments(serviceLocator()),
         downloadReceipt: DownloadReceipt(serviceLocator(), serviceLocator()),
+        getClubPayments: GetClubPayments(serviceLocator()),
       ),
     );
 }

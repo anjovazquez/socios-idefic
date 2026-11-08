@@ -10,6 +10,7 @@ import '../onboarding/activation_page.dart';
 import '../onboarding/onboarding_page.dart';
 import '../club/club_selector_page.dart';
 import '../platform/audit_log_page.dart';
+import '../payment/club_payments_page.dart';
 import '../payment/my_subscription_page.dart';
 import '../profile/my_data_page.dart';
 import '../season/renewal_page.dart';
@@ -114,6 +115,10 @@ GoRouter createRouter(
         ),
         GoRoute(path: 'card', builder: (context, state) => const MyCardPage()),
         GoRoute(path: 'me', builder: (context, state) => const MyDataPage()),
+        GoRoute(
+          path: 'payments',
+          builder: (context, state) => const ClubPaymentsPage(),
+        ),
         GoRoute(
           path: 'subscription',
           builder: (context, state) => const MySubscriptionPage(),
