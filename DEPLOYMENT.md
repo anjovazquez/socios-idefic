@@ -57,7 +57,9 @@ local.
 | `PUBLIC_SUPABASE_URL` | `https://<ref>.supabase.co` |
 
 `SUPABASE_URL`, `SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` los pone
-Supabase. Sin `RESEND_API_KEY` las invitaciones no salen por email (solo
+Supabase. `validate-card` es pública (se despliega con `--no-verify-jwt`):
+la abre quien escanea un QR y solo devuelve los datos de RF-020. Sin
+`RESEND_API_KEY` las invitaciones no salen por email (solo
 quedan en el log de la función).
 
 ## 2. Resend

@@ -42,7 +42,13 @@ Si falta un patrón, se añade aquí en el mismo cambio.
 
 ### 2.2 Estados (semánticos)
 
-Hasta que existan estados de pago/carnet (VS-015, VS-017) solo se usa
+- Validación del carnet (pantalla pública del QR): `BrandTokens.valid`
+  (verde, «SOCIO ACTIVO») y `BrandTokens.invalid` (rojo, «NO VÁLIDO…» /
+  «CARNET NO ENCONTRADO»), siempre con icono y texto en mayúsculas.
+- Socio por temporada: `SeasonMembershipChip` (Socio, Pendiente de pago,
+  No renovado, Cancelado).
+
+Para el resto, hasta los pagos (VS-017) solo se usa
 `colorScheme.error` para errores. Los nuevos estados (activo, pendiente,
 fallido, cancelado) se añadirán aquí como tokens semánticos, siempre con
 icono + texto, nunca solo color.
