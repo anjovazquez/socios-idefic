@@ -66,6 +66,7 @@ void configureDependencies() {
         getClubBranding: GetClubBranding(serviceLocator()),
         saveClubBranding: SaveClubBranding(serviceLocator()),
         uploadClubAsset: UploadClubAsset(serviceLocator()),
+        getAuditLog: GetAuditLog(serviceLocator()),
       ),
     );
 }

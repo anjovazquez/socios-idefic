@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../application/app_use_cases.dart';
 import '../auth/login_view_model.dart';
 import '../club/image_picking.dart';
+import '../platform/impersonation_banner.dart';
 import '../session/session_view_model.dart';
 import '../theme/club_theme.dart';
 import 'router.dart';
@@ -69,6 +70,23 @@ class _SociosAppState extends State<SociosApp> {
             secondaryHex: _session.activeClub?.secondaryColor,
           ),
           routerConfig: _router,
+          builder: (context, child) => Column(
+            children: [
+              if (_session.isActingAsPlatform)
+                ImpersonationBanner(
+                  clubName: _session.activeClub!.name,
+                  onExit: _session.leaveClubToPlatform,
+                ),
+              Expanded(
+                // The banner already covers the status bar.
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: _session.isActingAsPlatform,
+                  child: child ?? const SizedBox.shrink(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

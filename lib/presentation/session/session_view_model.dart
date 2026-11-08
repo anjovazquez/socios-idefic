@@ -41,6 +41,11 @@ class SessionViewModel extends ChangeNotifier {
   /// Shows the platform administration entry (§3.1).
   bool get isPlatformAdmin => _isPlatformAdmin;
 
+  /// The platform admin is inside a club they do not administer (§17).
+  bool get isActingAsPlatform =>
+      _status == SessionStatus.inClub &&
+      _activeClub?.role == ClubRole.platformAdmin;
+
   String? _userId;
 
   /// Failure raised while a provider (Google) sends the user back.
@@ -112,6 +117,12 @@ class SessionViewModel extends ChangeNotifier {
 
   void openPlatform() {
     if (_isPlatformAdmin) _setStatus(SessionStatus.platform);
+  }
+
+  /// Leaves a club administered as platform and returns to the platform.
+  void leaveClubToPlatform() {
+    _activeClub = null;
+    openPlatform();
   }
 
   /// Leaves the platform administration back to the club or the selector.

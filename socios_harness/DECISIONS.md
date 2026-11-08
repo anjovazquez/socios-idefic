@@ -21,6 +21,7 @@ Resumen de decisiones. Las de impacto fuerte tienen ADR en `adr/`.
 | D-015 | ACCEPTED | Recibos en PDF generados en cliente (paquete `pdf`) a partir de una RPC que devuelve los datos inmutables del pago. Sin facturas en el MVP. |
 | D-017 | ACCEPTED | Logos e imágenes de club en el bucket **público** `club-assets/<club_id>/` (PNG/JPG/WebP ≤ 2 MB): son marca y aparecen en la validación pública del QR y en emails. Escritura solo `can_admin_club`; lectura de filas para autenticados (el upsert de Storage la necesita). Las fotos de socios irán en un bucket privado (VS-009). |
 | D-018 | ACCEPTED | `can_admin_club(club_id)` = admin activo del club o superadmin; toda RPC/policy de administración de club la usa. |
+| D-019 | ACCEPTED | `audit_log.as_platform_admin` es verdadero solo cuando un superadmin actúa sobre un club del que no es admin. Mientras lo hace, la app muestra un banner persistente con salida. La auditoría completa solo la ve el superadmin (`get_audit_log`). |
 | D-016 | PROPOSED | Nombre comercial del producto y bundle id (pendiente de usuario). |
 
 ## Cuándo crear un ADR

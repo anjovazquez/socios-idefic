@@ -4,6 +4,7 @@ import '../auth/login_page.dart';
 import '../club/club_home_page.dart';
 import '../club/club_settings_page.dart';
 import '../club/club_selector_page.dart';
+import '../platform/audit_log_page.dart';
 import '../platform/platform_clubs_page.dart';
 import '../session/session_status_pages.dart';
 import '../session/session_view_model.dart';
@@ -77,6 +78,12 @@ GoRouter createRouter(SessionViewModel session, {String? initialLocation}) =>
         GoRoute(
           path: AppRoutes.platform,
           builder: (context, state) => const PlatformClubsPage(),
+          routes: [
+            GoRoute(
+              path: 'audit',
+              builder: (context, state) => const AuditLogPage(),
+            ),
+          ],
         ),
         GoRoute(
           path: AppRoutes.error,

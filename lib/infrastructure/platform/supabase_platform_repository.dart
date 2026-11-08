@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../domain/platform/audit_entry.dart';
 import '../../domain/platform/club_data.dart';
 import '../../domain/platform/platform_club.dart';
 import '../../domain/platform/platform_failures.dart';
@@ -59,6 +60,19 @@ class SupabasePlatformRepository implements PlatformRepository {
         ),
       );
 
+  @override
+  Future<List<AuditEntry>> getAuditLog({
+    String? clubId,
+    int? beforeId,
+    int limit = 50,
+  }) => _guard(() async {
+    final rows = await _client.rpc<List<dynamic>>(
+      'get_audit_log',
+      params: {'p_club_id': clubId, 'p_before_id': beforeId, 'p_limit': limit},
+    );
+    return rows.cast<Map<String, dynamic>>().map(auditEntryFromRow).toList();
+  });
+
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
       return await action();
@@ -80,6 +94,17 @@ PlatformClub platformClubFromRow(Map<String, dynamic> row) => PlatformClub(
   memberCount: (row['member_count'] as int?) ?? 0,
   adminEmail: row['admin_email'] as String?,
   pendingAdminEmail: row['pending_admin_email'] as String?,
+);
+
+AuditEntry auditEntryFromRow(Map<String, dynamic> row) => AuditEntry(
+  id: (row['id'] as num).toInt(),
+  action: row['action'] as String,
+  asPlatformAdmin: row['as_platform_admin'] as bool? ?? false,
+  createdAt: DateTime.parse(row['created_at'] as String),
+  clubId: row['club_id'] as String?,
+  clubName: row['club_name'] as String?,
+  actorEmail: row['actor_email'] as String?,
+  payload: (row['payload'] as Map<String, dynamic>?) ?? const {},
 );
 
 PlatformFailure mapPlatformError(PostgrestException error) {

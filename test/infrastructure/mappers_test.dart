@@ -212,4 +212,22 @@ void main() {
       isA<InvalidAssetFailure>(),
     );
   });
+
+  test('maps an audit row', () {
+    final entry = auditEntryFromRow({
+      'id': 7,
+      'club_id': 'c1',
+      'club_name': 'IDEFIC',
+      'actor_email': 'root@example.com',
+      'as_platform_admin': true,
+      'action': 'club_branding_updated',
+      'payload': {'name': 'IDEFIC'},
+      'created_at': '2026-11-08T12:00:00+00:00',
+    });
+
+    expect(entry.id, 7);
+    expect(entry.asPlatformAdmin, isTrue);
+    expect(entry.payload['name'], 'IDEFIC');
+    expect(entry.createdAt.isUtc, isTrue);
+  });
 }

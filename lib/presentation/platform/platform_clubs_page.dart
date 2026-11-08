@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../application/app_use_cases.dart';
@@ -100,6 +101,12 @@ class _PlatformClubsView extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Plataforma · Clubes'),
         actions: [
+          IconButton(
+            key: const Key('open-audit'),
+            tooltip: 'Auditoría',
+            icon: const Icon(Icons.history),
+            onPressed: () => context.go('/platform/audit'),
+          ),
           if (session.clubs.isNotEmpty)
             IconButton(
               tooltip: 'Volver a mis clubes',
@@ -211,7 +218,10 @@ class _PlatformClubTile extends StatelessWidget {
         },
         itemBuilder: (_) => [
           if (canEnter)
-            const PopupMenuItem(value: 'enter', child: Text('Entrar al club')),
+            const PopupMenuItem(
+              value: 'enter',
+              child: Text('Entrar como administrador'),
+            ),
           const PopupMenuItem(value: 'edit', child: Text('Editar')),
           PopupMenuItem(
             value: 'toggle',

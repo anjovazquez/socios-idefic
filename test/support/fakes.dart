@@ -18,6 +18,7 @@ import 'package:socios_idefic/domain/club/club_branding.dart';
 import 'package:socios_idefic/domain/club/club_branding_repository.dart';
 import 'package:socios_idefic/domain/club/club_repository.dart';
 import 'package:socios_idefic/domain/club/my_club.dart';
+import 'package:socios_idefic/domain/platform/audit_entry.dart';
 import 'package:socios_idefic/domain/platform/club_data.dart';
 import 'package:socios_idefic/domain/platform/platform_club.dart';
 import 'package:socios_idefic/domain/platform/platform_failures.dart';
@@ -166,6 +167,37 @@ class FakePlatformRepository implements PlatformRepository {
   final List<PlatformClub> clubs;
   final Set<String> existingUsers;
   FakeAuthRepository? auth;
+  final List<AuditEntry> audit = [];
+
+  void _audit(String clubId, String action, Map<String, Object?> payload) {
+    final club = clubs.where((c) => c.id == clubId).firstOrNull;
+    audit.add(
+      AuditEntry(
+        id: audit.length + 1,
+        action: action,
+        asPlatformAdmin: true,
+        createdAt: DateTime(2026, 11, 8, 12, audit.length),
+        clubId: clubId,
+        clubName: club?.name,
+        actorEmail: auth?.currentUser?.email,
+        payload: payload,
+      ),
+    );
+  }
+
+  @override
+  Future<List<AuditEntry>> getAuditLog({
+    String? clubId,
+    int? beforeId,
+    int limit = 50,
+  }) async {
+    _require();
+    return audit.reversed
+        .where((e) => clubId == null || e.clubId == clubId)
+        .where((e) => beforeId == null || e.id < beforeId)
+        .take(limit)
+        .toList();
+  }
 
   bool get _isAdmin => adminEmails.contains(auth?.currentUser?.email);
 
@@ -203,6 +235,7 @@ class FakePlatformRepository implements PlatformRepository {
       pendingAdminEmail: known ? null : adminEmail,
     );
     clubs.add(club);
+    _audit(club.id, 'club_created', {'name': club.name, 'code': club.code});
     return club.id;
   }
 
@@ -225,6 +258,7 @@ class FakePlatformRepository implements PlatformRepository {
   }) async {
     _require();
     _replace(clubId, (c) => _copy(c, isActive: active));
+    _audit(clubId, active ? 'club_activated' : 'club_deactivated', {});
   }
 
   void _replace(String id, PlatformClub Function(PlatformClub) change) {
@@ -353,6 +387,7 @@ AppUseCases buildUseCases({
     createClub: CreateClub(platformRepository),
     updateClub: UpdateClub(platformRepository),
     setClubActive: SetClubActive(platformRepository),
+    getAuditLog: GetAuditLog(platformRepository),
     getClubBranding: GetClubBranding(brandingRepository),
     saveClubBranding: SaveClubBranding(brandingRepository),
     uploadClubAsset: UploadClubAsset(brandingRepository),

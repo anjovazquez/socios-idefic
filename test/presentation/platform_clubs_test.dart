@@ -187,7 +187,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Club Demo Renovado'), findsOneWidget);
 
-    await chooseMenu(tester, 'DEMO', 'Entrar al club');
+    await chooseMenu(tester, 'DEMO', 'Entrar como administrador');
     expect(find.text('Club Demo Renovado'), findsWidgets);
     expect(find.byKey(const Key('open-platform')), findsOneWidget);
   });

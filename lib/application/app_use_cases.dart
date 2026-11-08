@@ -24,6 +24,7 @@ class AppUseCases {
     required this.getClubBranding,
     required this.saveClubBranding,
     required this.uploadClubAsset,
+    required this.getAuditLog,
   });
 
   final WatchSession watchSession;
@@ -40,4 +41,5 @@ class AppUseCases {
   final GetClubBranding getClubBranding;
   final SaveClubBranding saveClubBranding;
   final UploadClubAsset uploadClubAsset;
+  final GetAuditLog getAuditLog;
 }
