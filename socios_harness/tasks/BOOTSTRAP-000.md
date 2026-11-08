@@ -1,6 +1,6 @@
 # BOOTSTRAP-000 — Bootstrap Flutter + Supabase local + CI
 
-Status: READY
+Status: DONE
 Milestone: Bootstrap
 
 ## Goal

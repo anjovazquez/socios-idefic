@@ -1,0 +1,3 @@
+-- Local demo data only. Never applied to staging/production.
+-- Slices add their demo clubs, users and seasons here (VS-001 onwards).
+-- Dates must be relative to now().

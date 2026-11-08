@@ -1,0 +1,11 @@
+{
+  "name": "socios-idefic",
+  "private": true,
+  "description": "Supabase CLI tooling for Socios IDEFIC",
+  "scripts": {
+    "supabase": "supabase"
+  },
+  "devDependencies": {
+    "supabase": "^2.122.1"
+  }
+}

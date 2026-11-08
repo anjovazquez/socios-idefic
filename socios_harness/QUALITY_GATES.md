@@ -9,6 +9,17 @@ Una tarea no puede marcarse `DONE` si falla un gate aplicable.
 | Local Windows + WSL2 (como Xogalle) | `fvm flutter` en Windows (delegar vía `powershell.exe` desde WSL) | Docker Engine en WSL2, `npx supabase` |
 | Claude Code cloud (Linux) | Flutter 3.35.1 instalado en `$HOME/flutter` (ver BOOTSTRAP-000) o `fvm` si existe | `dockerd` local si está disponible; si no, Gate 6 queda documentado como pendiente |
 
+Preparación en una sesión cloud nueva (el contenedor es efímero):
+
+```bash
+curl -sSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.35.1-stable.tar.xz | tar -xJ -C $HOME
+export PATH=$HOME/flutter/bin:$PATH
+git config --global --add safe.directory '*'
+(dockerd > /tmp/dockerd.log 2>&1 &)   # luego: docker ps
+npm ci
+npx supabase start -x studio,imgproxy,vector,logflare,edge-runtime,realtime,pooler,postgres-meta
+```
+
 Los wrappers `scripts/*.sh` eligen `fvm flutter` si `fvm` existe y `flutter` si no.
 Flutter fijado: **3.35.1** (`.fvmrc`).
 
