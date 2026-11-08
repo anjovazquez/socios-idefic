@@ -8,6 +8,7 @@ import 'club/select_active_club.dart';
 import 'member/member_use_cases.dart';
 import 'onboarding/onboarding_use_cases.dart';
 import 'platform/platform_use_cases.dart';
+import 'profile/profile_use_cases.dart';
 
 /// Use cases the presentation layer needs, built by the composition root.
 class AppUseCases {
@@ -34,6 +35,9 @@ class AppUseCases {
     required this.verifyInvitationLink,
     required this.setNewPassword,
     required this.completeOnboarding,
+    required this.getMyProfile,
+    required this.updateMyProfile,
+    required this.uploadProfilePhoto,
   });
 
   final WatchSession watchSession;
@@ -58,4 +62,7 @@ class AppUseCases {
   final VerifyInvitationLink verifyInvitationLink;
   final SetNewPassword setNewPassword;
   final CompleteOnboarding completeOnboarding;
+  final GetMyProfile getMyProfile;
+  final UpdateMyProfile updateMyProfile;
+  final UploadProfilePhoto uploadProfilePhoto;
 }

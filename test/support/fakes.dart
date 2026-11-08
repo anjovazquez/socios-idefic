@@ -12,6 +12,7 @@ import 'package:socios_idefic/application/club/select_active_club.dart';
 import 'package:socios_idefic/application/member/member_use_cases.dart';
 import 'package:socios_idefic/application/onboarding/onboarding_use_cases.dart';
 import 'package:socios_idefic/application/platform/platform_use_cases.dart';
+import 'package:socios_idefic/application/profile/profile_use_cases.dart';
 import 'package:socios_idefic/domain/auth/auth_failures.dart';
 import 'package:socios_idefic/domain/auth/auth_repository.dart';
 import 'package:socios_idefic/domain/auth/auth_user.dart';
@@ -25,6 +26,8 @@ import 'package:socios_idefic/domain/member/members_repository.dart';
 import 'package:socios_idefic/domain/onboarding/onboarding.dart';
 import 'package:socios_idefic/domain/onboarding/onboarding_repository.dart';
 import 'package:socios_idefic/domain/platform/audit_entry.dart';
+import 'package:socios_idefic/domain/profile/my_profile.dart';
+import 'package:socios_idefic/domain/profile/profile_repository.dart';
 import 'package:socios_idefic/domain/platform/club_data.dart';
 import 'package:socios_idefic/domain/platform/platform_club.dart';
 import 'package:socios_idefic/domain/platform/platform_failures.dart';
@@ -524,6 +527,50 @@ class FakeOnboardingRepository implements OnboardingRepository {
   }
 }
 
+/// Profiles by email; the signed-in person only reaches their own.
+class FakeProfileRepository implements ProfileRepository {
+  FakeProfileRepository([Map<String, MyProfile>? profiles])
+    : profiles = profiles ?? {};
+
+  final Map<String, MyProfile> profiles;
+  FakeAuthRepository? auth;
+  int uploads = 0;
+
+  String get _email => auth!.currentUser!.email;
+
+  @override
+  Future<MyProfile> getMyProfile() async =>
+      profiles[_email] ?? MyProfile(email: _email);
+
+  @override
+  Future<void> updateMyProfile({
+    required PersonalData data,
+    required String? photoPath,
+  }) async {
+    profiles[_email] = MyProfile(
+      email: _email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      birthDate: data.birthDate,
+      photoPath: photoPath,
+      photoUrl: photoPath == null ? null : 'https://signed.test/$photoPath',
+    );
+  }
+
+  @override
+  Future<String> uploadPhoto({
+    required Uint8List bytes,
+    required String contentType,
+  }) async {
+    uploads++;
+    return 'user-$_email/photo-$uploads.jpg';
+  }
+
+  @override
+  Future<String> photoUrl(String path) async => 'https://signed.test/$path';
+}
+
 AppUseCases buildUseCases({
   required FakeAuthRepository auth,
   required FakeClubRepository clubs,
@@ -532,10 +579,12 @@ AppUseCases buildUseCases({
   FakeClubBrandingRepository? branding,
   FakeMembersRepository? members,
   FakeOnboardingRepository? onboarding,
+  FakeProfileRepository? profile,
 }) {
   final activeClubStore = store ?? InMemoryActiveClubStore();
   final platformRepository = platform ?? FakePlatformRepository();
   final brandingRepository = branding ?? FakeClubBrandingRepository(clubs);
+  final profileRepository = (profile ?? FakeProfileRepository())..auth = auth;
   final onboardingRepository = (onboarding ?? FakeOnboardingRepository())
     ..auth = auth
     ..clubs = clubs;
@@ -566,6 +615,9 @@ AppUseCases buildUseCases({
     verifyInvitationLink: VerifyInvitationLink(onboardingRepository),
     setNewPassword: SetNewPassword(onboardingRepository),
     completeOnboarding: CompleteOnboarding(onboardingRepository),
+    getMyProfile: GetMyProfile(profileRepository),
+    updateMyProfile: UpdateMyProfile(profileRepository),
+    uploadProfilePhoto: UploadProfilePhoto(profileRepository),
     getClubBranding: GetClubBranding(brandingRepository),
     saveClubBranding: SaveClubBranding(brandingRepository),
     uploadClubAsset: UploadClubAsset(brandingRepository),

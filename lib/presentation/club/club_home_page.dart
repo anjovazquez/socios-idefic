@@ -26,6 +26,12 @@ class ClubHomePage extends StatelessWidget {
               icon: const Icon(Icons.admin_panel_settings_outlined),
               onPressed: session.openPlatform,
             ),
+          IconButton(
+            key: const Key('open-my-data'),
+            tooltip: 'Mis datos',
+            icon: const Icon(Icons.person_outline),
+            onPressed: () => context.go('/club/me'),
+          ),
           if (club.canAdminister)
             IconButton(
               key: const Key('open-members'),

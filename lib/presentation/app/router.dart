@@ -8,6 +8,7 @@ import '../onboarding/activation_page.dart';
 import '../onboarding/onboarding_page.dart';
 import '../club/club_selector_page.dart';
 import '../platform/audit_log_page.dart';
+import '../profile/my_data_page.dart';
 import '../platform/platform_clubs_page.dart';
 import '../session/session_status_pages.dart';
 import '../session/session_view_model.dart';
@@ -96,6 +97,10 @@ GoRouter createRouter(SessionViewModel session, {String? initialLocation}) =>
             GoRoute(
               path: 'members',
               builder: (context, state) => const MembersPage(),
+            ),
+            GoRoute(
+              path: 'me',
+              builder: (context, state) => const MyDataPage(),
             ),
           ],
         ),
