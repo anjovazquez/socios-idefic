@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 
 import '../../application/app_use_cases.dart';
 import '../../domain/member/club_member.dart';
+import '../../domain/season/season.dart';
+import '../../domain/season/season_membership.dart';
+import '../season/seasons_view_model.dart';
 
 class MembersViewModel extends ChangeNotifier {
   MembersViewModel(this._useCases, {required this.clubId});
@@ -128,6 +131,34 @@ class MembersViewModel extends ChangeNotifier {
         : '${member.displayName} vuelve a ser socio del club';
   }
 
+  /// Changes the fee of [member] in the active season (RF-010).
+  Future<String> changeFee(ClubMember member, String fee) async {
+    await _guard(
+      () => _useCases.setMemberFee(
+        seasonMembershipId: member.seasonMembershipId!,
+        fee: fee,
+      ),
+    );
+    await load();
+    return 'Cuota de ${member.displayName} actualizada';
+  }
+
+  Future<String> setPaid(ClubMember member, {required bool paid}) async {
+    await _guard(
+      () => _useCases.setSeasonMembershipPaid(
+        seasonMembershipId: member.seasonMembershipId!,
+        paid: paid,
+      ),
+    );
+    await load();
+    return paid
+        ? '${member.displayName} queda como socio de la temporada'
+        : '${member.displayName} vuelve a estar pendiente de pago';
+  }
+
+  Future<List<MemberSeason>> seasons(ClubMember member) =>
+      _useCases.getMemberSeasons(member.membershipId);
+
   Future<String?> photoUrl(ClubMember member) =>
       _useCases.getMemberPhotoUrl(member);
 
@@ -136,6 +167,12 @@ class MembersViewModel extends ChangeNotifier {
       return await action();
     } on MemberFailure catch (failure) {
       throw messageFor(failure);
+    } on InvalidSeasonDataFailure catch (failure) {
+      throw failure.field == SeasonField.fee
+          ? 'Escribe una cuota válida (0 € o más)'
+          : SeasonsViewModel.messageFor(failure);
+    } on SeasonFailure catch (failure) {
+      throw SeasonsViewModel.messageFor(failure);
     } catch (error) {
       if (error is String) rethrow;
       throw messageFor(const MemberUnavailableFailure());

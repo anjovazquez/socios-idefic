@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/season/season.dart';
+import '../../domain/season/season_membership.dart';
 import '../../domain/season/season_repository.dart';
 
 class SupabaseSeasonRepository implements SeasonRepository {
@@ -49,6 +50,50 @@ class SupabaseSeasonRepository implements SeasonRepository {
     ),
   );
 
+  @override
+  Future<List<MemberSeason>> getMemberSeasons(String membershipId) =>
+      _guard(() async {
+        final rows = await _client.rpc<List<dynamic>>(
+          'get_member_seasons',
+          params: {'p_membership_id': membershipId},
+        );
+        return rows
+            .cast<Map<String, dynamic>>()
+            .map(memberSeasonFromRow)
+            .toList();
+      });
+
+  @override
+  Future<void> setMemberFee({
+    required String seasonMembershipId,
+    required int feeCents,
+  }) => _guard(
+    () => _client.rpc<void>(
+      'set_member_fee',
+      params: {
+        'p_season_membership_id': seasonMembershipId,
+        'p_fee_cents': feeCents,
+      },
+    ),
+  );
+
+  @override
+  Future<void> setSeasonMembershipStatus({
+    required String seasonMembershipId,
+    required SeasonMembershipStatus status,
+  }) => _guard(
+    () => _client.rpc<void>(
+      'set_season_membership_status',
+      params: {
+        'p_season_membership_id': seasonMembershipId,
+        'p_status': switch (status) {
+          SeasonMembershipStatus.active => 'active',
+          _ => 'pending_payment',
+        },
+      },
+    ),
+  );
+
   static String? _date(DateTime? date) =>
       date?.toIso8601String().substring(0, 10);
 
@@ -79,13 +124,24 @@ Season seasonFromRow(Map<String, dynamic> row) => Season(
   defaultFeeCents: row['default_fee_cents'] as int?,
 );
 
+MemberSeason memberSeasonFromRow(Map<String, dynamic> row) => MemberSeason(
+  seasonMembershipId: row['season_membership_id'] as String?,
+  seasonName: row['season_name'] as String,
+  seasonStatus: switch (row['season_status']) {
+    'active' => SeasonStatus.active,
+    'closed' => SeasonStatus.closed,
+    _ => SeasonStatus.draft,
+  },
+  status: seasonMembershipStatusFromName(row['status'] as String?),
+  feeCents: row['fee_cents'] as int?,
+);
+
 SeasonFailure mapSeasonError(String? code, String message, String? hint) =>
     switch (code) {
       '42501' => const SeasonPermissionFailure(),
       '23505' => const SeasonAlreadyExistsFailure(),
-      '22023' when message.contains('fee') => const InvalidSeasonDataFailure(
-        SeasonField.fee,
-      ),
+      '22023' when message.contains('fee') || message.contains('invalid fee') =>
+        const InvalidSeasonDataFailure(SeasonField.fee),
       '22023' when message.contains('dates') => const InvalidSeasonDataFailure(
         SeasonField.dates,
       ),

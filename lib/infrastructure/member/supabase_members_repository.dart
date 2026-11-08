@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/member/club_member.dart';
 import '../../domain/member/members_repository.dart';
+import '../../domain/season/season_membership.dart';
 
 class SupabaseMembersRepository implements MembersRepository {
   const SupabaseMembersRepository(this._client);
@@ -142,6 +143,12 @@ ClubMember clubMemberFromRow(Map<String, dynamic> row) => ClubMember(
     _ => null,
   },
   photoPath: row['photo_path'] as String?,
+  seasonMembershipId: row['season_membership_id'] as String?,
+  seasonFeeCents: row['season_fee_cents'] as int?,
+  seasonStatus: switch (row['season_status']) {
+    final String status => seasonMembershipStatusFromName(status),
+    _ => null,
+  },
 );
 
 MemberStatus memberStatusFromName(String? status) => switch (status) {

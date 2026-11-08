@@ -79,3 +79,19 @@ insert into public.seasons (club_id, name, starts_on, ends_on, default_fee_cents
   ('20000000-0000-0000-0000-000000000001', '2025/2026', '2025-09-01', '2026-08-31', 4500, 'closed', now() - interval '1 year', now()),
   ('20000000-0000-0000-0000-000000000001', '2026/2027', '2026-09-01', '2027-08-31', 5000, 'active', now(), null)
 on conflict (club_id, name) do nothing;
+
+-- Members per season (VS-013): the seed memberships were created before the
+-- seasons, so their season rows are explicit.
+insert into public.season_memberships (club_membership_id, season_id, fee_cents, status)
+select m.id, s.id,
+       case when p.email = 'admin@example.com' then 0 else s.default_fee_cents end,
+       case
+         when s.name = '2025/2026' then 'active'
+         when p.email in ('admin@example.com', 'ana@example.com') then 'active'
+         else 'pending_payment'
+       end
+from public.club_memberships m
+join public.profiles p on p.id = m.user_id
+join public.seasons s on s.club_id = m.club_id
+where m.club_id = '20000000-0000-0000-0000-000000000001'
+on conflict (club_membership_id, season_id) do nothing;

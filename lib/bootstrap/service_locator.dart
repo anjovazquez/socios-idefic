@@ -108,6 +108,9 @@ void configureDependencies() {
         getSeasons: GetSeasons(serviceLocator()),
         createSeason: CreateSeason(serviceLocator()),
         activateSeason: ActivateSeason(serviceLocator()),
+        getMemberSeasons: GetMemberSeasons(serviceLocator()),
+        setMemberFee: SetMemberFee(serviceLocator()),
+        setSeasonMembershipPaid: SetSeasonMembershipPaid(serviceLocator()),
       ),
     );
 }

@@ -30,6 +30,7 @@ import 'package:socios_idefic/domain/platform/audit_entry.dart';
 import 'package:socios_idefic/domain/profile/my_profile.dart';
 import 'package:socios_idefic/domain/profile/profile_repository.dart';
 import 'package:socios_idefic/domain/season/season.dart';
+import 'package:socios_idefic/domain/season/season_membership.dart';
 import 'package:socios_idefic/domain/season/season_repository.dart';
 import 'package:socios_idefic/domain/platform/club_data.dart';
 import 'package:socios_idefic/domain/platform/platform_club.dart';
@@ -654,6 +655,51 @@ class FakeSeasonRepository implements SeasonRepository {
 
   final Map<String, List<Season>> seasons;
   FakeClubRepository? clubs;
+  FakeMembersRepository? members;
+
+  /// History per club membership id.
+  final Map<String, List<MemberSeason>> history = {};
+
+  void _updateMember(
+    String seasonMembershipId,
+    ClubMember Function(ClubMember) change,
+  ) {
+    for (final list in members?.members.values ?? <List<ClubMember>>[]) {
+      final index = list.indexWhere(
+        (m) => m.seasonMembershipId == seasonMembershipId,
+      );
+      if (index >= 0) list[index] = change(list[index]);
+    }
+  }
+
+  @override
+  Future<List<MemberSeason>> getMemberSeasons(String membershipId) async =>
+      history[membershipId] ?? const [];
+
+  @override
+  Future<void> setMemberFee({
+    required String seasonMembershipId,
+    required int feeCents,
+  }) async => _updateMember(
+    seasonMembershipId,
+    (m) => m.copyWith(
+      seasonFeeCents: feeCents,
+      seasonStatus:
+          feeCents == 0 &&
+              m.seasonStatus == SeasonMembershipStatus.pendingPayment
+          ? SeasonMembershipStatus.active
+          : m.seasonStatus,
+    ),
+  );
+
+  @override
+  Future<void> setSeasonMembershipStatus({
+    required String seasonMembershipId,
+    required SeasonMembershipStatus status,
+  }) async => _updateMember(
+    seasonMembershipId,
+    (m) => m.copyWith(seasonStatus: status),
+  );
 
   @override
   Future<List<Season>> getSeasons(String clubId) async =>
@@ -756,6 +802,7 @@ AppUseCases buildUseCases({
   final membersRepository = (members ?? FakeMembersRepository())
     ..auth = auth
     ..clubs = clubs;
+  seasonRepository.members = membersRepository;
   platformRepository.auth = auth;
   clubs
     ..auth = auth
@@ -790,6 +837,9 @@ AppUseCases buildUseCases({
     getSeasons: GetSeasons(seasonRepository),
     createSeason: CreateSeason(seasonRepository),
     activateSeason: ActivateSeason(seasonRepository),
+    getMemberSeasons: GetMemberSeasons(seasonRepository),
+    setMemberFee: SetMemberFee(seasonRepository),
+    setSeasonMembershipPaid: SetSeasonMembershipPaid(seasonRepository),
     getClubBranding: GetClubBranding(brandingRepository),
     saveClubBranding: SaveClubBranding(brandingRepository),
     uploadClubAsset: UploadClubAsset(brandingRepository),

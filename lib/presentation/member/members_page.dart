@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import '../../application/app_use_cases.dart';
 import '../../domain/member/club_member.dart';
 import '../session/session_view_model.dart';
+import '../format/money.dart';
+import '../season/season_membership_chip.dart';
 import 'member_detail_sheet.dart';
 import 'member_number_dialog.dart';
 import 'member_status_chip.dart';
@@ -255,7 +257,13 @@ class _MemberTile extends StatelessWidget {
       ),
       title: Text(member.displayName),
       subtitle: Text(
-        [member.email, if (member.isClubAdmin) 'Administrador'].join(' · '),
+        [
+          member.email,
+          if (member.isClubAdmin) 'Administrador',
+          if (member.seasonStatus case final status?)
+            '${formatCents(member.seasonFeeCents ?? 0)} · '
+                '${SeasonMembershipChip.label(status)}',
+        ].join(' · '),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,

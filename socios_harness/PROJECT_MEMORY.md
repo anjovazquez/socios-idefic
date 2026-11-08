@@ -74,6 +74,9 @@ Memoria estable. Solo hechos válidos durante muchas tareas (ver `MEMORY_POLICY.
 - «Cuenta existente activa» (RF-004) = `profiles.onboarded_at` no nulo; quien abrió una invitación sin terminar el primer acceso recibe un enlace de activación nuevo.
 - Cualquier usuario autenticado pasa primero por `get_my_onboarding_status`; las cuentas de la seed ya lo tienen completado.
 
+- RLS: una política que necesite mirar `club_memberships` de otras personas (p. ej. «admin de su club») debe llamar a una función `security definer` (`can_see_club_membership`, `can_admin_club`), porque `club_memberships` solo deja ver las filas propias.
+- Diálogos con campos: el `TextEditingController` vive en el `State` del propio diálogo, nunca se libera tras `showDialog` (la animación de cierre aún lo usa).
+
 ## Producto / UX
 
 - Socio: navegación Inicio/Blog · Mi carnet · Mis ventajas · Mi suscripción · Mis datos.

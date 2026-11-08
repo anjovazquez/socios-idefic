@@ -1,4 +1,5 @@
 import 'season.dart';
+import 'season_membership.dart';
 
 abstract interface class SeasonRepository {
   /// Newest first.
@@ -9,6 +10,21 @@ abstract interface class SeasonRepository {
     required String name,
     DateTime? startsOn,
     DateTime? endsOn,
+  });
+
+  /// History of a club membership, newest first.
+  Future<List<MemberSeason>> getMemberSeasons(String membershipId);
+
+  /// Custom fee (≥ 0) of a member in a season; 0 makes them active.
+  Future<void> setMemberFee({
+    required String seasonMembershipId,
+    required int feeCents,
+  });
+
+  /// Provisional until online payments (VS-017): paid ↔ pending.
+  Future<void> setSeasonMembershipStatus({
+    required String seasonMembershipId,
+    required SeasonMembershipStatus status,
   });
 
   /// Makes [seasonId] the only active season of its club with the fee.

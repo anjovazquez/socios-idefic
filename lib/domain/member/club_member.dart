@@ -1,3 +1,5 @@
+import '../season/season_membership.dart';
+
 enum MemberStatus { invited, active, inactive }
 
 /// A person in a club, as seen by its administration.
@@ -14,6 +16,9 @@ class ClubMember {
     this.phone,
     this.birthDate,
     this.photoPath,
+    this.seasonMembershipId,
+    this.seasonFeeCents,
+    this.seasonStatus,
   });
 
   final String membershipId;
@@ -34,7 +39,17 @@ class ClubMember {
   /// Private photo path; shown with a short-lived URL.
   final String? photoPath;
 
-  ClubMember copyWith({MemberStatus? status, int? memberNumber}) => ClubMember(
+  /// Membership in the active season of the club, if any (RN-007).
+  final String? seasonMembershipId;
+  final int? seasonFeeCents;
+  final SeasonMembershipStatus? seasonStatus;
+
+  ClubMember copyWith({
+    MemberStatus? status,
+    int? memberNumber,
+    int? seasonFeeCents,
+    SeasonMembershipStatus? seasonStatus,
+  }) => ClubMember(
     membershipId: membershipId,
     email: email,
     status: status ?? this.status,
@@ -46,6 +61,9 @@ class ClubMember {
     phone: phone,
     birthDate: birthDate,
     photoPath: photoPath,
+    seasonMembershipId: seasonMembershipId,
+    seasonFeeCents: seasonFeeCents ?? this.seasonFeeCents,
+    seasonStatus: seasonStatus ?? this.seasonStatus,
   );
 
   String get displayName {

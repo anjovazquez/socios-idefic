@@ -1,88 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/season/season.dart';
+import '../common/submit_dialog.dart';
 import '../format/money.dart';
-
-/// Shared shape of a dialog that submits and shows its error inline.
-class _SubmitDialog extends StatefulWidget {
-  const _SubmitDialog({
-    required this.title,
-    required this.action,
-    required this.saveKey,
-    required this.builder,
-    required this.onSubmit,
-  });
-
-  final String title;
-  final String action;
-  final Key saveKey;
-  final List<Widget> Function(BuildContext context, VoidCallback refresh)
-  builder;
-  final Future<String> Function() onSubmit;
-
-  @override
-  State<_SubmitDialog> createState() => _SubmitDialogState();
-}
-
-class _SubmitDialogState extends State<_SubmitDialog> {
-  String? _error;
-  bool _saving = false;
-
-  Future<void> _save() async {
-    setState(() {
-      _saving = true;
-      _error = null;
-    });
-    try {
-      final confirmation = await widget.onSubmit();
-      if (mounted) Navigator.of(context).pop(confirmation);
-    } catch (error) {
-      if (mounted) {
-        setState(() {
-          _saving = false;
-          _error = '$error';
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return AlertDialog(
-      title: Text(widget.title),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ...widget.builder(context, () => setState(() {})),
-            if (_error case final error?) ...[
-              const SizedBox(height: 12),
-              Text(
-                error,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _saving ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
-        ),
-        FilledButton(
-          key: widget.saveKey,
-          onPressed: _saving ? null : _save,
-          child: Text(widget.action),
-        ),
-      ],
-    );
-  }
-}
 
 /// New season: name suggested after the newest one; dates by default
 /// 1 September – 31 August.
@@ -110,7 +30,7 @@ class _NewSeasonDialogState extends State<NewSeasonDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => _SubmitDialog(
+  Widget build(BuildContext context) => SubmitDialog(
     title: 'Nueva temporada',
     action: 'Crear',
     saveKey: const Key('new-season-save'),
@@ -164,7 +84,7 @@ class _ActivateSeasonDialogState extends State<ActivateSeasonDialog> {
   Widget build(BuildContext context) {
     final previous = widget.currentActive;
     final isActive = widget.season.status == SeasonStatus.active;
-    return _SubmitDialog(
+    return SubmitDialog(
       title: isActive
           ? 'Cuota de ${widget.season.name}'
           : 'Activar ${widget.season.name}',

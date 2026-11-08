@@ -46,6 +46,9 @@ class AppUseCases {
     required this.getSeasons,
     required this.createSeason,
     required this.activateSeason,
+    required this.getMemberSeasons,
+    required this.setMemberFee,
+    required this.setSeasonMembershipPaid,
   });
 
   final WatchSession watchSession;
@@ -80,4 +83,7 @@ class AppUseCases {
   final GetSeasons getSeasons;
   final CreateSeason createSeason;
   final ActivateSeason activateSeason;
+  final GetMemberSeasons getMemberSeasons;
+  final SetMemberFee setMemberFee;
+  final SetSeasonMembershipPaid setSeasonMembershipPaid;
 }
