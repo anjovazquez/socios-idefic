@@ -16,7 +16,7 @@ dependencias ya estén todas `DONE` (salvo bloqueo explícito por decisión).
 | VS-005 | Suplantación funcional auditada | DONE | VS-003 | 1 · 0.1 Acceso | §17 |
 | VS-006 | Alta de socio e invitación por email | DONE | VS-003 | 2 · 0.2 Socios | RF-002, RN-002 |
 | VS-007 | Activación de cuenta en el primer acceso | DONE | VS-006 | 2 · 0.2 Socios | RF-003 |
-| VS-008 | Alta de un usuario existente en otro club | READY | VS-007 | 2 · 0.2 Socios | RF-004, RN-003…RN-005 |
+| VS-008 | Alta de un usuario existente en otro club | DONE | VS-007 | 2 · 0.2 Socios | RF-004, RN-003…RN-005 |
 | VS-009 | Mis datos (perfil y foto) | READY | VS-007 | 2 · 0.2 Socios | RF-005 |
 | VS-010 | Número de socio por club | READY | VS-006 | 2 · 0.2 Socios | RF-006, RN-006 |
 | VS-011 | Gestión de socios (listado, edición, baja) | TODO | VS-010 | 2 · 0.2 Socios | §16 Socios |

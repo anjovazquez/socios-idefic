@@ -428,6 +428,23 @@ class FakeMembersRepository implements MembersRepository {
       ),
     );
     sentEmails.add(email);
+    if (existing) {
+      // Same account, one more club (RF-004).
+      final club = clubs!.clubsByEmail[auth!.currentUser!.email]!.firstWhere(
+        (c) => c.id == clubId,
+      );
+      clubs!.clubsByEmail[email] = [
+        ...?clubs!.clubsByEmail[email],
+        MyClub(
+          id: club.id,
+          name: club.name,
+          code: club.code,
+          role: ClubRole.member,
+          primaryColor: club.primaryColor,
+          memberNumber: next,
+        ),
+      ];
+    }
     return existing
         ? InvitationOutcome.addedExistingAccount
         : InvitationOutcome.invited;

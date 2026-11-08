@@ -6,8 +6,8 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 - Fase actual: **2 — Socios (0.2)**.
 - Tarea activa: ninguna.
-- Última tarea completada: `VS-007 — Activación de cuenta en el primer acceso` (2026-11-08).
-- Siguiente tarea READY: `VS-008 — Alta de un usuario existente en otro club` (también READY: VS-009, VS-010, VS-025).
+- Última tarea completada: `VS-008 — Alta de un usuario existente en otro club` (2026-11-08).
+- Siguiente tarea READY: `VS-009 — Mis datos (perfil y foto)` (también READY: VS-010, VS-025).
 - Bloqueos globales: ninguno.
 
 ## Milestones
@@ -16,7 +16,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 |---|---|
 | Bootstrap | DONE |
 | 0.1 Acceso multi-club | DONE |
-| 0.2 Socios | IN_PROGRESS (VS-006, VS-007 DONE; VS-008, VS-009, VS-010 READY) |
+| 0.2 Socios | IN_PROGRESS (VS-006…VS-008 DONE; VS-009, VS-010 READY) |
 | 0.3 Temporadas y cuotas | TODO |
 | 0.4 Carnet digital | TODO |
 | 0.5 Pagos | TODO |

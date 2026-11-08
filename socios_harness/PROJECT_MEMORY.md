@@ -71,6 +71,7 @@ Memoria estable. Solo hechos válidos durante muchas tareas (ver `MEMORY_POLICY.
 - Edge Functions: Deno 2, sin dependencias npm en runtime (`supabase/functions/deno.json` con `lock: false` y `nodeModulesDir: none`); el acceso a Supabase va por `_shared/supabase_rest.ts`; la lógica se prueba con una interfaz `Backend` falsa (`deno test`, job `edge-functions` en CI). Los errores de RPC se traducen a HTTP (`403 forbidden`, `400 invalid_*`, `409 <hint>`), y la app los mapea a fallos de dominio.
 - Enlaces de email: nunca el `action_link` de GoTrue (tokens implícitos incompatibles con PKCE), sino `APP_URL/#/activar?token_hash=…&type=…` + `verifyOTP` en la app. Los tokens son de un solo uso.
 - GoTrue pone un hash aleatorio de contraseña a los invitados: «necesita contraseña» se deduce de no haber completado el primer acceso y no tener identidad Google. Volver a poner la misma contraseña devuelve `same_password` (se trata como éxito).
+- «Cuenta existente activa» (RF-004) = `profiles.onboarded_at` no nulo; quien abrió una invitación sin terminar el primer acceso recibe un enlace de activación nuevo.
 - Cualquier usuario autenticado pasa primero por `get_my_onboarding_status`; las cuentas de la seed ya lo tienen completado.
 
 ## Producto / UX

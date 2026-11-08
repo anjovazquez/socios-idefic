@@ -6,6 +6,10 @@ insert into auth.users (id, email, aud, role, last_sign_in_at) values
   ('a6000000-0000-0000-0000-000000000001', 'admin6@test.com', 'authenticated', 'authenticated', now()),
   ('a6000000-0000-0000-0000-000000000002', 'socio6@test.com', 'authenticated', 'authenticated', now()),
   ('a6000000-0000-0000-0000-000000000003', 'otro6@test.com', 'authenticated', 'authenticated', now());
+-- "Existing active account" = first access completed (VS-008).
+update public.profiles set onboarded_at = now()
+where id in ('a6000000-0000-0000-0000-000000000001', 'a6000000-0000-0000-0000-000000000002',
+             'a6000000-0000-0000-0000-000000000003');
 insert into public.clubs (id, name, code, primary_color) values
   ('c6000000-0000-0000-0000-000000000001', 'Seis TEST', 'SEISTEST', '#0B3D91');
 insert into public.club_memberships (user_id, club_id, role, member_number) values
