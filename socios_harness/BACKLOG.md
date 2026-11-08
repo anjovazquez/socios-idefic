@@ -12,7 +12,7 @@ dependencias ya estén todas `DONE` (salvo bloqueo explícito por decisión).
 | VS-001 | Login email/contraseña y selector de club | DONE | BOOTSTRAP-000 | 1 · 0.1 Acceso | RF-001, RF-030, RN-001 |
 | VS-002 | Login con Google | DONE | VS-001 | 1 · 0.1 Acceso | RF-001 |
 | VS-003 | Superadmin: alta, edición y desactivación de clubes | DONE | VS-001 | 1 · 0.1 Acceso | §3.1, §17 |
-| VS-004 | Identidad visual por club + DESIGN.md | READY | VS-003 | 1 · 0.1 Acceso | §20, RF-030 |
+| VS-004 | Identidad visual por club + DESIGN.md | DONE | VS-003 | 1 · 0.1 Acceso | §20, RF-030 |
 | VS-005 | Suplantación funcional auditada | READY | VS-003 | 1 · 0.1 Acceso | §17 |
 | VS-006 | Alta de socio e invitación por email | READY | VS-003 | 2 · 0.2 Socios | RF-002, RN-002 |
 | VS-007 | Activación de cuenta en el primer acceso | TODO | VS-006 | 2 · 0.2 Socios | RF-003 |
@@ -33,7 +33,7 @@ dependencias ya estén todas `DONE` (salvo bloqueo explícito por decisión).
 | VS-022 | Método de pago guardado para renovaciones | TODO | VS-021 | 6 · 0.6 Renovación | RF-012 |
 | VS-023 | Aviso previo de renovación | TODO | VS-022, VS-014 | 6 · 0.6 Renovación | RF-013, RN-012 |
 | VS-024 | Cancelación y cobro automático de la renovación | TODO | VS-023 | 6 · 0.6 Renovación | RF-014, RN-013 |
-| VS-025 | Blog: publicar (admin) | TODO | VS-004 | 7 · 0.7 Comunidad | RF-022 |
+| VS-025 | Blog: publicar (admin) | READY | VS-004 | 7 · 0.7 Comunidad | RF-022 |
 | VS-026 | Blog: Inicio del socio | TODO | VS-025 | 7 · 0.7 Comunidad | RF-023 |
 | VS-027 | Patrocinadores por temporada (admin) | TODO | VS-012 | 7 · 0.7 Comunidad | RF-026…RF-028, RN-016 |
 | VS-028 | Patrocinadores para el socio | TODO | VS-027 | 7 · 0.7 Comunidad | RF-029 |

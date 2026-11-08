@@ -11,4 +11,12 @@ void main() {
     expect(routeFor(SessionStatus.loading), AppRoutes.loading);
     expect(routeFor(SessionStatus.error), AppRoutes.error);
   });
+
+  test('sub-routes of the current area are allowed', () {
+    expect(redirectFor(SessionStatus.inClub, '/club/settings'), isNull);
+    expect(redirectFor(SessionStatus.inClub, '/club'), isNull);
+    expect(redirectFor(SessionStatus.signedOut, '/club/settings'), '/login');
+    expect(redirectFor(SessionStatus.choosingClub, '/club/settings'), '/clubs');
+    expect(redirectFor(SessionStatus.loading, '/club'), '/');
+  });
 }

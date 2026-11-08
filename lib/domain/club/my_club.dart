@@ -9,7 +9,8 @@ class MyClub {
     required this.name,
     required this.code,
     required this.role,
-    this.logoPath,
+    this.logoUrl,
+    this.imageUrl,
     this.primaryColor,
     this.secondaryColor,
     this.memberNumber,
@@ -19,7 +20,10 @@ class MyClub {
   final String name;
   final String code;
   final ClubRole role;
-  final String? logoPath;
+
+  /// Public URLs of the club brand assets, if any.
+  final String? logoUrl;
+  final String? imageUrl;
 
   /// Hex color `#RRGGBB` chosen by the club, if any.
   final String? primaryColor;
@@ -27,4 +31,8 @@ class MyClub {
 
   /// Per-club member number (RN-006).
   final int? memberNumber;
+
+  /// Club admins and platform admins manage the club (§16).
+  bool get canAdminister =>
+      role == ClubRole.clubAdmin || role == ClubRole.platformAdmin;
 }

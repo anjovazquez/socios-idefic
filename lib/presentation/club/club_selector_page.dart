@@ -34,7 +34,11 @@ class ClubSelectorPage extends StatelessWidget {
           for (final club in session.clubs)
             ListTile(
               key: Key('club-${club.code}'),
-              leading: ClubAvatar(club: club),
+              leading: ClubAvatar(
+                name: club.name,
+                logoUrl: club.logoUrl,
+                primaryColor: club.primaryColor,
+              ),
               title: Text(club.name),
               subtitle: club.memberNumber == null
                   ? null

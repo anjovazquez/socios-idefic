@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import '../auth/login_page.dart';
 import '../club/club_home_page.dart';
+import '../club/club_settings_page.dart';
 import '../club/club_selector_page.dart';
 import '../platform/platform_clubs_page.dart';
 import '../session/session_status_pages.dart';
@@ -29,14 +30,23 @@ String routeFor(SessionStatus status) => switch (status) {
   SessionStatus.error => AppRoutes.error,
 };
 
+/// Keeps the user inside the area of their session status; sub-routes of
+/// that area (e.g. `/club/settings`) are allowed.
+String? redirectFor(SessionStatus status, String location) {
+  final target = routeFor(status);
+  if (location == target) return null;
+  if (target != AppRoutes.loading && location.startsWith('$target/')) {
+    return null;
+  }
+  return target;
+}
+
 GoRouter createRouter(SessionViewModel session, {String? initialLocation}) =>
     GoRouter(
       initialLocation: initialLocation ?? AppRoutes.loading,
       refreshListenable: session,
-      redirect: (context, state) {
-        final target = routeFor(session.status);
-        return state.matchedLocation == target ? null : target;
-      },
+      redirect: (context, state) =>
+          redirectFor(session.status, state.matchedLocation),
       routes: [
         GoRoute(
           path: AppRoutes.loading,
@@ -53,6 +63,12 @@ GoRouter createRouter(SessionViewModel session, {String? initialLocation}) =>
         GoRoute(
           path: AppRoutes.club,
           builder: (context, state) => const ClubHomePage(),
+          routes: [
+            GoRoute(
+              path: 'settings',
+              builder: (context, state) => const ClubSettingsPage(),
+            ),
+          ],
         ),
         GoRoute(
           path: AppRoutes.noClubs,

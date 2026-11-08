@@ -4,13 +4,23 @@ import 'package:provider/provider.dart';
 
 import '../../application/app_use_cases.dart';
 import '../auth/login_view_model.dart';
+import '../club/image_picking.dart';
 import '../session/session_view_model.dart';
+import '../theme/club_theme.dart';
 import 'router.dart';
 
 class SociosApp extends StatefulWidget {
-  const SociosApp({super.key, required this.useCases, this.initialLocation});
+  const SociosApp({
+    super.key,
+    required this.useCases,
+    this.initialLocation,
+    this.pickImage = pickImageFromGallery,
+  });
 
   final AppUseCases useCases;
+
+  /// Device image chooser (injectable for tests).
+  final PickImage pickImage;
 
   /// Deep link used on start (tests and web refreshes).
   final String? initialLocation;
@@ -39,6 +49,7 @@ class _SociosAppState extends State<SociosApp> {
     return MultiProvider(
       providers: [
         Provider<AppUseCases>.value(value: widget.useCases),
+        Provider<PickImage>.value(value: widget.pickImage),
         ChangeNotifierProvider.value(value: _session),
         ChangeNotifierProvider(
           create: (_) => LoginViewModel(
@@ -47,13 +58,18 @@ class _SociosAppState extends State<SociosApp> {
           ),
         ),
       ],
-      child: MaterialApp.router(
-        title: 'Socios',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0B3D91)),
+      child: ListenableBuilder(
+        listenable: _session,
+        builder: (context, _) => MaterialApp.router(
+          title: _session.activeClub?.name ?? 'Socios',
+          debugShowCheckedModeBanner: false,
+          // The active club tints header, navigation and actions (§20).
+          theme: buildClubTheme(
+            primaryHex: _session.activeClub?.primaryColor,
+            secondaryHex: _session.activeClub?.secondaryColor,
+          ),
+          routerConfig: _router,
         ),
-        routerConfig: _router,
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'auth/sign_in_with_google.dart';
 import 'auth/sign_in_with_password.dart';
 import 'auth/sign_out.dart';
 import 'auth/watch_session.dart';
+import 'club/club_branding_use_cases.dart';
 import 'club/resolve_club_entry.dart';
 import 'club/select_active_club.dart';
 import 'platform/platform_use_cases.dart';
@@ -20,6 +21,9 @@ class AppUseCases {
     required this.createClub,
     required this.updateClub,
     required this.setClubActive,
+    required this.getClubBranding,
+    required this.saveClubBranding,
+    required this.uploadClubAsset,
   });
 
   final WatchSession watchSession;
@@ -33,4 +37,7 @@ class AppUseCases {
   final CreateClub createClub;
   final UpdateClub updateClub;
   final SetClubActive setClubActive;
+  final GetClubBranding getClubBranding;
+  final SaveClubBranding saveClubBranding;
+  final UploadClubAsset uploadClubAsset;
 }

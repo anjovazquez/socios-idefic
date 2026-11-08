@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:socios_idefic/domain/auth/auth_failures.dart';
+import 'package:socios_idefic/domain/club/club_branding.dart';
 import 'package:socios_idefic/domain/club/my_club.dart';
 import 'package:socios_idefic/domain/platform/platform_failures.dart';
 import 'package:socios_idefic/infrastructure/auth/supabase_auth_repository.dart';
 import 'package:socios_idefic/infrastructure/club/my_club_mapper.dart';
+import 'package:socios_idefic/infrastructure/club/supabase_club_branding_repository.dart';
 import 'package:socios_idefic/infrastructure/platform/supabase_platform_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -162,5 +164,52 @@ void main() {
         ),
       );
     });
+  });
+
+  test('resolves club asset URLs', () {
+    final club = myClubFromRow({
+      'club_id': 'c1',
+      'name': 'IDEFIC',
+      'code': 'IDEFIC',
+      'role': 'member',
+      'logo_path': 'c1/logo.png',
+      'image_path': null,
+    }, publicUrl: (path) => 'https://cdn/$path');
+
+    expect(club.logoUrl, 'https://cdn/c1/logo.png');
+    expect(club.imageUrl, isNull);
+  });
+
+  test('maps a branding row with the default color', () {
+    final branding = clubBrandingFromRow({
+      'club_id': 'c1',
+      'name': 'IDEFIC',
+      'primary_color': null,
+      'secondary_color': '#F2A900',
+      'logo_path': 'c1/logo.png',
+      'image_path': null,
+    }, (path) => 'https://cdn/$path');
+
+    expect(branding.primaryColor, ClubBranding.defaultPrimaryColor);
+    expect(branding.logoUrl, 'https://cdn/c1/logo.png');
+  });
+
+  test('maps branding errors', () {
+    expect(
+      mapBrandingError('42501', 'club admin required'),
+      isA<BrandingPermissionFailure>(),
+    );
+    expect(
+      mapBrandingError('403', 'new row violates row-level security policy'),
+      isA<BrandingPermissionFailure>(),
+    );
+    expect(
+      mapBrandingError('22023', 'invalid color'),
+      isA<InvalidBrandingFailure>(),
+    );
+    expect(
+      mapBrandingError('413', 'Payload too large'),
+      isA<InvalidAssetFailure>(),
+    );
   });
 }

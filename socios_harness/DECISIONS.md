@@ -19,6 +19,8 @@ Resumen de decisiones. Las de impacto fuerte tienen ADR en `adr/`.
 | D-013 | ACCEPTED | Email transaccional con **Resend** detrás del puerto `Mailer` en Edge Functions (`RESEND_API_KEY` solo como secreto de función). En local se usa Mailpit de Supabase. |
 | D-014 | ACCEPTED | QR = URL `/v/<token>` con token aleatorio de 128 bits por `season_membership`; validación por RPC anónima que devuelve solo datos mínimos (RF-020). |
 | D-015 | ACCEPTED | Recibos en PDF generados en cliente (paquete `pdf`) a partir de una RPC que devuelve los datos inmutables del pago. Sin facturas en el MVP. |
+| D-017 | ACCEPTED | Logos e imágenes de club en el bucket **público** `club-assets/<club_id>/` (PNG/JPG/WebP ≤ 2 MB): son marca y aparecen en la validación pública del QR y en emails. Escritura solo `can_admin_club`; lectura de filas para autenticados (el upsert de Storage la necesita). Las fotos de socios irán en un bucket privado (VS-009). |
+| D-018 | ACCEPTED | `can_admin_club(club_id)` = admin activo del club o superadmin; toda RPC/policy de administración de club la usa. |
 | D-016 | PROPOSED | Nombre comercial del producto y bundle id (pendiente de usuario). |
 
 ## Cuándo crear un ADR

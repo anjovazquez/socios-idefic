@@ -128,9 +128,8 @@ class SessionViewModel extends ChangeNotifier {
   Future<void> refreshClubs() async {
     final entry = await _useCases.resolveClubEntry();
     _clubs = entry.clubs;
-    if (_activeClub case final active?
-        when !_clubs.any((club) => club.id == active.id)) {
-      _activeClub = null;
+    if (_activeClub case final active?) {
+      _activeClub = _clubs.where((club) => club.id == active.id).firstOrNull;
     }
     notifyListeners();
   }

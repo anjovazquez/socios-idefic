@@ -60,7 +60,9 @@ Memoria estable. Solo hechos válidos durante muchas tareas (ver `MEMORY_POLICY.
 - Cliente: `Supabase.initialize(publishableKey: ...)` (`anonKey` está deprecado).
 - Navegación: cada `SessionStatus` tiene una ruta; `go_router` redirige con `refreshListenable` = `SessionViewModel`.
 - Club activo recordado por dispositivo (`ActiveClubStore`, shared_preferences) y olvidado al cerrar sesión.
-- Pruebas web en el sandbox: `flutter build web --no-web-resources-cdn` (gstatic bloqueado); los campos de Flutter web se rellenan haciendo clic por coordenadas y escribiendo con el teclado.
+- Storage: un upload con `upsert` exige política SELECT sobre `storage.objects` además de INSERT/UPDATE.
+- Rutas: cada estado de sesión tiene un área (`/club`, `/platform`…) y sus subrutas (`/club/settings`) se permiten con `redirectFor`.
+- Pruebas web en el sandbox: `flutter build web --no-web-resources-cdn` (gstatic bloqueado); los campos de Flutter web se rellenan haciendo clic por coordenadas y escribiendo con el teclado; para `image_picker` web se engancha `HTMLInputElement.prototype.click` e inyecta el fichero con `DataTransfer` (build `--profile` para trazas legibles).
 
 - Administración: toda RPC de gestión es `security definer`, valida el rol con `require_platform_admin()` (o `can_admin_club` desde VS-005) y registra `audit(club_id, action, payload)`, que guarda el actor real y si actuó como plataforma.
 - Errores de RPC → SQLSTATE: `42501` permiso, `22023` dato inválido, `23505` duplicado, `P0001` regla de negocio (con `hint`), `P0002` no encontrado. Los adapters los mapean a fallos de dominio.
@@ -72,4 +74,4 @@ Memoria estable. Solo hechos válidos durante muchas tareas (ver `MEMORY_POLICY.
 - Admin de club (web): Dashboard · Socios · Temporadas · Pagos · Patrocinadores · Ventajas · Blog · Configuración.
 - Selector de club tras login si hay más de uno; cambio sin re-login (RF-030).
 - La identidad visual del club activo tiñe cabecera, navegación, carnet y recibos.
-- Sistema de diseño en `DESIGN.md` (se crea en VS-004 y se amplía en VS-032).
+- Sistema de diseño en `DESIGN.md` (raíz): tema del club con `buildClubTheme`, contraste AA con `readableOn`, `ClubAvatar`, patrones de formulario/confirmación/estado vacío. Se amplía en cada slice que lo necesite.

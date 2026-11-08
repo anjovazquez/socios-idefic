@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:socios_idefic/application/app_use_cases.dart';
 import 'package:socios_idefic/application/auth/sign_in_with_google.dart';
 import 'package:socios_idefic/application/auth/sign_in_with_password.dart';
 import 'package:socios_idefic/application/auth/sign_out.dart';
 import 'package:socios_idefic/application/auth/watch_session.dart';
+import 'package:socios_idefic/application/club/club_branding_use_cases.dart';
 import 'package:socios_idefic/application/club/resolve_club_entry.dart';
 import 'package:socios_idefic/application/club/select_active_club.dart';
 import 'package:socios_idefic/application/platform/platform_use_cases.dart';
@@ -12,6 +14,8 @@ import 'package:socios_idefic/domain/auth/auth_failures.dart';
 import 'package:socios_idefic/domain/auth/auth_repository.dart';
 import 'package:socios_idefic/domain/auth/auth_user.dart';
 import 'package:socios_idefic/domain/club/active_club_store.dart';
+import 'package:socios_idefic/domain/club/club_branding.dart';
+import 'package:socios_idefic/domain/club/club_branding_repository.dart';
 import 'package:socios_idefic/domain/club/club_repository.dart';
 import 'package:socios_idefic/domain/club/my_club.dart';
 import 'package:socios_idefic/domain/platform/club_data.dart';
@@ -26,6 +30,15 @@ const idefic = MyClub(
   role: ClubRole.member,
   primaryColor: '#0B3D91',
   memberNumber: 2,
+);
+
+const ideficAsAdmin = MyClub(
+  id: 'club-idefic',
+  name: 'IDEFIC',
+  code: 'IDEFIC',
+  role: ClubRole.clubAdmin,
+  primaryColor: '#0B3D91',
+  memberNumber: 1,
 );
 
 const demo = MyClub(
@@ -235,14 +248,95 @@ class FakePlatformRepository implements PlatformRepository {
   );
 }
 
+/// Branding store that also updates what [FakeClubRepository] returns, so
+/// the session sees the new identity after saving.
+class FakeClubBrandingRepository implements ClubBrandingRepository {
+  FakeClubBrandingRepository(this.clubs);
+
+  final FakeClubRepository clubs;
+  int uploads = 0;
+  ClubBranding? lastSaved;
+
+  MyClub _club(String clubId) => clubs.clubsByEmail.values
+      .expand((list) => list)
+      .firstWhere((club) => club.id == clubId);
+
+  MyClub? _mine(String clubId) => clubs
+      .clubsByEmail[clubs.auth?.currentUser?.email]
+      ?.where((club) => club.id == clubId)
+      .firstOrNull;
+
+  void _requireAdmin(String clubId) {
+    if (!(_mine(clubId)?.canAdminister ?? false)) {
+      throw const BrandingPermissionFailure();
+    }
+  }
+
+  @override
+  Future<ClubBranding> getBranding(String clubId) async {
+    _requireAdmin(clubId);
+    final club = _club(clubId);
+    return ClubBranding(
+      clubId: club.id,
+      name: club.name,
+      primaryColor: club.primaryColor ?? ClubBranding.defaultPrimaryColor,
+      secondaryColor: club.secondaryColor,
+      logoUrl: club.logoUrl,
+      logoPath: club.logoUrl == null ? null : '$clubId/logo.png',
+    );
+  }
+
+  @override
+  Future<void> saveBranding(ClubBranding branding) async {
+    _requireAdmin(branding.clubId);
+    lastSaved = branding;
+    for (final entry in clubs.clubsByEmail.entries) {
+      clubs.clubsByEmail[entry.key] = [
+        for (final club in entry.value)
+          if (club.id == branding.clubId)
+            MyClub(
+              id: club.id,
+              name: branding.name,
+              code: club.code,
+              role: club.role,
+              memberNumber: club.memberNumber,
+              primaryColor: branding.primaryColor,
+              secondaryColor: branding.secondaryColor,
+              logoUrl: branding.logoUrl,
+              imageUrl: branding.imageUrl,
+            )
+          else
+            club,
+      ];
+    }
+  }
+
+  @override
+  Future<String> uploadAsset({
+    required String clubId,
+    required ClubAssetKind kind,
+    required Uint8List bytes,
+    required String contentType,
+  }) async {
+    _requireAdmin(clubId);
+    uploads++;
+    return '$clubId/${kind.name}-$uploads.png';
+  }
+
+  @override
+  String publicUrl(String path) => 'https://cdn.test/$path';
+}
+
 AppUseCases buildUseCases({
   required FakeAuthRepository auth,
   required FakeClubRepository clubs,
   InMemoryActiveClubStore? store,
   FakePlatformRepository? platform,
+  FakeClubBrandingRepository? branding,
 }) {
   final activeClubStore = store ?? InMemoryActiveClubStore();
   final platformRepository = platform ?? FakePlatformRepository();
+  final brandingRepository = branding ?? FakeClubBrandingRepository(clubs);
   platformRepository.auth = auth;
   clubs
     ..auth = auth
@@ -259,5 +353,8 @@ AppUseCases buildUseCases({
     createClub: CreateClub(platformRepository),
     updateClub: UpdateClub(platformRepository),
     setClubActive: SetClubActive(platformRepository),
+    getClubBranding: GetClubBranding(brandingRepository),
+    saveClubBranding: SaveClubBranding(brandingRepository),
+    uploadClubAsset: UploadClubAsset(brandingRepository),
   );
 }

@@ -6,8 +6,8 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 - Fase actual: **1 — Acceso multi-club (0.1)**.
 - Tarea activa: ninguna.
-- Última tarea completada: `VS-003 — Superadmin: alta, edición y desactivación de clubes` (2026-11-08).
-- Siguiente tarea READY: `VS-004 — Identidad visual por club + DESIGN.md` (también READY: VS-005, VS-006).
+- Última tarea completada: `VS-004 — Identidad visual por club + DESIGN.md` (2026-11-08).
+- Siguiente tarea READY: `VS-005 — Suplantación funcional auditada` (también READY: VS-006, VS-025).
 - Bloqueos globales: ninguno.
 
 ## Milestones
@@ -15,13 +15,13 @@ Snapshot operativo. Se actualiza al final de cada loop.
 | Milestone | Estado |
 |---|---|
 | Bootstrap | DONE |
-| 0.1 Acceso multi-club | IN_PROGRESS (VS-001…VS-003 DONE; VS-004, VS-005 READY) |
+| 0.1 Acceso multi-club | IN_PROGRESS (VS-001…VS-004 DONE; VS-005 READY) |
 | 0.2 Socios | READY (VS-006) |
 | 0.3 Temporadas y cuotas | TODO |
 | 0.4 Carnet digital | TODO |
 | 0.5 Pagos | TODO |
 | 0.6 Pago real y renovación automática | TODO |
-| 0.7 Comunidad | TODO |
+| 0.7 Comunidad | READY (VS-025) |
 | 0.8 Piloto IDEFIC | TODO |
 
 ## Decisiones pendientes del usuario
@@ -39,4 +39,5 @@ Snapshot operativo. Se actualiza al final de cada loop.
 - CI: `.github/workflows/ci.yml` con `quality` y `sql-tests` (aún sin ejecución en GitHub: el workflow corre en PR/main).
 - Esquema: `profiles`, `clubs`, `club_memberships` + RPC `get_my_clubs` (VS-001). Seed local: `admin@`, `ana@`, `luis@`, `root@example.com` (superadmin) con contraseña `<nombre>-password`.
 - Plataforma (VS-003): `platform_admins`, `is_platform_admin()`, `audit_log` + `audit()`, `club_invitations` mínima, RPC `create_club`/`update_club`/`set_club_active`/`assign_club_admin`/`get_platform_clubs`.
+- Identidad (VS-004): `can_admin_club()`, `update_club_branding`, `get_club_branding`, bucket público `club-assets`; tema por club en `presentation/theme/club_theme.dart`; `DESIGN.md` creado.
 - Sesión cloud: Flutter en `$HOME/flutter/bin`; Docker requiere arrancar `dockerd` en segundo plano (ver `QUALITY_GATES.md`).

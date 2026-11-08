@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../session/session_view_model.dart';
@@ -25,6 +26,13 @@ class ClubHomePage extends StatelessWidget {
               icon: const Icon(Icons.admin_panel_settings_outlined),
               onPressed: session.openPlatform,
             ),
+          if (club.canAdminister)
+            IconButton(
+              key: const Key('open-settings'),
+              tooltip: 'Configuración del club',
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: () => context.go('/club/settings'),
+            ),
           if (session.canSwitchClub)
             IconButton(
               key: const Key('switch-club'),
@@ -43,7 +51,12 @@ class ClubHomePage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ClubAvatar(club: club, radius: 40),
+            ClubAvatar(
+              name: club.name,
+              logoUrl: club.logoUrl,
+              primaryColor: club.primaryColor,
+              radius: 40,
+            ),
             const SizedBox(height: 16),
             Text(club.name, style: theme.textTheme.headlineSmall),
             if (club.memberNumber != null) ...[

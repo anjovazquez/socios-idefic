@@ -7,15 +7,18 @@ import '../application/auth/sign_in_with_google.dart';
 import '../application/auth/sign_in_with_password.dart';
 import '../application/auth/sign_out.dart';
 import '../application/auth/watch_session.dart';
+import '../application/club/club_branding_use_cases.dart';
 import '../application/club/resolve_club_entry.dart';
 import '../application/club/select_active_club.dart';
 import '../application/platform/platform_use_cases.dart';
 import '../domain/auth/auth_repository.dart';
 import '../domain/club/active_club_store.dart';
+import '../domain/club/club_branding_repository.dart';
 import '../domain/club/club_repository.dart';
 import '../domain/platform/platform_repository.dart';
 import '../infrastructure/auth/supabase_auth_repository.dart';
 import '../infrastructure/club/shared_preferences_active_club_store.dart';
+import '../infrastructure/club/supabase_club_branding_repository.dart';
 import '../infrastructure/club/supabase_club_repository.dart';
 import '../infrastructure/platform/supabase_platform_repository.dart';
 
@@ -38,6 +41,9 @@ void configureDependencies() {
     ..registerLazySingleton<ClubRepository>(
       () => SupabaseClubRepository(client),
     )
+    ..registerLazySingleton<ClubBrandingRepository>(
+      () => SupabaseClubBrandingRepository(client),
+    )
     ..registerLazySingleton<PlatformRepository>(
       () => SupabasePlatformRepository(client),
     )
@@ -57,6 +63,9 @@ void configureDependencies() {
         createClub: CreateClub(serviceLocator()),
         updateClub: UpdateClub(serviceLocator()),
         setClubActive: SetClubActive(serviceLocator()),
+        getClubBranding: GetClubBranding(serviceLocator()),
+        saveClubBranding: SaveClubBranding(serviceLocator()),
+        uploadClubAsset: UploadClubAsset(serviceLocator()),
       ),
     );
 }
