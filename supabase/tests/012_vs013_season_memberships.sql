@@ -88,14 +88,14 @@ select throws_ok(
   '22023', null, 'negative fees are rejected'
 );
 select lives_ok(
-  $$select public.set_season_membership_status((select id from public.season_memberships
-     where club_membership_id = 'e4000000-0000-0000-0000-000000000003'), 'active')$$,
-  'the admin records that Marta paid (until online payments exist)'
+  $$select public.record_manual_payment((select id from public.season_memberships
+     where club_membership_id = 'e4000000-0000-0000-0000-000000000003'), 'cash')$$,
+  'the admin records that Marta paid (VS-017 payments)'
 );
 select throws_ok(
-  $$select public.set_season_membership_status((select id from public.season_memberships
-     where club_membership_id = 'e4000000-0000-0000-0000-000000000003'), 'cancelled')$$,
-  '22023', null, 'only pending/active can be set by hand'
+  $$select public.record_manual_payment((select id from public.season_memberships
+     where club_membership_id = 'e4000000-0000-0000-0000-000000000003'), 'cash')$$,
+  'P0001', null, 'a paid season cannot be paid twice'
 );
 
 -- Marta (member)
@@ -120,7 +120,7 @@ select is_empty('select 1 from public.season_memberships', 'other clubs see noth
 
 reset role;
 select is(
-  (select count(*)::int from public.audit_log where action in ('member_fee_changed', 'member_season_status_changed')),
+  (select count(*)::int from public.audit_log where action in ('member_fee_changed', 'payment_recorded')),
   3,
   'fee and status changes are audited'
 );

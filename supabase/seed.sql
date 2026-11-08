@@ -95,3 +95,19 @@ join public.profiles p on p.id = m.user_id
 join public.seasons s on s.club_id = m.club_id
 where m.club_id = '20000000-0000-0000-0000-000000000001'
 on conflict (club_membership_id, season_id) do nothing;
+
+-- Payments (VS-017): how IDEFIC is paid and the payments of the seed
+-- members (Luis still owes 2026/2027).
+update public.clubs
+set payment_instructions = 'Transferencia a ES12 3456 7890 1234 5678 9012 (concepto: tu nombre y nº de socio) o Bizum al 600 000 000.'
+where id = '20000000-0000-0000-0000-000000000001';
+
+insert into public.payments (season_membership_id, amount_cents, concept, status, provider, method, paid_at)
+select sm.id, sm.fee_cents, 'Cuota de socio ' || s.name, 'paid', 'manual',
+       case when s.name = '2025/2026' then 'cash' else 'transfer' end,
+       s.starts_on::timestamptz + interval '10 days'
+from public.season_memberships sm
+join public.seasons s on s.id = sm.season_id
+where sm.status = 'active' and sm.fee_cents > 0
+  and s.club_id = '20000000-0000-0000-0000-000000000001'
+  and not exists (select 1 from public.payments p where p.season_membership_id = sm.id);

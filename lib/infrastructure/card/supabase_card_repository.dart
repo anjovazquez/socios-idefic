@@ -112,4 +112,6 @@ MembershipCard membershipCardFromRow(
   memberNumber: row['member_number'] as int?,
   seasonName: row['season_name'] as String?,
   cardToken: row['card_token'] as String?,
+  seasonMembershipId: row['season_membership_id'] as String?,
+  feeCents: row['fee_cents'] as int?,
 );

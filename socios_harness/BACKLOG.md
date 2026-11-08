@@ -25,8 +25,8 @@ dependencias ya estén todas `DONE` (salvo bloqueo explícito por decisión).
 | VS-014 | Renovación masiva | DONE | VS-013 | 3 · 0.3 Temporadas | RF-009, RN-011 |
 | VS-015 | Mi carnet digital | DONE | VS-013, VS-004 | 4 · 0.4 Carnet | RF-019, RF-021, RN-014 |
 | VS-016 | QR y página pública de validación | DONE | VS-015 | 4 · 0.4 Carnet | RF-020, RN-017 |
-| VS-017 | Pagar la cuota (puerto de pagos + proveedor manual) | READY | VS-013 | 5 · 0.5 Pagos | §9, RF-015 |
-| VS-018 | Mi suscripción e histórico de pagos | TODO | VS-017 | 5 · 0.5 Pagos | RF-011, RF-016 |
+| VS-017 | Pagar la cuota (puerto de pagos + proveedor manual) | DONE | VS-013 | 5 · 0.5 Pagos | §9, RF-015 |
+| VS-018 | Mi suscripción e histórico de pagos | READY | VS-017 | 5 · 0.5 Pagos | RF-011, RF-016 |
 | VS-019 | Recibo descargable | TODO | VS-018 | 5 · 0.5 Pagos | RF-017 |
 | VS-020 | Pagos del club para el admin (filtros y recibos) | TODO | VS-019 | 5 · 0.5 Pagos | RF-018 |
 | VS-021 | Proveedor de pago real (checkout + webhook) | TODO | VS-020, ADR-001 | 6 · 0.6 Renovación | §9 |

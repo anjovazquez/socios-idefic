@@ -81,20 +81,6 @@ class SetMemberFee {
   }
 }
 
-class SetSeasonMembershipPaid {
-  const SetSeasonMembershipPaid(this._repository);
-
-  final SeasonRepository _repository;
-
-  Future<void> call({required String seasonMembershipId, required bool paid}) =>
-      _repository.setSeasonMembershipStatus(
-        seasonMembershipId: seasonMembershipId,
-        status: paid
-            ? SeasonMembershipStatus.active
-            : SeasonMembershipStatus.pendingPayment,
-      );
-}
-
 class GetRenewalCandidates {
   const GetRenewalCandidates(this._repository);
 

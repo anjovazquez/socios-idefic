@@ -15,6 +15,8 @@ class MembershipCard {
     this.memberNumber,
     this.seasonName,
     this.cardToken,
+    this.seasonMembershipId,
+    this.feeCents,
   });
 
   final String clubName;
@@ -30,6 +32,10 @@ class MembershipCard {
 
   /// Opaque token of the QR; only present on an active card (VS-016).
   final String? cardToken;
+
+  /// Membership in the active season, to start a payment from the card.
+  final String? seasonMembershipId;
+  final int? feeCents;
 
   bool get isActive => state == CardState.active;
 

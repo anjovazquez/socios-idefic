@@ -4,7 +4,10 @@ import '../../domain/member/club_member.dart';
 import '../../domain/season/season_membership.dart';
 import '../common/submit_dialog.dart';
 import '../format/money.dart';
+import '../payment/payment_labels.dart';
+import '../payment/record_payment_dialog.dart';
 import '../season/season_membership_chip.dart';
+import '../../domain/payment/payment.dart';
 import 'member_status_chip.dart';
 import 'members_view_model.dart';
 
@@ -91,6 +94,29 @@ class MemberDetailSheet extends StatelessWidget {
     );
     if (!(confirmed ?? false)) return;
     await _run(navigator, messenger, () => viewModel.regenerateCard(member));
+  }
+
+  Future<void> _recordPayment(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmation = await showDialog<String>(
+      context: context,
+      builder: (_) => RecordPaymentDialog(
+        memberName: member.displayName,
+        feeCents: member.seasonFeeCents ?? 0,
+        onSubmit: (method, amount, reference) => viewModel.recordPayment(
+          member,
+          method: method,
+          amount: amount,
+          reference: reference,
+        ),
+      ),
+    );
+    if (confirmation == null) return;
+    navigator.pop();
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(confirmation)));
   }
 
   Future<void> _changeFee(BuildContext context) async {
@@ -207,28 +233,14 @@ class MemberDetailSheet extends StatelessWidget {
                   ),
                   if (seasonStatus == SeasonMembershipStatus.pendingPayment)
                     TextButton(
-                      key: const Key('member-mark-paid'),
-                      onPressed: () => _run(
-                        Navigator.of(context),
-                        ScaffoldMessenger.of(context),
-                        () => viewModel.setPaid(member, paid: true),
-                      ),
-                      child: const Text('Marcar como pagada'),
-                    ),
-                  if (seasonStatus == SeasonMembershipStatus.active &&
-                      (member.seasonFeeCents ?? 0) > 0)
-                    TextButton(
-                      key: const Key('member-mark-pending'),
-                      onPressed: () => _run(
-                        Navigator.of(context),
-                        ScaffoldMessenger.of(context),
-                        () => viewModel.setPaid(member, paid: false),
-                      ),
-                      child: const Text('Marcar pendiente'),
+                      key: const Key('member-record-payment'),
+                      onPressed: () => _recordPayment(context),
+                      child: const Text('Registrar pago'),
                     ),
                 ],
               ),
             ],
+            _Payments(member: member, viewModel: viewModel),
             _History(member: member, viewModel: viewModel),
             const SizedBox(height: 8),
             if (member.isClubAdmin)
@@ -345,4 +357,94 @@ class _MemberFeeDialogState extends State<_MemberFeeDialog> {
       ),
     ],
   );
+}
+
+/// Payments of the current season, with "Anular" when allowed (RF-015).
+class _Payments extends StatelessWidget {
+  const _Payments({required this.member, required this.viewModel});
+
+  final ClubMember member;
+  final MembersViewModel viewModel;
+
+  Future<void> _cancel(BuildContext context, Payment payment) async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('¿Anular este pago?'),
+        content: Text(
+          '${formatCents(payment.amountCents)} · ${payment.concept}. Si era '
+          'el único pago, la cuota vuelve a quedar pendiente.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            key: const Key('confirm-cancel-payment'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Anular pago'),
+          ),
+        ],
+      ),
+    );
+    if (!(confirmed ?? false)) return;
+    try {
+      final message = await viewModel.cancelPayment(member, payment);
+      navigator.pop();
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(message)));
+    } catch (error) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text('$error')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return FutureBuilder<List<Payment>>(
+      future: viewModel.payments(member),
+      builder: (context, snapshot) {
+        final payments = snapshot.data ?? const [];
+        if (payments.isEmpty) return const SizedBox.shrink();
+        return Column(
+          key: const Key('member-payments'),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Divider(),
+            Text('Pagos', style: theme.textTheme.titleSmall),
+            for (final payment in payments)
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      [
+                        formatCents(payment.amountCents),
+                        if (payment.method case final method?)
+                          paymentMethodLabel(method),
+                        if (payment.paidAt case final date?) formatDate(date),
+                      ].join(' · '),
+                    ),
+                  ),
+                  PaymentStatusChip(status: payment.status),
+                  if (payment.canBeCancelled &&
+                      payment.status != PaymentStatus.cancelled)
+                    IconButton(
+                      key: Key('cancel-payment-${payment.id}'),
+                      tooltip: 'Anular pago',
+                      icon: const Icon(Icons.undo),
+                      onPressed: () => _cancel(context, payment),
+                    ),
+                ],
+              ),
+          ],
+        );
+      },
+    );
+  }
 }

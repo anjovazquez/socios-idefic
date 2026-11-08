@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../application/app_use_cases.dart';
 import '../../domain/club/club_branding_repository.dart';
+import '../payment/payment_instructions_section.dart';
 import '../session/session_view_model.dart';
 import '../theme/club_theme.dart';
 import 'club_avatar.dart';
@@ -129,6 +130,7 @@ class _ClubSettingsView extends StatelessWidget {
             const SizedBox(height: 24),
             FilledButton(
               key: const Key('settings-save'),
+              // Saves name, colors and images (instructions save on their own).
               onPressed: viewModel.isBusy
                   ? null
                   : () async {
@@ -141,6 +143,8 @@ class _ClubSettingsView extends StatelessWidget {
                     },
               child: const Text('Guardar cambios'),
             ),
+            const SizedBox(height: 32),
+            PaymentInstructionsSection(clubId: viewModel.clubId),
           ],
         ),
       },

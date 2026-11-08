@@ -13,6 +13,7 @@ import '../application/club/resolve_club_entry.dart';
 import '../application/club/select_active_club.dart';
 import '../application/member/member_use_cases.dart';
 import '../application/onboarding/onboarding_use_cases.dart';
+import '../application/payment/payment_use_cases.dart';
 import '../application/platform/platform_use_cases.dart';
 import '../application/profile/profile_use_cases.dart';
 import '../application/season/season_use_cases.dart';
@@ -23,6 +24,8 @@ import '../domain/club/club_branding_repository.dart';
 import '../domain/club/club_repository.dart';
 import '../domain/member/members_repository.dart';
 import '../domain/onboarding/onboarding_repository.dart';
+import '../domain/payment/payment_gateway.dart';
+import '../domain/payment/payments_repository.dart';
 import '../domain/platform/platform_repository.dart';
 import '../domain/profile/profile_repository.dart';
 import '../domain/season/season_repository.dart';
@@ -33,6 +36,8 @@ import '../infrastructure/club/supabase_club_branding_repository.dart';
 import '../infrastructure/club/supabase_club_repository.dart';
 import '../infrastructure/member/supabase_members_repository.dart';
 import '../infrastructure/onboarding/supabase_onboarding_repository.dart';
+import '../infrastructure/payment/manual_payment_gateway.dart';
+import '../infrastructure/payment/supabase_payments_repository.dart';
 import '../infrastructure/platform/supabase_platform_repository.dart';
 import '../infrastructure/profile/supabase_profile_repository.dart';
 import '../infrastructure/season/supabase_season_repository.dart';
@@ -58,6 +63,12 @@ void configureDependencies() {
     )
     ..registerLazySingleton<ClubBrandingRepository>(
       () => SupabaseClubBrandingRepository(client),
+    )
+    ..registerLazySingleton<PaymentsRepository>(
+      () => SupabasePaymentsRepository(client),
+    )
+    ..registerLazySingleton<PaymentGateway>(
+      () => ManualPaymentGateway(serviceLocator()),
     )
     ..registerLazySingleton<CardRepository>(
       () => SupabaseCardRepository(client),
@@ -116,12 +127,17 @@ void configureDependencies() {
         activateSeason: ActivateSeason(serviceLocator()),
         getMemberSeasons: GetMemberSeasons(serviceLocator()),
         setMemberFee: SetMemberFee(serviceLocator()),
-        setSeasonMembershipPaid: SetSeasonMembershipPaid(serviceLocator()),
         getRenewalCandidates: GetRenewalCandidates(serviceLocator()),
         bulkRenew: BulkRenew(serviceLocator()),
         getMyCard: GetMyCard(serviceLocator()),
         validateCard: ValidateCard(serviceLocator()),
         regenerateCard: RegenerateCard(serviceLocator()),
+        getSeasonPayments: GetSeasonPayments(serviceLocator()),
+        recordManualPayment: RecordManualPayment(serviceLocator()),
+        cancelPayment: CancelPayment(serviceLocator()),
+        getPaymentInstructions: GetPaymentInstructions(serviceLocator()),
+        setPaymentInstructions: SetPaymentInstructions(serviceLocator()),
+        startPayment: StartPayment(serviceLocator()),
       ),
     );
 }

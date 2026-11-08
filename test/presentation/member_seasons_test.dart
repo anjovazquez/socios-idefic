@@ -134,18 +134,6 @@ void main() {
     expect(find_('Marta').seasonFeeCents, 5000);
   });
 
-  testWidgets('the admin records a payment by hand', (tester) async {
-    await openMembers(tester);
-    await tester.tap(find.byKey(const Key('member-marta@example.com')));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('member-mark-paid')));
-    await tester.pumpAndSettle();
-
-    expect(find_('Marta').seasonStatus, SeasonMembershipStatus.active);
-    expect(find.text('Marta queda como socio de la temporada'), findsOneWidget);
-  });
-
   testWidgets('the record shows the history per season', (tester) async {
     await openMembers(tester);
 

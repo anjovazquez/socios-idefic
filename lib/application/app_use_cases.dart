@@ -8,6 +8,7 @@ import 'club/resolve_club_entry.dart';
 import 'club/select_active_club.dart';
 import 'member/member_use_cases.dart';
 import 'onboarding/onboarding_use_cases.dart';
+import 'payment/payment_use_cases.dart';
 import 'platform/platform_use_cases.dart';
 import 'profile/profile_use_cases.dart';
 import 'season/season_use_cases.dart';
@@ -49,12 +50,17 @@ class AppUseCases {
     required this.activateSeason,
     required this.getMemberSeasons,
     required this.setMemberFee,
-    required this.setSeasonMembershipPaid,
     required this.getRenewalCandidates,
     required this.bulkRenew,
     required this.getMyCard,
     required this.validateCard,
     required this.regenerateCard,
+    required this.getSeasonPayments,
+    required this.recordManualPayment,
+    required this.cancelPayment,
+    required this.getPaymentInstructions,
+    required this.setPaymentInstructions,
+    required this.startPayment,
   });
 
   final WatchSession watchSession;
@@ -91,10 +97,15 @@ class AppUseCases {
   final ActivateSeason activateSeason;
   final GetMemberSeasons getMemberSeasons;
   final SetMemberFee setMemberFee;
-  final SetSeasonMembershipPaid setSeasonMembershipPaid;
   final GetRenewalCandidates getRenewalCandidates;
   final BulkRenew bulkRenew;
   final GetMyCard getMyCard;
   final ValidateCard validateCard;
   final RegenerateCard regenerateCard;
+  final GetSeasonPayments getSeasonPayments;
+  final RecordManualPayment recordManualPayment;
+  final CancelPayment cancelPayment;
+  final GetPaymentInstructions getPaymentInstructions;
+  final SetPaymentInstructions setPaymentInstructions;
+  final StartPayment startPayment;
 }

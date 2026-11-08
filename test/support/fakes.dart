@@ -12,6 +12,7 @@ import 'package:socios_idefic/application/club/resolve_club_entry.dart';
 import 'package:socios_idefic/application/club/select_active_club.dart';
 import 'package:socios_idefic/application/member/member_use_cases.dart';
 import 'package:socios_idefic/application/onboarding/onboarding_use_cases.dart';
+import 'package:socios_idefic/application/payment/payment_use_cases.dart';
 import 'package:socios_idefic/application/platform/platform_use_cases.dart';
 import 'package:socios_idefic/application/profile/profile_use_cases.dart';
 import 'package:socios_idefic/application/season/season_use_cases.dart';
@@ -30,6 +31,9 @@ import 'package:socios_idefic/domain/member/club_member.dart';
 import 'package:socios_idefic/domain/member/members_repository.dart';
 import 'package:socios_idefic/domain/onboarding/onboarding.dart';
 import 'package:socios_idefic/domain/onboarding/onboarding_repository.dart';
+import 'package:socios_idefic/domain/payment/payment.dart';
+import 'package:socios_idefic/domain/payment/payments_repository.dart';
+import 'package:socios_idefic/infrastructure/payment/manual_payment_gateway.dart';
 import 'package:socios_idefic/domain/platform/audit_entry.dart';
 import 'package:socios_idefic/domain/profile/my_profile.dart';
 import 'package:socios_idefic/domain/profile/profile_repository.dart';
@@ -748,7 +752,6 @@ class FakeSeasonRepository implements SeasonRepository {
     ),
   );
 
-  @override
   Future<void> setSeasonMembershipStatus({
     required String seasonMembershipId,
     required SeasonMembershipStatus status,
@@ -869,6 +872,97 @@ class FakeCardRepository implements CardRepository {
   }
 }
 
+/// Payments per season membership; paying activates the member and
+/// cancelling the only payment makes the fee pending again.
+class FakePaymentsRepository implements PaymentsRepository {
+  final Map<String, List<Payment>> payments = {};
+  final Map<String, String> instructions = {};
+  FakeMembersRepository? members;
+  int _ids = 0;
+
+  void _setSeasonStatus(String seasonMembershipId, SeasonMembershipStatus s) {
+    for (final list in members?.members.values ?? <List<ClubMember>>[]) {
+      final i = list.indexWhere(
+        (m) => m.seasonMembershipId == seasonMembershipId,
+      );
+      if (i >= 0) list[i] = list[i].copyWith(seasonStatus: s);
+    }
+  }
+
+  ClubMember? _member(String seasonMembershipId) => members?.members.values
+      .expand((list) => list)
+      .where((m) => m.seasonMembershipId == seasonMembershipId)
+      .firstOrNull;
+
+  @override
+  Future<List<Payment>> getSeasonPayments(String seasonMembershipId) async =>
+      [...?payments[seasonMembershipId]].reversed.toList();
+
+  @override
+  Future<void> recordManualPayment({
+    required String seasonMembershipId,
+    required PaymentMethod method,
+    int? amountCents,
+    DateTime? paidOn,
+    String? reference,
+  }) async {
+    final list = payments.putIfAbsent(seasonMembershipId, () => []);
+    if (list.any((p) => p.status == PaymentStatus.paid)) {
+      throw const AlreadyPaidFailure();
+    }
+    list.add(
+      Payment(
+        id: 'pay-${++_ids}',
+        seasonMembershipId: seasonMembershipId,
+        amountCents:
+            amountCents ?? _member(seasonMembershipId)!.seasonFeeCents!,
+        concept: 'Cuota de socio 2026/2027',
+        status: PaymentStatus.paid,
+        provider: PaymentProvider.manual,
+        method: method,
+        reference: reference,
+        paidAt: paidOn ?? DateTime(2026, 11, 9),
+        createdAt: DateTime(2026, 11, 9),
+      ),
+    );
+    _setSeasonStatus(seasonMembershipId, SeasonMembershipStatus.active);
+  }
+
+  @override
+  Future<void> setStatus(String paymentId, PaymentStatus status) async {
+    for (final list in payments.values) {
+      final i = list.indexWhere((p) => p.id == paymentId);
+      if (i < 0) continue;
+      final p = list[i];
+      list[i] = Payment(
+        id: p.id,
+        seasonMembershipId: p.seasonMembershipId,
+        amountCents: p.amountCents,
+        concept: p.concept,
+        status: status,
+        provider: p.provider,
+        method: p.method,
+        paidAt: p.paidAt,
+        createdAt: p.createdAt,
+      );
+      if (!list.any((x) => x.status == PaymentStatus.paid)) {
+        _setSeasonStatus(
+          p.seasonMembershipId,
+          SeasonMembershipStatus.pendingPayment,
+        );
+      }
+    }
+  }
+
+  @override
+  Future<String?> getPaymentInstructions(String clubId) async =>
+      instructions[clubId];
+
+  @override
+  Future<void> setPaymentInstructions(String clubId, String text) async =>
+      instructions[clubId] = text.trim();
+}
+
 AppUseCases buildUseCases({
   required FakeAuthRepository auth,
   required FakeClubRepository clubs,
@@ -880,6 +974,7 @@ AppUseCases buildUseCases({
   FakeProfileRepository? profile,
   FakeSeasonRepository? seasons,
   FakeCardRepository? cards,
+  FakePaymentsRepository? payments,
 }) {
   final activeClubStore = store ?? InMemoryActiveClubStore();
   final platformRepository = platform ?? FakePlatformRepository();
@@ -894,6 +989,8 @@ AppUseCases buildUseCases({
     ..auth = auth
     ..clubs = clubs;
   seasonRepository.members = membersRepository;
+  final paymentsRepository = (payments ?? FakePaymentsRepository())
+    ..members = membersRepository;
   platformRepository.auth = auth;
   clubs
     ..auth = auth
@@ -930,12 +1027,17 @@ AppUseCases buildUseCases({
     activateSeason: ActivateSeason(seasonRepository),
     getMemberSeasons: GetMemberSeasons(seasonRepository),
     setMemberFee: SetMemberFee(seasonRepository),
-    setSeasonMembershipPaid: SetSeasonMembershipPaid(seasonRepository),
     getRenewalCandidates: GetRenewalCandidates(seasonRepository),
     bulkRenew: BulkRenew(seasonRepository),
     getMyCard: GetMyCard(cardRepository),
     validateCard: ValidateCard(cardRepository),
     regenerateCard: RegenerateCard(cardRepository),
+    getSeasonPayments: GetSeasonPayments(paymentsRepository),
+    recordManualPayment: RecordManualPayment(paymentsRepository),
+    cancelPayment: CancelPayment(paymentsRepository),
+    getPaymentInstructions: GetPaymentInstructions(paymentsRepository),
+    setPaymentInstructions: SetPaymentInstructions(paymentsRepository),
+    startPayment: StartPayment(ManualPaymentGateway(paymentsRepository)),
     getClubBranding: GetClubBranding(brandingRepository),
     saveClubBranding: SaveClubBranding(brandingRepository),
     uploadClubAsset: UploadClubAsset(brandingRepository),

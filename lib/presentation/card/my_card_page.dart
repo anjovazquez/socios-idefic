@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../../application/app_use_cases.dart';
 import '../../domain/card/membership_card.dart';
+import '../../domain/payment/payment_gateway.dart';
+import '../format/money.dart';
 import '../session/session_view_model.dart';
 import 'card_qr.dart';
 import 'membership_card_view.dart';
@@ -23,6 +25,53 @@ class _MyCardPageState extends State<MyCardPage> {
 
   Widget? _qrOf(MembershipCard card) =>
       card.cardToken == null ? null : CardQr(token: card.cardToken!);
+
+  Future<void> _howToPay(MembershipCard card) async {
+    final start = await context.read<AppUseCases>().startPayment(
+      clubId: context.read<SessionViewModel>().activeClub!.id,
+      seasonMembershipId: card.seasonMembershipId!,
+    );
+    if (!mounted) return;
+    switch (start) {
+      case ManualPaymentStart(:final instructions):
+        await showModalBottomSheet<void>(
+          context: context,
+          builder: (context) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Cómo pagar tu cuota'
+                    '${card.feeCents == null ? '' : ' de ${formatCents(card.feeCents!)}'}',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    instructions ??
+                        'Tu club todavía no ha indicado cómo pagar. Ponte en '
+                            'contacto con él.',
+                    key: const Key('payment-instructions-text'),
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Cuando el club registre tu pago, tu carnet se activará '
+                    'solo.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      case RedirectPaymentStart():
+        // Online payment arrives with the real provider (VS-021).
+        break;
+    }
+  }
 
   void _showFullScreen(MembershipCard card) {
     Navigator.of(context).push(
@@ -101,12 +150,25 @@ class _MyCardPageState extends State<MyCardPage> {
                   icon: const Icon(Icons.fullscreen),
                   label: const Text('Mostrar en grande'),
                 ),
-                CardState.pendingPayment => _Notice(
-                  key: const Key('card-pending'),
-                  icon: Icons.schedule,
-                  text:
-                      'Tu carnet de la temporada ${card.seasonName} se '
-                      'activará cuando se complete el pago de la cuota.',
+                CardState.pendingPayment => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _Notice(
+                      key: const Key('card-pending'),
+                      icon: Icons.schedule,
+                      text:
+                          'Tu carnet de la temporada ${card.seasonName} se '
+                          'activará cuando se complete el pago de la cuota.',
+                    ),
+                    const SizedBox(height: 8),
+                    if (card.seasonMembershipId != null)
+                      FilledButton.icon(
+                        key: const Key('card-how-to-pay'),
+                        onPressed: () => _howToPay(card),
+                        icon: const Icon(Icons.payments_outlined),
+                        label: const Text('Cómo pagar'),
+                      ),
+                  ],
                 ),
                 CardState.notRenewed => _Notice(
                   key: const Key('card-not-renewed'),

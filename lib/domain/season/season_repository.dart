@@ -22,12 +22,6 @@ abstract interface class SeasonRepository {
     required int feeCents,
   });
 
-  /// Provisional until online payments (VS-017): paid ↔ pending.
-  Future<void> setSeasonMembershipStatus({
-    required String seasonMembershipId,
-    required SeasonMembershipStatus status,
-  });
-
   /// Members of the previous season that can join [seasonId].
   Future<List<RenewalCandidate>> getRenewalCandidates(
     String seasonId, {

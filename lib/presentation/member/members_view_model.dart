@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 
 import '../../application/app_use_cases.dart';
 import '../../domain/member/club_member.dart';
+import '../../domain/payment/payment.dart';
+import '../payment/payment_labels.dart';
 import '../../domain/season/season.dart';
 import '../../domain/season/season_membership.dart';
 import '../season/seasons_view_model.dart';
@@ -143,19 +145,6 @@ class MembersViewModel extends ChangeNotifier {
     return 'Cuota de ${member.displayName} actualizada';
   }
 
-  Future<String> setPaid(ClubMember member, {required bool paid}) async {
-    await _guard(
-      () => _useCases.setSeasonMembershipPaid(
-        seasonMembershipId: member.seasonMembershipId!,
-        paid: paid,
-      ),
-    );
-    await load();
-    return paid
-        ? '${member.displayName} queda como socio de la temporada'
-        : '${member.displayName} vuelve a estar pendiente de pago';
-  }
-
   Future<String> regenerateCard(ClubMember member) async {
     try {
       await _useCases.regenerateCard(member.seasonMembershipId!);
@@ -164,6 +153,44 @@ class MembersViewModel extends ChangeNotifier {
     }
     return 'Carnet de ${member.displayName} regenerado: el QR anterior ya no '
         'sirve';
+  }
+
+  Future<List<Payment>> payments(ClubMember member) =>
+      member.seasonMembershipId == null
+      ? Future.value(const [])
+      : _useCases.getSeasonPayments(member.seasonMembershipId!);
+
+  /// Records a fee paid outside the app (transfer, Bizum, cash).
+  Future<String> recordPayment(
+    ClubMember member, {
+    required PaymentMethod method,
+    required String amount,
+    required String reference,
+  }) async {
+    await _payment(
+      () => _useCases.recordManualPayment(
+        seasonMembershipId: member.seasonMembershipId!,
+        method: method,
+        amount: amount,
+        reference: reference,
+      ),
+    );
+    await load();
+    return 'Pago de ${member.displayName} registrado';
+  }
+
+  Future<String> cancelPayment(ClubMember member, Payment payment) async {
+    await _payment(() => _useCases.cancelPayment(payment));
+    await load();
+    return 'Pago anulado';
+  }
+
+  Future<void> _payment(Future<void> Function() action) async {
+    try {
+      await action();
+    } on PaymentFailure catch (failure) {
+      throw paymentFailureMessage(failure);
+    }
   }
 
   Future<List<MemberSeason>> seasons(ClubMember member) =>

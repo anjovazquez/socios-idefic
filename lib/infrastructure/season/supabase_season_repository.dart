@@ -79,23 +79,6 @@ class SupabaseSeasonRepository implements SeasonRepository {
   );
 
   @override
-  Future<void> setSeasonMembershipStatus({
-    required String seasonMembershipId,
-    required SeasonMembershipStatus status,
-  }) => _guard(
-    () => _client.rpc<void>(
-      'set_season_membership_status',
-      params: {
-        'p_season_membership_id': seasonMembershipId,
-        'p_status': switch (status) {
-          SeasonMembershipStatus.active => 'active',
-          _ => 'pending_payment',
-        },
-      },
-    ),
-  );
-
-  @override
   Future<List<RenewalCandidate>> getRenewalCandidates(
     String seasonId, {
     required bool keepCustomFees,
