@@ -185,6 +185,7 @@ void configureDependencies() {
         setSponsorActive: SetSponsorActive(serviceLocator()),
         renewSponsors: RenewSponsors(serviceLocator()),
         uploadSponsorLogo: UploadSponsorLogo(serviceLocator()),
+        getActiveSponsors: GetActiveSponsors(serviceLocator()),
       ),
     );
 }

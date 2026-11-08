@@ -25,6 +25,18 @@ class SupabaseSponsorRepository implements SponsorRepository {
   });
 
   @override
+  Future<List<Sponsor>> getActiveSponsors(String clubId) => _guard(() async {
+    final rows = await _client.rpc<List<dynamic>>(
+      'get_club_active_sponsors',
+      params: {'p_club_id': clubId},
+    );
+    return rows
+        .cast<Map<String, dynamic>>()
+        .map((row) => sponsorFromRow(row, logoUrl: logoUrl))
+        .toList();
+  });
+
+  @override
   Future<String> saveSponsor({
     String? sponsorId,
     required String clubId,

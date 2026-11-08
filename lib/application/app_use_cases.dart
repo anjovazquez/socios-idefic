@@ -88,6 +88,7 @@ class AppUseCases {
     required this.setSponsorActive,
     required this.renewSponsors,
     required this.uploadSponsorLogo,
+    required this.getActiveSponsors,
   });
 
   final WatchSession watchSession;
@@ -162,4 +163,5 @@ class AppUseCases {
   final SetSponsorActive setSponsorActive;
   final RenewSponsors renewSponsors;
   final UploadSponsorLogo uploadSponsorLogo;
+  final GetActiveSponsors getActiveSponsors;
 }

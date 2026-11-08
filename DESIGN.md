@@ -128,7 +128,7 @@ Patrones:
 | Pantalla | Qué muestra |
 |---|---|
 | Selector de club | `ClubAvatar` (logo/iniciales), nombre, nº de socio |
-| Portada del club (Inicio) | Cabecera con color del club, `ClubAvatar` grande, Mi carnet / Mi suscripción y «Noticias» del club (vacío: «Aquí verás las novedades de {club}») |
+| Portada del club (Inicio) | Cabecera con color del club, `ClubAvatar` grande, Mi carnet / Mi suscripción, «Noticias» del club (vacío: «Aquí verás las novedades de {club}») y «Patrocinadores» de la temporada (tarjetas de 140 px con `SponsorLogo`, nombre y dominio; abren la web en pestaña nueva; sin sección si no hay) |
 | Configuración | Vista previa en vivo de cabecera, avatar, botón principal y acento |
 | Carnet (VS-015), recibos (VS-019, PDF), emails (VS-006/032) | Logo y colores del club |
 

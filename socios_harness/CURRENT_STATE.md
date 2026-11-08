@@ -6,8 +6,8 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 - Fase actual: **7 — Comunidad (0.7)**.
 - Tarea activa: ninguna.
-- Última tarea completada: `VS-027 — Patrocinadores por temporada (admin)` (2026-11-09).
-- Siguiente tarea READY: `VS-028 — Patrocinadores para el socio` (también READY: VS-029).
+- Última tarea completada: `VS-028 — Patrocinadores para el socio` (2026-11-09).
+- Siguiente tarea READY: `VS-029 — Ventajas (admin)`.
 - Bloqueos globales: ninguno. VS-033 (staging) BLOCKED a la espera de credenciales del usuario.
 
 ## Milestones
@@ -21,7 +21,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 | 0.4 Carnet digital | DONE |
 | 0.5 Pagos | DONE |
 | 0.6 Pago real y renovación automática | DONE (con Stripe falso local; prueba real pendiente de claves) |
-| 0.7 Comunidad | IN_PROGRESS (VS-025…VS-027 DONE; VS-028, VS-029 READY) |
+| 0.7 Comunidad | IN_PROGRESS (VS-025…VS-028 DONE; VS-029 READY) |
 | 0.8 Piloto IDEFIC | TODO (VS-033 adelantada, BLOCKED por credenciales) |
 
 ## Decisiones pendientes del usuario
@@ -33,7 +33,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 ## Infraestructura
 
-- Flutter 223.35.1 (`.fvmrc`); proyecto `socios_idefic`, plataformas web/android/ios.
+- Flutter 226.35.1 (`.fvmrc`); proyecto `socios_idefic`, plataformas web/android/ios.
 - Config cliente: `--dart-define=SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` (ver `.env.example`).
 - Supabase CLI 2.122 (devDependency npm); signup deshabilitado; Google declarado y desactivado.
 - CI/CD: `.github/workflows/ci.yml` con `quality`, `edge-functions`, `sql-tests` y despliegue manual a staging (`deploy-migrations`, `deploy-functions`, `deploy-hosting`). Aún sin ejecutar en GitHub.
@@ -60,4 +60,5 @@ Snapshot operativo. Se actualiza al final de cada loop.
 - Blog (VS-025): `posts` (draft/published/archived, `published_at` programable) con RLS (admin todo; socios activos solo publicadas con fecha cumplida), `is_club_member`, RPC `save_post`, `set_post_status`, `get_club_posts` (auditoría); bucket privado `post-images/<club_id>/` (lectura miembros, escritura admin, URL firmada); pantallas `/club/news` (lista con estados) y `/club/news/edit` (editor: imagen, Ahora/Programar); acción «Noticias» en la portada (admin).
 - Inicio del socio (VS-026): la portada lista las noticias publicadas del club activo (lectura directa de `posts` por RLS, 10 por página, «Ver más»), tarjeta con imagen firmada, fecha y extracto; detalle `/club/post?id=`; `anon` sin privilegios en `posts`; seed con 3 noticias publicadas y 1 borrador de IDEFIC.
 - Patrocinadores (VS-027): `sponsors` (nombre único por club, logo en `club-assets`, web https, activo) y `sponsor_seasons`; RLS de lectura solo admin (socios en VS-028); RPC `save_sponsor`, `set_sponsor_active`, `set_sponsor_seasons`, `renew_sponsors`, `get_club_sponsors` (auditoría); pantalla `/club/sponsors` (lista, alta/edición con logo y temporadas, activar/desactivar, «Renovar para {temporada activa}» con los activos de la anterior); seed con 3 patrocinadores de IDEFIC.
+- Patrocinadores del socio (VS-028): RPC `get_club_active_sponsors` (miembros; activos de la temporada activa); sección «Patrocinadores» en Inicio (logo, nombre, dominio; abre la web en pestaña nueva con `WebsiteOpener`, inyectable en `SociosApp.openWebsite`); sin sección si no hay.
 - Sesión cloud: Flutter en `$HOME/flutter/bin`; Docker requiere arrancar `dockerd` en segundo plano (ver `QUALITY_GATES.md`). Para probar Edge Functions arrancar sin excluir `edge-runtime`; emails locales en Mailpit `http://127.0.0.1:54324`. El edge-runtime del sandbox no puede descargar de npm (CA del proxy): las funciones no usan npm.

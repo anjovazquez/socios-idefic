@@ -91,3 +91,12 @@ class UploadSponsorLogo {
     );
   }
 }
+
+class GetActiveSponsors {
+  const GetActiveSponsors(this._repository);
+
+  final SponsorRepository _repository;
+
+  Future<List<Sponsor>> call(String clubId) =>
+      _repository.getActiveSponsors(clubId);
+}

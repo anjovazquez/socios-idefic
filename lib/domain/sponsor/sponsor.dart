@@ -60,6 +60,9 @@ final class SponsorUnavailableFailure extends SponsorFailure {
 abstract interface class SponsorRepository {
   Future<List<Sponsor>> getClubSponsors(String clubId);
 
+  /// Member: active sponsors of the active season (RF-029).
+  Future<List<Sponsor>> getActiveSponsors(String clubId);
+
   /// Creates ([sponsorId] null) or edits; returns the id.
   Future<String> saveSponsor({
     String? sponsorId,

@@ -6,6 +6,7 @@ import '../../application/app_use_cases.dart';
 import '../blog/home_feed_view_model.dart';
 import '../blog/post_widgets.dart';
 import '../session/session_view_model.dart';
+import '../sponsor/club_sponsors_section.dart';
 import 'club_avatar.dart';
 
 /// Club home: identity, card and subscription, and the club news (RF-023).
@@ -150,6 +151,16 @@ class ClubHomePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 32),
                 _HomeNews(feed: feed, clubName: club.name),
+                const SizedBox(height: 32),
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 640),
+                    child: ClubSponsorsSection(
+                      key: ValueKey('sponsors-${club.id}'),
+                      clubId: club.id,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

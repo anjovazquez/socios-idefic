@@ -18,6 +18,7 @@ class SociosApp extends StatefulWidget {
     this.initialLocation,
     this.pickImage = pickImageFromGallery,
     this.openUrl = openExternalUrl,
+    this.openWebsite = openWebsiteInNewTab,
   });
 
   final AppUseCases useCases;
@@ -27,6 +28,9 @@ class SociosApp extends StatefulWidget {
 
   /// Opens provider pages such as Stripe Checkout (injectable for tests).
   final OpenUrl openUrl;
+
+  /// Opens sponsor websites (injectable for tests).
+  final OpenWebsite openWebsite;
 
   /// Deep link used on start (tests and web refreshes).
   final String? initialLocation;
@@ -57,6 +61,7 @@ class _SociosAppState extends State<SociosApp> {
         Provider<AppUseCases>.value(value: widget.useCases),
         Provider<PickImage>.value(value: widget.pickImage),
         Provider<OpenUrl>.value(value: widget.openUrl),
+        Provider<WebsiteOpener>.value(value: WebsiteOpener(widget.openWebsite)),
         ChangeNotifierProvider.value(value: _session),
         ChangeNotifierProvider(
           create: (_) => LoginViewModel(

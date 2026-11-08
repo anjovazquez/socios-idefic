@@ -1292,6 +1292,22 @@ class FakeSponsorRepository implements SponsorRepository {
     ...?sponsors[clubId],
   ];
 
+  /// Season shown to members as active (RF-029).
+  String? activeSeasonId;
+
+  @override
+  Future<List<Sponsor>> getActiveSponsors(String clubId) async => [
+    for (final s in sponsors[clubId] ?? <Sponsor>[])
+      if (s.isActive && s.seasonIds.contains(activeSeasonId))
+        Sponsor(
+          id: s.id,
+          name: s.name,
+          logoPath: s.logoPath,
+          logoUrl: s.logoPath == null ? null : logoUrl(s.logoPath!),
+          websiteUrl: s.websiteUrl,
+        ),
+  ]..sort((a, b) => a.name.compareTo(b.name));
+
   @override
   Future<String> saveSponsor({
     String? sponsorId,
@@ -1465,6 +1481,7 @@ AppUseCases buildUseCases({
     setSponsorActive: SetSponsorActive(sponsorRepository),
     renewSponsors: RenewSponsors(sponsorRepository),
     uploadSponsorLogo: UploadSponsorLogo(sponsorRepository),
+    getActiveSponsors: GetActiveSponsors(sponsorRepository),
     downloadReceipt: DownloadReceipt(
       paymentsRepository,
       receiptRenderer ?? FakeReceiptRenderer(),

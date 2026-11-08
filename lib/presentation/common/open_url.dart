@@ -11,3 +11,22 @@ Future<void> openExternalUrl(Uri url) async {
     webOnlyWindowName: '_self',
   );
 }
+
+/// Opens a third-party website (a sponsor) in a new tab / the browser,
+/// keeping the app open. Injectable for tests.
+typedef OpenWebsite = Future<void> Function(Uri url);
+
+/// Distinct type for Provider: [OpenUrl] has the same function signature.
+class WebsiteOpener {
+  const WebsiteOpener(this.open);
+
+  final OpenWebsite open;
+}
+
+Future<void> openWebsiteInNewTab(Uri url) async {
+  await launchUrl(
+    url,
+    mode: LaunchMode.externalApplication,
+    webOnlyWindowName: '_blank',
+  );
+}
