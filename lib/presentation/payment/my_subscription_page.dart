@@ -104,7 +104,7 @@ class _MySubscriptionView extends StatelessWidget {
                 _RenewalSection(renewal: viewModel.renewal),
                 const SizedBox(height: 16),
               ],
-              const _NextCharges(),
+              _NextCharges(subscription: value),
               const SizedBox(height: 24),
               Text(
                 'Histórico de pagos',
@@ -230,15 +230,25 @@ class _Row extends StatelessWidget {
 }
 
 class _NextCharges extends StatelessWidget {
-  const _NextCharges();
+  const _NextCharges({required this.subscription});
+
+  final MySubscription subscription;
 
   @override
-  Widget build(BuildContext context) => const Card(
-    key: Key('subscription-next-charges'),
+  Widget build(BuildContext context) => Card(
+    key: const Key('subscription-next-charges'),
     child: ListTile(
-      leading: Icon(Icons.event_repeat),
-      title: Text('Próximos cargos'),
-      subtitle: Text('No tienes cargos programados.'),
+      leading: const Icon(Icons.event_repeat),
+      title: const Text('Próximos cargos'),
+      subtitle: Text(
+        subscription.hasNextCharge
+            ? 'Próximo cargo: ${formatCents(subscription.nextChargeCents!)} el '
+                  '${formatLongDate(subscription.nextChargeOn!)}'
+                  '${subscription.nextChargeSeason == null ? '' : ' · Temporada ${subscription.nextChargeSeason}'}. '
+                  'Te avisaremos antes.'
+            : 'No tienes cargos programados.',
+        key: const Key('next-charge'),
+      ),
     ),
   );
 }

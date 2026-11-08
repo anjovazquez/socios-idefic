@@ -76,3 +76,26 @@ Deno.test("parses addresses", () => {
   assertEquals(parseAddress("Socios <no-reply@x.es>"), { name: "Socios", email: "no-reply@x.es" });
   assertEquals(parseAddress("a@b.es"), { email: "a@b.es" });
 });
+
+Deno.test("renewal notice: season, amount, charge date and how to cancel", async () => {
+  const { renewalNoticeEmail, longSpanishDate, euros } = await import("./emails.ts");
+  const email = renewalNoticeEmail({
+    club: { name: "IDEFIC", primaryColor: "#0B3D91" },
+    to: { email: "marta@example.com", name: "Marta" },
+    seasonName: "2027/2028",
+    amountCents: 5000,
+    chargeOn: "2027-09-01",
+    method: { kind: "card", brand: "visa", last4: "4242" },
+    link: "https://socios.example/#/club/subscription",
+  });
+  assertStringIncludes(
+    email.text,
+    "Tu suscripción a IDEFIC se renovará para la temporada 2027/2028 por un importe de 50 €. " +
+      "El cargo se realizará el 1 de septiembre de 2027 en tu tarjeta Visa terminada en 4242.",
+  );
+  assertStringIncludes(email.text, "Puedes cancelar la renovación antes de esa fecha");
+  assertStringIncludes(email.html, "https://socios.example/#/club/subscription");
+  assertEquals(email.subject, "Tu suscripción a IDEFIC se renueva el 1 de septiembre de 2027");
+  assertEquals(longSpanishDate("2028-02-29"), "29 de febrero de 2028");
+  assertEquals(euros(125050), "1.250,50 €");
+});

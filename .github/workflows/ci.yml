@@ -121,6 +121,7 @@ jobs:
           npx supabase functions deploy create-checkout --project-ref "$SUPABASE_PROJECT_REF"
           npx supabase functions deploy stripe-onboarding --project-ref "$SUPABASE_PROJECT_REF"
           npx supabase functions deploy payment-methods --project-ref "$SUPABASE_PROJECT_REF"
+          npx supabase functions deploy send-renewal-notices --project-ref "$SUPABASE_PROJECT_REF"
           npx supabase functions deploy payments-webhook --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}

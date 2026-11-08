@@ -88,3 +88,96 @@ export function invitationEmail(params: {
 
   return { to, subject, html, text };
 }
+
+const MONTHS = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+
+/** `2027-09-01` → `1 de septiembre de 2027`. */
+export function longSpanishDate(isoDate: string): string {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  return `${day} de ${MONTHS[month - 1]} de ${year}`;
+}
+
+/** `5000` → `50 €`, `5050` → `50,50 €`. */
+export function euros(cents: number): string {
+  const whole = Math.floor(cents / 100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const rest = cents % 100;
+  return rest === 0 ? `${whole} €` : `${whole},${rest.toString().padStart(2, "0")} €`;
+}
+
+export interface SavedMethod {
+  kind: string | null;
+  brand?: string | null;
+  last4?: string | null;
+}
+
+/** «tu tarjeta Visa terminada en 4242», «tu cuenta terminada en 3000». */
+export function methodPhrase(method: SavedMethod): string {
+  const end = method.last4 ? ` terminada en ${method.last4}` : "";
+  if (method.kind === "sepa_debit") return `tu cuenta bancaria${end}`;
+  const brand = method.brand ? ` ${method.brand.charAt(0).toUpperCase()}${method.brand.slice(1)}` : "";
+  return `tu tarjeta${brand}${end}`;
+}
+
+/** RF-013: notice before an automatic renewal charge. */
+export function renewalNoticeEmail(params: {
+  club: ClubIdentity;
+  to: { email: string; name?: string };
+  seasonName: string;
+  amountCents: number;
+  chargeOn: string;
+  method: SavedMethod;
+  link: string;
+}): EmailMessage {
+  const { club, to, seasonName, amountCents, chargeOn, method, link } = params;
+  const color = /^#[0-9A-Fa-f]{6}$/.test(club.primaryColor ?? "") ? club.primaryColor! : "#0B3D91";
+  const onColor = readableOn(color);
+  const date = longSpanishDate(chargeOn);
+  const greeting = to.name ? `Hola, ${to.name}` : "Hola";
+  const main =
+    `Tu suscripción a ${club.name} se renovará para la temporada ${seasonName} por un importe de ` +
+    `${euros(amountCents)}. El cargo se realizará el ${date} en ${methodPhrase(method)}.`;
+  const cancel = "Puedes cancelar la renovación antes de esa fecha desde Mi suscripción.";
+  const subject = `Tu suscripción a ${club.name} se renueva el ${date}`;
+  const logo = club.logoUrl
+    ? `<img src="${escapeHtml(club.logoUrl)}" alt="${escapeHtml(club.name)}" width="56" height="56" style="border-radius:28px;background:#FFFFFF;display:block;margin:0 auto 8px">`
+    : "";
+
+  const html = `<!doctype html>
+<html lang="es"><body style="margin:0;background:#F4F5F7;font-family:Arial,Helvetica,sans-serif;color:#111111">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#FFFFFF;border-radius:12px;overflow:hidden">
+<tr><td align="center" style="background:${color};color:${onColor};padding:24px 16px">${logo}<div style="font-size:20px;font-weight:bold">${escapeHtml(club.name)}</div></td></tr>
+<tr><td style="padding:24px">
+<p style="font-size:16px;margin:0 0 12px">${escapeHtml(greeting)}:</p>
+<p style="font-size:15px;line-height:1.5;margin:0 0 16px">${escapeHtml(main)}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F5F7;border-radius:8px;margin:0 0 16px">
+<tr><td style="padding:12px 16px;font-size:14px;line-height:1.7">
+Temporada: <strong>${escapeHtml(seasonName)}</strong><br>
+Importe: <strong>${escapeHtml(euros(amountCents))}</strong><br>
+Fecha del cargo: <strong>${escapeHtml(date)}</strong>
+</td></tr></table>
+<p style="font-size:15px;line-height:1.5;margin:0 0 24px">${escapeHtml(cancel)}</p>
+<p style="text-align:center;margin:0 0 8px"><a href="${escapeHtml(link)}" style="background:${color};color:${onColor};padding:12px 24px;border-radius:24px;text-decoration:none;font-weight:bold;display:inline-block">Ver mi suscripción</a></p>
+</td></tr></table>
+<p style="font-size:12px;color:#777777;margin:16px 0 0">Recibes este aviso porque tienes activada la renovación automática en ${escapeHtml(club.name)}.</p>
+</td></tr></table></body></html>`;
+
+  const text = [
+    `${greeting}:`,
+    "",
+    main,
+    "",
+    `Temporada: ${seasonName}`,
+    `Importe: ${euros(amountCents)}`,
+    `Fecha del cargo: ${date}`,
+    "",
+    cancel,
+    "",
+    `Ver mi suscripción: ${link}`,
+  ].join("\n");
+
+  return { to, subject, html, text };
+}

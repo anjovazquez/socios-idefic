@@ -108,3 +108,32 @@ class BulkRenew {
     return _repository.bulkRenew(seasonId, items);
   }
 }
+
+class SetSeasonRenewal {
+  const SetSeasonRenewal(this._repository);
+
+  final SeasonRepository _repository;
+
+  /// [noticeDays] as typed; 1 to 60 days, charge within the season.
+  Future<void> call({
+    required Season season,
+    required DateTime chargeOn,
+    required String noticeDays,
+  }) {
+    if (season.status == SeasonStatus.closed) {
+      throw const SeasonClosedFailure();
+    }
+    final days = int.tryParse(noticeDays.trim());
+    if (days == null ||
+        days < 1 ||
+        days > 60 ||
+        chargeOn.isAfter(season.endsOn)) {
+      throw const InvalidSeasonDataFailure(SeasonField.renewal);
+    }
+    return _repository.setSeasonRenewal(
+      seasonId: season.id,
+      chargeOn: chargeOn,
+      noticeDays: days,
+    );
+  }
+}

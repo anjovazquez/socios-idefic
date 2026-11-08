@@ -15,7 +15,8 @@ class SupabaseSeasonRepository implements SeasonRepository {
     final rows = await _client
         .from('seasons')
         .select(
-          'id, club_id, name, starts_on, ends_on, default_fee_cents, status',
+          'id, club_id, name, starts_on, ends_on, default_fee_cents, status, '
+          'renewal_charge_on, renewal_notice_days',
         )
         .eq('club_id', clubId)
         .order('name', ascending: false);
@@ -36,6 +37,22 @@ class SupabaseSeasonRepository implements SeasonRepository {
         'p_name': name,
         'p_starts_on': _date(startsOn),
         'p_ends_on': _date(endsOn),
+      },
+    ),
+  );
+
+  @override
+  Future<void> setSeasonRenewal({
+    required String seasonId,
+    required DateTime? chargeOn,
+    required int noticeDays,
+  }) => _guard(
+    () => _client.rpc<void>(
+      'set_season_renewal',
+      params: {
+        'p_season_id': seasonId,
+        'p_charge_on': chargeOn?.toIso8601String().substring(0, 10),
+        'p_notice_days': noticeDays,
       },
     ),
   );
@@ -138,6 +155,11 @@ Season seasonFromRow(Map<String, dynamic> row) => Season(
     _ => SeasonStatus.draft,
   },
   defaultFeeCents: row['default_fee_cents'] as int?,
+  renewalChargeOn: switch (row['renewal_charge_on']) {
+    final String value => DateTime.parse(value),
+    _ => null,
+  },
+  renewalNoticeDays: (row['renewal_notice_days'] as int?) ?? 15,
 );
 
 MemberSeason memberSeasonFromRow(Map<String, dynamic> row) => MemberSeason(
@@ -172,6 +194,8 @@ SeasonFailure mapSeasonError(String? code, String message, String? hint) =>
       '23505' => const SeasonAlreadyExistsFailure(),
       '22023' when message.contains('fee') || message.contains('invalid fee') =>
         const InvalidSeasonDataFailure(SeasonField.fee),
+      '22023' when message.contains('notice') || message.contains('charge') =>
+        const InvalidSeasonDataFailure(SeasonField.renewal),
       '22023' when message.contains('dates') => const InvalidSeasonDataFailure(
         SeasonField.dates,
       ),

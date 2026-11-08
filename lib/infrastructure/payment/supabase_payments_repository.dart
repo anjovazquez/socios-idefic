@@ -282,6 +282,7 @@ MySubscription mySubscriptionFromRow(Map<String, dynamic> row) =>
       lastMethod: _methodOf(row['payment_method']),
       nextChargeCents: row['next_charge_cents'] as int?,
       onlinePayments: row['online_payments'] == true,
+      nextChargeSeason: row['next_charge_season'] as String?,
       nextChargeOn: switch (row['next_charge_on']) {
         final String value => DateTime.parse(value),
         _ => null,

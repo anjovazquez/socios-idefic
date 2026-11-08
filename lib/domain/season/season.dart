@@ -10,6 +10,8 @@ class Season {
     required this.endsOn,
     required this.status,
     this.defaultFeeCents,
+    this.renewalChargeOn,
+    this.renewalNoticeDays = 15,
   });
 
   final String id;
@@ -23,6 +25,16 @@ class Season {
 
   /// Ordinary fee in euro cents; set when the season is activated.
   final int? defaultFeeCents;
+
+  /// Automatic renewal charge date (VS-023); null = [startsOn].
+  final DateTime? renewalChargeOn;
+
+  /// Days before the charge when the member gets the notice (RF-013).
+  final int renewalNoticeDays;
+
+  DateTime get chargeOn => renewalChargeOn ?? startsOn;
+
+  DateTime get noticeOn => chargeOn.subtract(Duration(days: renewalNoticeDays));
 }
 
 final _seasonName = RegExp(r'^(\d{4})/(\d{4})$');
@@ -62,7 +74,7 @@ int? parseEurosToCents(String input) {
   return euros * 100 + int.parse(decimals.isEmpty ? '0' : decimals);
 }
 
-enum SeasonField { name, dates, fee }
+enum SeasonField { name, dates, fee, renewal }
 
 sealed class SeasonFailure implements Exception {
   const SeasonFailure();

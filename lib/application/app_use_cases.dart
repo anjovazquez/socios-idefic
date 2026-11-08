@@ -48,6 +48,7 @@ class AppUseCases {
     required this.getSeasons,
     required this.createSeason,
     required this.activateSeason,
+    required this.setSeasonRenewal,
     required this.getMemberSeasons,
     required this.setMemberFee,
     required this.getRenewalCandidates,
@@ -106,6 +107,7 @@ class AppUseCases {
   final GetSeasons getSeasons;
   final CreateSeason createSeason;
   final ActivateSeason activateSeason;
+  final SetSeasonRenewal setSeasonRenewal;
   final GetMemberSeasons getMemberSeasons;
   final SetMemberFee setMemberFee;
   final GetRenewalCandidates getRenewalCandidates;

@@ -21,3 +21,22 @@ String centsToInput(int cents) => cents % 100 == 0
 String formatDate(DateTime date) =>
     '${date.day.toString().padLeft(2, '0')}/'
     '${date.month.toString().padLeft(2, '0')}/${date.year}';
+
+const _months = [
+  'enero',
+  'febrero',
+  'marzo',
+  'abril',
+  'mayo',
+  'junio',
+  'julio',
+  'agosto',
+  'septiembre',
+  'octubre',
+  'noviembre',
+  'diciembre',
+];
+
+/// `1 de septiembre de 2027`.
+String formatLongDate(DateTime date) =>
+    '${date.day} de ${_months[date.month - 1]} de ${date.year}';

@@ -51,6 +51,19 @@ class _SeasonsView extends StatelessWidget {
     }
   }
 
+  Future<void> _renewal(
+    BuildContext context,
+    SeasonsViewModel viewModel,
+    Season season,
+  ) => _show(
+    context,
+    RenewalChargeDialog(
+      season: season,
+      onSubmit: (chargeOn, days) =>
+          viewModel.changeRenewal(season, chargeOn: chargeOn, noticeDays: days),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<SeasonsViewModel>();
@@ -99,6 +112,7 @@ class _SeasonsView extends StatelessWidget {
             else
               _SeasonCard(
                 season: active,
+                onRenewal: () => _renewal(context, viewModel, active),
                 onActivate: () => _show(
                   context,
                   ActivateSeasonDialog(
@@ -115,6 +129,9 @@ class _SeasonsView extends StatelessWidget {
               for (final season in others)
                 _SeasonCard(
                   season: season,
+                  onRenewal: season.status == SeasonStatus.closed
+                      ? null
+                      : () => _renewal(context, viewModel, season),
                   onActivate: season.status == SeasonStatus.draft
                       ? () => _show(
                           context,
@@ -135,10 +152,17 @@ class _SeasonsView extends StatelessWidget {
 }
 
 class _SeasonCard extends StatelessWidget {
-  const _SeasonCard({required this.season, required this.onActivate});
+  const _SeasonCard({
+    required this.season,
+    required this.onActivate,
+    this.onRenewal,
+  });
 
   final Season season;
   final VoidCallback? onActivate;
+
+  /// Automatic renewal charge settings (VS-023).
+  final VoidCallback? onRenewal;
 
   @override
   Widget build(BuildContext context) {
@@ -191,6 +215,13 @@ class _SeasonCard extends StatelessWidget {
               fee == null ? 'Cuota sin fijar' : 'Cuota: ${formatCents(fee)}',
               style: theme.textTheme.bodyLarge,
             ),
+            if (season.status != SeasonStatus.closed)
+              Text(
+                'Cobro automático: ${formatDate(season.chargeOn)} · aviso '
+                '${season.renewalNoticeDays} días antes',
+                key: Key('season-charge-${season.name}'),
+                style: theme.textTheme.bodySmall,
+              ),
             Align(
               alignment: Alignment.centerRight,
               child: Wrap(
@@ -209,6 +240,12 @@ class _SeasonCard extends StatelessWidget {
                         ).toString(),
                       ),
                       child: const Text('Renovar socios'),
+                    ),
+                  if (onRenewal != null)
+                    TextButton(
+                      key: Key('season-renewal-${season.name}'),
+                      onPressed: onRenewal,
+                      child: const Text('Cobro automático'),
                     ),
                   if (onActivate != null)
                     TextButton(

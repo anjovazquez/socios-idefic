@@ -12,6 +12,7 @@ class MySubscription {
     this.nextChargeCents,
     this.nextChargeOn,
     this.onlinePayments = false,
+    this.nextChargeSeason,
   });
 
   /// Null when the club has no active season.
@@ -28,6 +29,9 @@ class MySubscription {
   /// Automatic renewals (phase 6) will schedule the next charge.
   final int? nextChargeCents;
   final DateTime? nextChargeOn;
+  final String? nextChargeSeason;
+
+  bool get hasNextCharge => nextChargeCents != null && nextChargeOn != null;
 
   /// The club takes online payments (Stripe account active).
   final bool onlinePayments;

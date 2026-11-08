@@ -90,6 +90,19 @@ Express, sin comisión de plataforma; ADR-001).
    Tarjetas de prueba: `4242 4242 4242 4242` (válida),
    `4000 0000 0000 0002` (rechazada).
 
+### Aviso previo de renovación (VS-023)
+
+Un job de `pg_cron` (`send-renewal-notices`, 07:05 UTC cada día) llama a la
+Edge Function del mismo nombre. Necesita dos secretos en **Vault** (SQL
+Editor, una sola vez por proyecto):
+
+```sql
+select vault.create_secret('https://<ref>.supabase.co', 'project_url');
+select vault.create_secret('<service_role key>', 'service_role_key');
+```
+
+Sin ellos el job no hace nada. Los emails salen por Resend (`RESEND_API_KEY`).
+
 Sin `STRIPE_SECRET_KEY` la app sigue con el pago manual y «Pagar ahora» no
 aparece. `payments-webhook` es pública (`--no-verify-jwt`) y rechaza todo
 evento sin firma válida.

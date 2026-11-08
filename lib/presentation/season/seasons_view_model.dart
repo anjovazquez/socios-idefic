@@ -67,6 +67,22 @@ class SeasonsViewModel extends ChangeNotifier {
     return 'Temporada ${season.name} activa';
   }
 
+  Future<String> changeRenewal(
+    Season season, {
+    required DateTime chargeOn,
+    required String noticeDays,
+  }) async {
+    await _guard(
+      () => _useCases.setSeasonRenewal(
+        season: season,
+        chargeOn: chargeOn,
+        noticeDays: noticeDays,
+      ),
+    );
+    await load();
+    return 'Cobro automático de ${season.name} actualizado';
+  }
+
   Future<void> _guard(Future<void> Function() action) async {
     try {
       await action();
@@ -83,6 +99,8 @@ class SeasonsViewModel extends ChangeNotifier {
       'El nombre debe ser dos años seguidos, p. ej. 2026/2027',
     InvalidSeasonDataFailure(field: SeasonField.dates) =>
       'La fecha de fin debe ser posterior a la de inicio',
+    InvalidSeasonDataFailure(field: SeasonField.renewal) =>
+      'El aviso debe ser de 1 a 60 días y el cobro, dentro de la temporada',
     InvalidSeasonDataFailure(field: SeasonField.fee) =>
       'Indica la cuota de la temporada',
     SeasonAlreadyExistsFailure() => 'Ya existe una temporada con ese nombre',

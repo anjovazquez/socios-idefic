@@ -794,6 +794,30 @@ class FakeSeasonRepository implements SeasonRepository {
   }
 
   @override
+  Future<void> setSeasonRenewal({
+    required String seasonId,
+    required DateTime? chargeOn,
+    required int noticeDays,
+  }) async {
+    for (final list in seasons.values) {
+      final i = list.indexWhere((s) => s.id == seasonId);
+      if (i < 0) continue;
+      final s = list[i];
+      list[i] = Season(
+        id: s.id,
+        clubId: s.clubId,
+        name: s.name,
+        startsOn: s.startsOn,
+        endsOn: s.endsOn,
+        status: s.status,
+        defaultFeeCents: s.defaultFeeCents,
+        renewalChargeOn: chargeOn,
+        renewalNoticeDays: noticeDays,
+      );
+    }
+  }
+
+  @override
   Future<void> activateSeason({
     required String seasonId,
     required int defaultFeeCents,
@@ -1147,6 +1171,7 @@ AppUseCases buildUseCases({
     getSeasons: GetSeasons(seasonRepository),
     createSeason: CreateSeason(seasonRepository),
     activateSeason: ActivateSeason(seasonRepository),
+    setSeasonRenewal: SetSeasonRenewal(seasonRepository),
     getMemberSeasons: GetMemberSeasons(seasonRepository),
     setMemberFee: SetMemberFee(seasonRepository),
     getRenewalCandidates: GetRenewalCandidates(seasonRepository),

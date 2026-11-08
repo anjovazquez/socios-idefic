@@ -115,3 +115,89 @@ class _ActivateSeasonDialogState extends State<ActivateSeasonDialog> {
     );
   }
 }
+
+/// Automatic renewal charge date and notice days of a season (VS-023).
+class RenewalChargeDialog extends StatefulWidget {
+  const RenewalChargeDialog({
+    super.key,
+    required this.season,
+    required this.onSubmit,
+  });
+
+  final Season season;
+  final Future<String> Function(DateTime chargeOn, String noticeDays) onSubmit;
+
+  @override
+  State<RenewalChargeDialog> createState() => _RenewalChargeDialogState();
+}
+
+class _RenewalChargeDialogState extends State<RenewalChargeDialog> {
+  late DateTime _chargeOn = widget.season.chargeOn;
+  late final _days = TextEditingController(
+    text: '${widget.season.renewalNoticeDays}',
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _days.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _days.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _chargeOn,
+      firstDate: DateTime(widget.season.startsOn.year - 1),
+      lastDate: widget.season.endsOn,
+    );
+    if (picked != null) setState(() => _chargeOn = picked);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final days = int.tryParse(_days.text.trim());
+    final noticeOn = days == null
+        ? null
+        : _chargeOn.subtract(Duration(days: days));
+    return SubmitDialog(
+      title: 'Cobro automático de ${widget.season.name}',
+      action: 'Guardar',
+      saveKey: const Key('renewal-charge-save'),
+      onSubmit: () => widget.onSubmit(_chargeOn, _days.text),
+      builder: (context, _) => [
+        Text(
+          'Solo para socios con renovación automática y método guardado.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 12),
+        ListTile(
+          key: const Key('renewal-charge-date'),
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.event),
+          title: const Text('Fecha del cobro'),
+          subtitle: Text(formatDate(_chargeOn)),
+          trailing: const Text('Cambiar'),
+          onTap: _pickDate,
+        ),
+        TextField(
+          key: const Key('renewal-notice-days'),
+          controller: _days,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: 'Días de aviso antes del cobro',
+            suffixText: 'días',
+            helperText: noticeOn == null
+                ? 'De 1 a 60 días'
+                : 'El aviso se enviará el ${formatDate(noticeOn)}',
+          ),
+        ),
+      ],
+    );
+  }
+}

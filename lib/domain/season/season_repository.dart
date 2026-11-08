@@ -31,6 +31,13 @@ abstract interface class SeasonRepository {
   /// Renews [items] at once; returns how many were new (idempotent).
   Future<int> bulkRenew(String seasonId, List<RenewalItem> items);
 
+  /// Automatic renewal charge date and notice days (VS-023).
+  Future<void> setSeasonRenewal({
+    required String seasonId,
+    required DateTime? chargeOn,
+    required int noticeDays,
+  });
+
   /// Makes [seasonId] the only active season of its club with the fee.
   Future<void> activateSeason({
     required String seasonId,
