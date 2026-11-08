@@ -9,6 +9,7 @@ import '../onboarding/onboarding_page.dart';
 import '../club/club_selector_page.dart';
 import '../platform/audit_log_page.dart';
 import '../profile/my_data_page.dart';
+import '../season/renewal_page.dart';
 import '../season/seasons_page.dart';
 import '../platform/platform_clubs_page.dart';
 import '../session/session_status_pages.dart';
@@ -106,6 +107,15 @@ GoRouter createRouter(SessionViewModel session, {String? initialLocation}) =>
             GoRoute(
               path: 'seasons',
               builder: (context, state) => const SeasonsPage(),
+              routes: [
+                GoRoute(
+                  path: 'renew',
+                  builder: (context, state) => RenewalPage(
+                    seasonId: state.uri.queryParameters['season'] ?? '',
+                    seasonName: state.uri.queryParameters['name'],
+                  ),
+                ),
+              ],
             ),
           ],
         ),

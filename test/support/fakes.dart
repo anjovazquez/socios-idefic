@@ -29,6 +29,7 @@ import 'package:socios_idefic/domain/onboarding/onboarding_repository.dart';
 import 'package:socios_idefic/domain/platform/audit_entry.dart';
 import 'package:socios_idefic/domain/profile/my_profile.dart';
 import 'package:socios_idefic/domain/profile/profile_repository.dart';
+import 'package:socios_idefic/domain/season/renewal.dart';
 import 'package:socios_idefic/domain/season/season.dart';
 import 'package:socios_idefic/domain/season/season_membership.dart';
 import 'package:socios_idefic/domain/season/season_repository.dart';
@@ -660,6 +661,57 @@ class FakeSeasonRepository implements SeasonRepository {
   /// History per club membership id.
   final Map<String, List<MemberSeason>> history = {};
 
+  /// Renewal candidates per target season, and its ordinary fee.
+  final Map<String, List<RenewalCandidate>> candidates = {};
+  int ordinaryFeeCents = 5500;
+  final List<List<RenewalItem>> renewals = [];
+
+  @override
+  Future<List<RenewalCandidate>> getRenewalCandidates(
+    String seasonId, {
+    required bool keepCustomFees,
+  }) async => [
+    for (final c in candidates[seasonId] ?? const <RenewalCandidate>[])
+      keepCustomFees && c.previousWasCustom
+          ? c
+          : RenewalCandidate(
+              membershipId: c.membershipId,
+              email: c.email,
+              firstName: c.firstName,
+              memberNumber: c.memberNumber,
+              previousSeasonName: c.previousSeasonName,
+              previousFeeCents: c.previousFeeCents,
+              previousWasCustom: c.previousWasCustom,
+              proposedFeeCents: ordinaryFeeCents,
+              alreadyRenewed: c.alreadyRenewed,
+            ),
+  ];
+
+  @override
+  Future<int> bulkRenew(String seasonId, List<RenewalItem> items) async {
+    renewals.add(items);
+    final list = candidates[seasonId]!;
+    var created = 0;
+    for (final item in items) {
+      final index = list.indexWhere((c) => c.membershipId == item.membershipId);
+      final c = list[index];
+      if (c.alreadyRenewed) continue;
+      created++;
+      list[index] = RenewalCandidate(
+        membershipId: c.membershipId,
+        email: c.email,
+        firstName: c.firstName,
+        memberNumber: c.memberNumber,
+        previousSeasonName: c.previousSeasonName,
+        previousFeeCents: c.previousFeeCents,
+        previousWasCustom: c.previousWasCustom,
+        proposedFeeCents: c.proposedFeeCents,
+        alreadyRenewed: true,
+      );
+    }
+    return created;
+  }
+
   void _updateMember(
     String seasonMembershipId,
     ClubMember Function(ClubMember) change,
@@ -840,6 +892,8 @@ AppUseCases buildUseCases({
     getMemberSeasons: GetMemberSeasons(seasonRepository),
     setMemberFee: SetMemberFee(seasonRepository),
     setSeasonMembershipPaid: SetSeasonMembershipPaid(seasonRepository),
+    getRenewalCandidates: GetRenewalCandidates(seasonRepository),
+    bulkRenew: BulkRenew(seasonRepository),
     getClubBranding: GetClubBranding(brandingRepository),
     saveClubBranding: SaveClubBranding(brandingRepository),
     uploadClubAsset: UploadClubAsset(brandingRepository),

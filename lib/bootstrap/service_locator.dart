@@ -111,6 +111,8 @@ void configureDependencies() {
         getMemberSeasons: GetMemberSeasons(serviceLocator()),
         setMemberFee: SetMemberFee(serviceLocator()),
         setSeasonMembershipPaid: SetSeasonMembershipPaid(serviceLocator()),
+        getRenewalCandidates: GetRenewalCandidates(serviceLocator()),
+        bulkRenew: BulkRenew(serviceLocator()),
       ),
     );
 }

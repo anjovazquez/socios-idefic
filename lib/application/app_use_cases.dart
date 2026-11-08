@@ -49,6 +49,8 @@ class AppUseCases {
     required this.getMemberSeasons,
     required this.setMemberFee,
     required this.setSeasonMembershipPaid,
+    required this.getRenewalCandidates,
+    required this.bulkRenew,
   });
 
   final WatchSession watchSession;
@@ -86,4 +88,6 @@ class AppUseCases {
   final GetMemberSeasons getMemberSeasons;
   final SetMemberFee setMemberFee;
   final SetSeasonMembershipPaid setSeasonMembershipPaid;
+  final GetRenewalCandidates getRenewalCandidates;
+  final BulkRenew bulkRenew;
 }

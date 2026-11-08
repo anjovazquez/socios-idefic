@@ -4,10 +4,10 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 ## Estado general
 
-- Fase actual: **3 — Temporadas y cuotas (0.3)**.
+- Fase actual: **4/5 — Carnet digital (0.4) y Pagos (0.5)**.
 - Tarea activa: ninguna.
-- Última tarea completada: `VS-013 — Socio por temporada y cuota personalizada` (2026-11-09).
-- Siguiente tarea READY: `VS-014 — Renovación masiva` (también READY: VS-015, VS-017, VS-025, VS-027).
+- Última tarea completada: `VS-014 — Renovación masiva` (2026-11-09). Milestone 0.3 completo.
+- Siguiente tarea READY: `VS-015 — Mi carnet digital` (también READY: VS-017, VS-025, VS-027).
 - Bloqueos globales: ninguno. VS-033 (staging) BLOCKED a la espera de credenciales del usuario.
 
 ## Milestones
@@ -17,7 +17,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 | Bootstrap | DONE |
 | 0.1 Acceso multi-club | DONE |
 | 0.2 Socios | DONE |
-| 0.3 Temporadas y cuotas | IN_PROGRESS (VS-012, VS-013 DONE; VS-014 READY) |
+| 0.3 Temporadas y cuotas | DONE |
 | 0.4 Carnet digital | READY (VS-015) |
 | 0.5 Pagos | READY (VS-017) |
 | 0.6 Pago real y renovación automática | TODO |
@@ -46,4 +46,5 @@ Snapshot operativo. Se actualiza al final de cada loop.
 - Mis datos (VS-009): bucket privado `profile-photos`, `can_see_member_photo`, `update_my_profile`; pantalla `/club/me`.
 - Temporadas (VS-012): `seasons`, `create_season`, `activate_season`, `get_my_clubs.active_season_name`; pantalla `/club/seasons`; seed IDEFIC 2025/2026 (cerrada, 45 €) y 2026/2027 (activa, 50 €).
 - Socio por temporada (VS-013): `season_memberships` (+ `card_token`), trigger `join_active_season`, `set_member_fee`, `set_season_membership_status` (provisional), `get_member_seasons`, `can_see_club_membership`; ficha con temporada actual e histórico.
+- Renovación (VS-014): `get_renewal_candidates`, `bulk_renew`, `previous_season_id`; pantalla `/club/seasons/renew?season=…`.
 - Sesión cloud: Flutter en `$HOME/flutter/bin`; Docker requiere arrancar `dockerd` en segundo plano (ver `QUALITY_GATES.md`). Para probar Edge Functions arrancar sin excluir `edge-runtime`; emails locales en Mailpit `http://127.0.0.1:54324`. El edge-runtime del sandbox no puede descargar de npm (CA del proxy): las funciones no usan npm.

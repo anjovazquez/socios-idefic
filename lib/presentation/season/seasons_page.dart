@@ -191,19 +191,38 @@ class _SeasonCard extends StatelessWidget {
               fee == null ? 'Cuota sin fijar' : 'Cuota: ${formatCents(fee)}',
               style: theme.textTheme.bodyLarge,
             ),
-            if (onActivate != null)
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  key: Key('season-action-${season.name}'),
-                  onPressed: onActivate,
-                  child: Text(
-                    season.status == SeasonStatus.active
-                        ? 'Cambiar cuota'
-                        : 'Activar',
-                  ),
-                ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  if (season.status != SeasonStatus.closed)
+                    TextButton(
+                      key: Key('season-renew-${season.name}'),
+                      onPressed: () => context.go(
+                        Uri(
+                          path: '/club/seasons/renew',
+                          queryParameters: {
+                            'season': season.id,
+                            'name': season.name,
+                          },
+                        ).toString(),
+                      ),
+                      child: const Text('Renovar socios'),
+                    ),
+                  if (onActivate != null)
+                    TextButton(
+                      key: Key('season-action-${season.name}'),
+                      onPressed: onActivate,
+                      child: Text(
+                        season.status == SeasonStatus.active
+                            ? 'Cambiar cuota'
+                            : 'Activar',
+                      ),
+                    ),
+                ],
               ),
+            ),
           ],
         ),
       ),

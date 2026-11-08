@@ -1,3 +1,4 @@
+import '../../domain/season/renewal.dart';
 import '../../domain/season/season.dart';
 import '../../domain/season/season_membership.dart';
 import '../../domain/season/season_repository.dart';
@@ -92,4 +93,32 @@ class SetSeasonMembershipPaid {
             ? SeasonMembershipStatus.active
             : SeasonMembershipStatus.pendingPayment,
       );
+}
+
+class GetRenewalCandidates {
+  const GetRenewalCandidates(this._repository);
+
+  final SeasonRepository _repository;
+
+  Future<List<RenewalCandidate>> call(
+    String seasonId, {
+    bool keepCustomFees = true,
+  }) => _repository.getRenewalCandidates(
+    seasonId,
+    keepCustomFees: keepCustomFees,
+  );
+}
+
+class BulkRenew {
+  const BulkRenew(this._repository);
+
+  final SeasonRepository _repository;
+
+  Future<int> call(String seasonId, List<RenewalItem> items) {
+    if (items.isEmpty) throw const NothingToRenewFailure();
+    if (items.any((item) => item.feeCents < 0)) {
+      throw const InvalidSeasonDataFailure(SeasonField.fee);
+    }
+    return _repository.bulkRenew(seasonId, items);
+  }
 }

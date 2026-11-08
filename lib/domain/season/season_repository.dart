@@ -1,3 +1,4 @@
+import 'renewal.dart';
 import 'season.dart';
 import 'season_membership.dart';
 
@@ -26,6 +27,15 @@ abstract interface class SeasonRepository {
     required String seasonMembershipId,
     required SeasonMembershipStatus status,
   });
+
+  /// Members of the previous season that can join [seasonId].
+  Future<List<RenewalCandidate>> getRenewalCandidates(
+    String seasonId, {
+    required bool keepCustomFees,
+  });
+
+  /// Renews [items] at once; returns how many were new (idempotent).
+  Future<int> bulkRenew(String seasonId, List<RenewalItem> items);
 
   /// Makes [seasonId] the only active season of its club with the fee.
   Future<void> activateSeason({

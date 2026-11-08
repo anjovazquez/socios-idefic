@@ -78,6 +78,16 @@ final class SeasonAlreadyExistsFailure extends SeasonFailure {
   const SeasonAlreadyExistsFailure();
 }
 
+/// Nobody selected to renew.
+final class NothingToRenewFailure extends SeasonFailure {
+  const NothingToRenewFailure();
+}
+
+/// A member is not renewable (deactivated or unpaid previous season).
+final class NotRenewableFailure extends SeasonFailure {
+  const NotRenewableFailure();
+}
+
 final class SeasonClosedFailure extends SeasonFailure {
   const SeasonClosedFailure();
 }

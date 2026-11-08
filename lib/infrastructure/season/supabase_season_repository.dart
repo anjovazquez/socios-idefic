@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../domain/season/renewal.dart';
 import '../../domain/season/season.dart';
 import '../../domain/season/season_membership.dart';
 import '../../domain/season/season_repository.dart';
@@ -94,6 +95,38 @@ class SupabaseSeasonRepository implements SeasonRepository {
     ),
   );
 
+  @override
+  Future<List<RenewalCandidate>> getRenewalCandidates(
+    String seasonId, {
+    required bool keepCustomFees,
+  }) => _guard(() async {
+    final rows = await _client.rpc<List<dynamic>>(
+      'get_renewal_candidates',
+      params: {'p_season_id': seasonId, 'p_keep_custom': keepCustomFees},
+    );
+    return rows
+        .cast<Map<String, dynamic>>()
+        .map(renewalCandidateFromRow)
+        .toList();
+  });
+
+  @override
+  Future<int> bulkRenew(String seasonId, List<RenewalItem> items) => _guard(
+    () async {
+      final created = await _client.rpc<int>(
+        'bulk_renew',
+        params: {
+          'p_season_id': seasonId,
+          'p_items': [
+            for (final item in items)
+              {'membership_id': item.membershipId, 'fee_cents': item.feeCents},
+          ],
+        },
+      );
+      return created;
+    },
+  );
+
   static String? _date(DateTime? date) =>
       date?.toIso8601String().substring(0, 10);
 
@@ -136,6 +169,20 @@ MemberSeason memberSeasonFromRow(Map<String, dynamic> row) => MemberSeason(
   feeCents: row['fee_cents'] as int?,
 );
 
+RenewalCandidate renewalCandidateFromRow(Map<String, dynamic> row) =>
+    RenewalCandidate(
+      membershipId: row['membership_id'] as String,
+      email: row['email'] as String,
+      firstName: row['first_name'] as String?,
+      lastName: row['last_name'] as String?,
+      memberNumber: row['member_number'] as int?,
+      previousSeasonName: row['previous_season_name'] as String,
+      previousFeeCents: row['previous_fee_cents'] as int,
+      previousWasCustom: row['previous_was_custom'] as bool? ?? false,
+      proposedFeeCents: row['proposed_fee_cents'] as int,
+      alreadyRenewed: row['already_renewed'] as bool? ?? false,
+    );
+
 SeasonFailure mapSeasonError(String? code, String message, String? hint) =>
     switch (code) {
       '42501' => const SeasonPermissionFailure(),
@@ -147,5 +194,6 @@ SeasonFailure mapSeasonError(String? code, String message, String? hint) =>
       ),
       '22023' => const InvalidSeasonDataFailure(SeasonField.name),
       'P0001' when hint == 'season_closed' => const SeasonClosedFailure(),
+      'P0001' when hint == 'not_renewable' => const NotRenewableFailure(),
       _ => SeasonUnavailableFailure('$code $message'),
     };

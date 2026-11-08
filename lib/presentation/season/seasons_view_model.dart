@@ -88,6 +88,10 @@ class SeasonsViewModel extends ChangeNotifier {
     SeasonAlreadyExistsFailure() => 'Ya existe una temporada con ese nombre',
     SeasonClosedFailure() =>
       'Una temporada cerrada no se puede volver a activar',
+    NothingToRenewFailure() => 'Selecciona al menos un socio para renovar',
+    NotRenewableFailure() =>
+      'Algún socio ya no se puede renovar (baja o temporada anterior sin '
+          'pagar). Vuelve a cargar la lista',
     SeasonPermissionFailure() =>
       'Solo el administrador del club puede gestionar temporadas',
     SeasonUnavailableFailure() =>
