@@ -1,10 +1,26 @@
-name: Socios CI
+name: Socios CI/CD
 
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      deploy_hosting:
+        description: Build the web app and deploy it to Firebase Hosting (staging)
+        required: true
+        default: false
+        type: boolean
+      deploy_migrations:
+        description: Push pending Supabase migrations to staging (never the seed)
+        required: true
+        default: false
+        type: boolean
+      deploy_functions:
+        description: Deploy Supabase Edge Functions to staging
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -61,3 +77,75 @@ jobs:
         run: npx supabase start -x studio,imgproxy,vector,logflare,edge-runtime,realtime,pooler,postgres-meta
       - name: Run SQL tests
         run: npx supabase test db
+
+  # ---------------------------------------------------------------------------
+  # Staging deployment: manual only (workflow_dispatch), see DEPLOYMENT.md.
+  # Every job runs in the GitHub environment "staging", where the secrets live.
+  # ---------------------------------------------------------------------------
+
+  deploy-migrations:
+    name: Deploy migrations (staging)
+    needs: [sql-tests]
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_migrations }}
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Push migrations
+        run: npx supabase db push --db-url "$SUPABASE_DB_URL"
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL_STAGING }}
+
+  deploy-functions:
+    name: Deploy Edge Functions (staging)
+    needs: [edge-functions]
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_functions }}
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Deploy invite-member
+        run: npx supabase functions deploy invite-member --project-ref "$SUPABASE_PROJECT_REF"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF_STAGING }}
+
+  deploy-hosting:
+    name: Deploy web (Firebase Hosting staging)
+    needs: [quality]
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_hosting }}
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Build web
+        run: >-
+          flutter build web --release
+          --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL_STAGING }}
+          --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY_STAGING }}
+      - name: Firebase credentials
+        run: echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-sa.json"
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STAGING }}
+      - name: Deploy
+        run: npx -y firebase-tools@14 deploy --only hosting --project "$FIREBASE_PROJECT_ID" --non-interactive
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID_STAGING }}
+

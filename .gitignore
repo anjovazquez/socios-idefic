@@ -50,3 +50,4 @@ supabase/.branches
 supabase/.temp
 .env
 *.local
+.firebase/

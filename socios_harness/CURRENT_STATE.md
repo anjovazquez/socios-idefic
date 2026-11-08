@@ -8,7 +8,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 - Tarea activa: ninguna.
 - Última tarea completada: `VS-008 — Alta de un usuario existente en otro club` (2026-11-08).
 - Siguiente tarea READY: `VS-009 — Mis datos (perfil y foto)` (también READY: VS-010, VS-025).
-- Bloqueos globales: ninguno.
+- Bloqueos globales: ninguno. VS-033 (staging) BLOCKED a la espera de credenciales del usuario.
 
 ## Milestones
 
@@ -22,7 +22,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 | 0.5 Pagos | TODO |
 | 0.6 Pago real y renovación automática | TODO |
 | 0.7 Comunidad | READY (VS-025) |
-| 0.8 Piloto IDEFIC | TODO |
+| 0.8 Piloto IDEFIC | TODO (VS-033 adelantada, BLOCKED por credenciales) |
 
 ## Decisiones pendientes del usuario
 
@@ -36,7 +36,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 - Flutter 3.35.1 (`.fvmrc`); proyecto `socios_idefic`, plataformas web/android/ios.
 - Config cliente: `--dart-define=SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` (ver `.env.example`).
 - Supabase CLI 2.122 (devDependency npm); signup deshabilitado; Google declarado y desactivado.
-- CI: `.github/workflows/ci.yml` con `quality` y `sql-tests` (aún sin ejecución en GitHub: el workflow corre en PR/main).
+- CI/CD: `.github/workflows/ci.yml` con `quality`, `edge-functions`, `sql-tests` y despliegue manual a staging (`deploy-migrations`, `deploy-functions`, `deploy-hosting`). Aún sin ejecutar en GitHub.
 - Esquema: `profiles`, `clubs`, `club_memberships` + RPC `get_my_clubs` (VS-001). Seed local: `admin@`, `ana@`, `luis@`, `root@example.com` (superadmin) con contraseña `<nombre>-password`.
 - Plataforma (VS-003): `platform_admins`, `is_platform_admin()`, `audit_log` + `audit()`, `club_invitations` mínima, RPC `create_club`/`update_club`/`set_club_active`/`assign_club_admin`/`get_platform_clubs`.
 - Identidad (VS-004): `can_admin_club()`, `update_club_branding`, `get_club_branding`, bucket público `club-assets`; tema por club en `presentation/theme/club_theme.dart`; `DESIGN.md` creado.

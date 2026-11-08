@@ -41,12 +41,14 @@ dependencias ya estén todas `DONE` (salvo bloqueo explícito por decisión).
 | VS-030 | Mis ventajas | TODO | VS-029 | 7 · 0.7 Comunidad | RF-025 |
 | VS-031 | Dashboard del club | TODO | VS-020, VS-030 | 8 · 0.8 Piloto | §16 Dashboard |
 | VS-032 | Acabado visual y navegación final del socio | TODO | VS-031 | 8 · 0.8 Piloto | §14, §20 |
-| VS-033 | CI/CD y entorno staging | TODO | VS-032 | 8 · 0.8 Piloto | - |
+| VS-033 | CI/CD y entorno staging | BLOCKED | (adelantada por el usuario) | 8 · 0.8 Piloto | - |
 | VS-034 | Piloto IDEFIC | TODO | VS-033 | 8 · 0.8 Piloto | §21 |
 
 Notas:
 
 - VS-021…VS-024 usan Stripe (ADR-001 `ACCEPTED`); necesitan claves de test
   de Stripe. Sin ellas se implementan con fakes y la prueba real queda pendiente.
+- VS-033 se adelantó a petición del usuario (2026-11-08): pipeline listo, BLOCKED hasta
+  que el usuario configure proyectos y secretos (`DEPLOYMENT.md`) y lance el primer despliegue.
 - VS-006 usa el buzón local de Supabase (Inbucket/Mailpit) en desarrollo; el
   proveedor real de email (Resend, D-013) solo se configura en VS-033.
