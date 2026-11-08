@@ -9,17 +9,64 @@ class SupabaseMembersRepository implements MembersRepository {
   final SupabaseClient _client;
 
   @override
-  Future<List<ClubMember>> getMembers(String clubId) async {
+  Future<MemberPage> getMembers(
+    String clubId, {
+    String? query,
+    MemberStatus? status,
+    int offset = 0,
+    int limit = 50,
+  }) => _rpc(() async {
+    final rows = await _client.rpc<List<dynamic>>(
+      'get_club_members',
+      params: {
+        'p_club_id': clubId,
+        'p_query': query,
+        'p_status': status?.name,
+        'p_limit': limit,
+        'p_offset': offset,
+      },
+    );
+    final maps = rows.cast<Map<String, dynamic>>();
+    return MemberPage(
+      members: maps.map(clubMemberFromRow).toList(),
+      total: maps.isEmpty ? 0 : (maps.first['total_count'] as num).toInt(),
+    );
+  });
+
+  @override
+  Future<void> deactivate(String membershipId) => _rpc(
+    () => _client.rpc<void>(
+      'deactivate_membership',
+      params: {'p_membership_id': membershipId},
+    ),
+  );
+
+  @override
+  Future<MemberStatus> reactivate(String membershipId) => _rpc(() async {
+    final status = await _client.rpc<String>(
+      'reactivate_membership',
+      params: {'p_membership_id': membershipId},
+    );
+    return memberStatusFromName(status);
+  });
+
+  @override
+  Future<String> memberPhotoUrl(String path) => _rpc(
+    () => _client.storage.from('profile-photos').createSignedUrl(path, 3600),
+  );
+
+  Future<T> _rpc<T>(Future<T> Function() action) async {
     try {
-      final rows = await _client.rpc<List<dynamic>>(
-        'get_club_members',
-        params: {'p_club_id': clubId},
-      );
-      return rows.cast<Map<String, dynamic>>().map(clubMemberFromRow).toList();
+      return await action();
     } on PostgrestException catch (error) {
-      throw error.code == '42501'
-          ? const MemberPermissionFailure()
-          : MemberUnavailableFailure(error);
+      throw switch (error.code) {
+        '42501' => const MemberPermissionFailure(),
+        'P0001' when error.hint == 'cannot_deactivate_admin' =>
+          const CannotDeactivateAdminFailure(),
+        _ => MemberUnavailableFailure(error),
+      };
+    } on MemberFailure {
+      rethrow;
     } catch (error) {
       throw MemberUnavailableFailure(error);
     }
@@ -80,11 +127,7 @@ class SupabaseMembersRepository implements MembersRepository {
 ClubMember clubMemberFromRow(Map<String, dynamic> row) => ClubMember(
   membershipId: row['membership_id'] as String,
   email: row['email'] as String,
-  status: switch (row['status']) {
-    'invited' => MemberStatus.invited,
-    'inactive' => MemberStatus.inactive,
-    _ => MemberStatus.active,
-  },
+  status: memberStatusFromName(row['status'] as String?),
   isClubAdmin: row['role'] == 'club_admin',
   firstName: row['first_name'] as String?,
   lastName: row['last_name'] as String?,
@@ -93,7 +136,19 @@ ClubMember clubMemberFromRow(Map<String, dynamic> row) => ClubMember(
     final String value => DateTime.parse(value),
     _ => null,
   },
+  phone: row['phone'] as String?,
+  birthDate: switch (row['birth_date']) {
+    final String value => DateTime.parse(value),
+    _ => null,
+  },
+  photoPath: row['photo_path'] as String?,
 );
+
+MemberStatus memberStatusFromName(String? status) => switch (status) {
+  'invited' => MemberStatus.invited,
+  'inactive' => MemberStatus.inactive,
+  _ => MemberStatus.active,
+};
 
 MemberFailure mapInvitationError(int status, String? code) => switch (code) {
   'invalid_email' => const InvalidMemberDataFailure(MemberField.email),

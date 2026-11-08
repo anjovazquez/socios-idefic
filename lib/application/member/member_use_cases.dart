@@ -4,10 +4,61 @@ import '../../domain/member/members_repository.dart';
 class GetClubMembers {
   const GetClubMembers(this._repository);
 
+  static const pageSize = 50;
+
   final MembersRepository _repository;
 
-  Future<List<ClubMember>> call(String clubId) =>
-      _repository.getMembers(clubId);
+  Future<MemberPage> call(
+    String clubId, {
+    String? query,
+    MemberStatus? status,
+    int offset = 0,
+  }) {
+    final trimmed = query?.trim();
+    return _repository.getMembers(
+      clubId,
+      query: trimmed == null || trimmed.isEmpty ? null : trimmed,
+      status: status,
+      offset: offset,
+      limit: pageSize,
+    );
+  }
+}
+
+class DeactivateMember {
+  const DeactivateMember(this._repository);
+
+  final MembersRepository _repository;
+
+  Future<void> call(ClubMember member) {
+    if (member.isClubAdmin) throw const CannotDeactivateAdminFailure();
+    return _repository.deactivate(member.membershipId);
+  }
+}
+
+class ReactivateMember {
+  const ReactivateMember(this._repository);
+
+  final MembersRepository _repository;
+
+  Future<MemberStatus> call(ClubMember member) =>
+      _repository.reactivate(member.membershipId);
+}
+
+class GetMemberPhotoUrl {
+  const GetMemberPhotoUrl(this._repository);
+
+  final MembersRepository _repository;
+
+  Future<String?> call(ClubMember member) async {
+    final path = member.photoPath;
+    if (path == null) return null;
+    try {
+      return await _repository.memberPhotoUrl(path);
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
 class InviteMember {

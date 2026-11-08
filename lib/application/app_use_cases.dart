@@ -32,6 +32,9 @@ class AppUseCases {
     required this.inviteMember,
     required this.resendInvitation,
     required this.setMemberNumber,
+    required this.deactivateMember,
+    required this.reactivateMember,
+    required this.getMemberPhotoUrl,
     required this.getOnboardingStatus,
     required this.verifyInvitationLink,
     required this.setNewPassword,
@@ -60,6 +63,9 @@ class AppUseCases {
   final InviteMember inviteMember;
   final ResendInvitation resendInvitation;
   final SetMemberNumber setMemberNumber;
+  final DeactivateMember deactivateMember;
+  final ReactivateMember reactivateMember;
+  final GetMemberPhotoUrl getMemberPhotoUrl;
   final GetOnboardingStatus getOnboardingStatus;
   final VerifyInvitationLink verifyInvitationLink;
   final SetNewPassword setNewPassword;

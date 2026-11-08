@@ -397,10 +397,55 @@ class FakeMembersRepository implements MembersRepository {
       false;
 
   @override
-  Future<List<ClubMember>> getMembers(String clubId) async {
+  Future<MemberPage> getMembers(
+    String clubId, {
+    String? query,
+    MemberStatus? status,
+    int offset = 0,
+    int limit = 50,
+  }) async {
     if (!_isAdmin(clubId)) throw const MemberPermissionFailure();
-    return members[clubId] ?? const [];
+    final q = query?.toLowerCase();
+    final matching =
+        (members[clubId] ?? const <ClubMember>[])
+            .where((m) => status == null || m.status == status)
+            .where(
+              (m) =>
+                  q == null ||
+                  m.displayName.toLowerCase().contains(q) ||
+                  m.email.contains(q) ||
+                  m.memberNumber?.toString() == q,
+            )
+            .toList()
+          ..sort(
+            (a, b) => (a.memberNumber ?? 0).compareTo(b.memberNumber ?? 0),
+          );
+    return MemberPage(
+      members: matching.skip(offset).take(limit).toList(),
+      total: matching.length,
+    );
   }
+
+  void _replace(String membershipId, ClubMember Function(ClubMember) change) {
+    for (final list in members.values) {
+      final index = list.indexWhere((m) => m.membershipId == membershipId);
+      if (index >= 0) list[index] = change(list[index]);
+    }
+  }
+
+  @override
+  Future<void> deactivate(String membershipId) async =>
+      _replace(membershipId, (m) => m.copyWith(status: MemberStatus.inactive));
+
+  @override
+  Future<MemberStatus> reactivate(String membershipId) async {
+    _replace(membershipId, (m) => m.copyWith(status: MemberStatus.active));
+    return MemberStatus.active;
+  }
+
+  @override
+  Future<String> memberPhotoUrl(String path) async =>
+      'https://signed.test/$path';
 
   @override
   Future<InvitationOutcome> invite({
@@ -638,6 +683,9 @@ AppUseCases buildUseCases({
     getClubMembers: GetClubMembers(membersRepository),
     inviteMember: InviteMember(membersRepository),
     resendInvitation: ResendInvitation(membersRepository),
+    deactivateMember: DeactivateMember(membersRepository),
+    reactivateMember: ReactivateMember(membersRepository),
+    getMemberPhotoUrl: GetMemberPhotoUrl(membersRepository),
     setMemberNumber: SetMemberNumber(membersRepository),
     getOnboardingStatus: GetOnboardingStatus(onboardingRepository),
     verifyInvitationLink: VerifyInvitationLink(onboardingRepository),

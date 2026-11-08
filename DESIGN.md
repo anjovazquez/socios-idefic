@@ -89,7 +89,12 @@ Patrones:
   cerrar el formulario.
 - **Confirmación destructiva** (desactivar, dar de baja): diálogo con
   consecuencia explicada («No se borra ningún dato») y botón con el verbo.
-- **Confirmación de éxito:** `SnackBar` con frase corta («Cambios guardados»).
+- **Confirmación de éxito:** `SnackBar` con frase corta («Cambios guardados»). Un aviso nuevo
+  sustituye al anterior (`hideCurrentSnackBar()` antes de `showSnackBar`), para
+  que no se acumulen en cola.
+- **Listas largas de gestión:** buscador con espera de 300 ms, filtros con
+  `ChoiceChip`, total visible («N socios»), «Ver más» al final y ficha en
+  `BottomSheet` con las acciones del elemento.
 - **Flujo por pasos** (primer acceso): «Paso N de M» + `LinearProgressIndicator`,
   un título por paso, el botón principal «Continuar» y la última acción con
   el verbo final («Aceptar y entrar»). Los datos ya conocidos se precargan.

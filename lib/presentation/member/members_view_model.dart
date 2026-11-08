@@ -12,25 +12,67 @@ class MembersViewModel extends ChangeNotifier {
   List<ClubMember> _members = const [];
   List<ClubMember> get members => _members;
 
+  int _total = 0;
+  int get total => _total;
+
+  bool get hasMore => _members.length < _total;
+
+  String _query = '';
+  String get query => _query;
+
+  MemberStatus? _status;
+  MemberStatus? get status => _status;
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
   String? _loadError;
   String? get loadError => _loadError;
 
-  Future<void> load() async {
+  /// Ignores answers of searches that were replaced while loading.
+  int _request = 0;
+
+  Future<void> load() => _fetch(reset: true);
+
+  Future<void> search(String query) {
+    _query = query;
+    return _fetch(reset: true);
+  }
+
+  Future<void> filter(MemberStatus? status) {
+    _status = status;
+    return _fetch(reset: true);
+  }
+
+  Future<void> loadMore() =>
+      hasMore && !_isLoading ? _fetch(reset: false) : Future.value();
+
+  Future<void> _fetch({required bool reset}) async {
+    final request = ++_request;
     _isLoading = true;
     _loadError = null;
     notifyListeners();
     try {
-      _members = await _useCases.getClubMembers(clubId);
+      final page = await _useCases.getClubMembers(
+        clubId,
+        query: _query,
+        status: _status,
+        offset: reset ? 0 : _members.length,
+      );
+      if (request != _request) return;
+      _members = reset ? page.members : [..._members, ...page.members];
+      _total = page.total;
     } on MemberFailure catch (failure) {
-      _loadError = messageFor(failure);
+      if (request == _request) _loadError = messageFor(failure);
     } catch (_) {
-      _loadError = messageFor(const MemberUnavailableFailure());
+      if (request == _request) {
+        _loadError = messageFor(const MemberUnavailableFailure());
+      }
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (request == _request) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -72,6 +114,23 @@ class MembersViewModel extends ChangeNotifier {
     return 'Nueva invitación enviada a ${member.email}';
   }
 
+  Future<String> deactivate(ClubMember member) async {
+    await _guard(() => _useCases.deactivateMember(member));
+    await load();
+    return '${member.displayName} ha causado baja en el club';
+  }
+
+  Future<String> reactivate(ClubMember member) async {
+    final status = await _guard(() => _useCases.reactivateMember(member));
+    await load();
+    return status == MemberStatus.invited
+        ? '${member.displayName} vuelve como invitado: reenvíale la invitación'
+        : '${member.displayName} vuelve a ser socio del club';
+  }
+
+  Future<String?> photoUrl(ClubMember member) =>
+      _useCases.getMemberPhotoUrl(member);
+
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
       return await action();
@@ -92,10 +151,12 @@ class MembersViewModel extends ChangeNotifier {
       'Escribe un número mayor que 0',
     AlreadyMemberFailure() => 'Esta persona ya es socia del club',
     MemberNumberTakenFailure() => 'Ese número ya está asignado',
+    CannotDeactivateAdminFailure() =>
+      'El administrador del club no puede darse de baja',
     InvitationNotPendingFailure() =>
       'Esta persona ya activó su cuenta; no hace falta reenviar',
     MemberPermissionFailure() =>
-      'Solo el administrador del club puede dar de alta socios',
+      'Solo el administrador del club puede gestionar socios',
     MemberUnavailableFailure() =>
       'No hemos podido conectar. Inténtalo de nuevo en un momento',
   };
