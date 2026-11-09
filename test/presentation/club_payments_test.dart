@@ -8,6 +8,7 @@ import 'package:socios_idefic/infrastructure/payment/supabase_payments_repositor
 import 'package:socios_idefic/presentation/app/socios_app.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-020.md — Pagos del club.
 void main() {
@@ -132,7 +133,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('login-password')), 'pw');
     await tester.tap(find.byKey(const Key('login-submit')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('open-payments')));
+    await openAdminSection(tester, 'open-payments');
     await tester.pumpAndSettle();
   }
 

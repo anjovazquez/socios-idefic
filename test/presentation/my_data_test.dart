@@ -58,7 +58,7 @@ void main() {
 
   testWidgets('the member edits her phone and photo', (tester) async {
     await openMyData(tester);
-    expect(find.text('Mis datos'), findsOneWidget);
+    expect(find.widgetWithText(AppBar, 'Mis datos'), findsOneWidget);
     expect(find.text('Socio nº 2'), findsOneWidget);
 
     await tester.enterText(

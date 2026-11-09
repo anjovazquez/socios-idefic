@@ -10,7 +10,8 @@ import '../session/session_view_model.dart';
 import '../sponsor/club_sponsors_section.dart';
 import 'club_avatar.dart';
 
-/// Club home: identity, card and subscription, and the club news (RF-023).
+/// «Inicio» (§14): club identity, the card shortcut, the admin summary,
+/// news and sponsors. The other sections live in the bottom bar (ClubShell).
 class ClubHomePage extends StatelessWidget {
   const ClubHomePage({super.key});
 
@@ -31,54 +32,7 @@ class ClubHomePage extends StatelessWidget {
               icon: const Icon(Icons.admin_panel_settings_outlined),
               onPressed: session.openPlatform,
             ),
-          IconButton(
-            key: const Key('open-my-data'),
-            tooltip: 'Mis datos',
-            icon: const Icon(Icons.person_outline),
-            onPressed: () => context.go('/club/me'),
-          ),
-          if (club.canAdminister)
-            IconButton(
-              key: const Key('open-members'),
-              tooltip: 'Socios',
-              icon: const Icon(Icons.people_outline),
-              onPressed: () => context.go('/club/members'),
-            ),
-          if (club.canAdminister)
-            IconButton(
-              key: const Key('open-news-admin'),
-              tooltip: 'Noticias',
-              icon: const Icon(Icons.campaign_outlined),
-              onPressed: () => context.go('/club/news'),
-            ),
-          if (club.canAdminister)
-            IconButton(
-              key: const Key('open-sponsors'),
-              tooltip: 'Patrocinadores',
-              icon: const Icon(Icons.handshake_outlined),
-              onPressed: () => context.go('/club/sponsors'),
-            ),
-          if (club.canAdminister)
-            IconButton(
-              key: const Key('open-payments'),
-              tooltip: 'Pagos',
-              icon: const Icon(Icons.payments_outlined),
-              onPressed: () => context.go('/club/payments'),
-            ),
-          if (club.canAdminister)
-            IconButton(
-              key: const Key('open-seasons'),
-              tooltip: 'Temporadas',
-              icon: const Icon(Icons.event_note_outlined),
-              onPressed: () => context.go('/club/seasons'),
-            ),
-          if (club.canAdminister)
-            IconButton(
-              key: const Key('open-settings'),
-              tooltip: 'Configuración del club',
-              icon: const Icon(Icons.settings_outlined),
-              onPressed: () => context.go('/club/settings'),
-            ),
+          if (club.canAdminister) const _AdminMenu(),
           if (session.canSwitchClub)
             IconButton(
               key: const Key('switch-club'),
@@ -133,25 +87,12 @@ class ClubHomePage extends StatelessWidget {
                           ),
                         ],
                         const SizedBox(height: 24),
+                        // The card is what members use most (at the door).
                         FilledButton.icon(
-                          key: const Key('open-card'),
+                          key: const Key('home-show-card'),
                           onPressed: () => context.go('/club/card'),
                           icon: const Icon(Icons.badge_outlined),
-                          label: const Text('Mi carnet'),
-                        ),
-                        const SizedBox(height: 8),
-                        OutlinedButton.icon(
-                          key: const Key('open-subscription'),
-                          onPressed: () => context.go('/club/subscription'),
-                          icon: const Icon(Icons.receipt_long_outlined),
-                          label: const Text('Mi suscripción'),
-                        ),
-                        const SizedBox(height: 8),
-                        OutlinedButton.icon(
-                          key: const Key('open-my-perks'),
-                          onPressed: () => context.go('/club/benefits'),
-                          icon: const Icon(Icons.local_offer_outlined),
-                          label: const Text('Mis ventajas'),
+                          label: const Text('Mostrar mi carnet'),
                         ),
                       ],
                     ),
@@ -251,4 +192,49 @@ class _HomeNews extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Club management for the admin in one place (§16).
+class _AdminMenu extends StatelessWidget {
+  const _AdminMenu();
+
+  static const _entries = [
+    ('open-members', 'Socios', Icons.people_outline, '/club/members'),
+    ('open-payments', 'Pagos', Icons.payments_outlined, '/club/payments'),
+    ('open-seasons', 'Temporadas', Icons.event_note_outlined, '/club/seasons'),
+    ('open-news-admin', 'Noticias', Icons.campaign_outlined, '/club/news'),
+    (
+      'open-sponsors',
+      'Patrocinadores',
+      Icons.handshake_outlined,
+      '/club/sponsors',
+    ),
+    ('open-perks-admin', 'Ventajas', Icons.local_offer_outlined, '/club/perks'),
+    (
+      'open-settings',
+      'Configuración del club',
+      Icons.settings_outlined,
+      '/club/settings',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) => PopupMenuButton<String>(
+    key: const Key('open-admin-menu'),
+    tooltip: 'Gestión del club',
+    icon: const Icon(Icons.business_center_outlined),
+    onSelected: (path) => context.go(path),
+    itemBuilder: (context) => [
+      for (final (key, label, icon, path) in _entries)
+        PopupMenuItem(
+          key: Key(key),
+          value: path,
+          child: ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(icon),
+            title: Text(label),
+          ),
+        ),
+    ],
+  );
 }

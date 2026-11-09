@@ -9,6 +9,7 @@ import 'package:socios_idefic/infrastructure/payment/supabase_payments_repositor
 import 'package:socios_idefic/presentation/app/socios_app.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-017.md — Pago de cuota.
 void main() {
@@ -69,7 +70,7 @@ void main() {
   }
 
   Future<void> openMarta(WidgetTester tester) async {
-    await tester.tap(find.byKey(const Key('open-members')));
+    await openAdminSection(tester, 'open-members');
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('member-marta@example.com')));
     await tester.pumpAndSettle();
@@ -154,7 +155,7 @@ void main() {
 
   testWidgets('the admin writes how to pay in the settings', (tester) async {
     await signIn(tester, 'admin@example.com');
-    await tester.tap(find.byKey(const Key('open-settings')));
+    await openAdminSection(tester, 'open-settings');
     await tester.pumpAndSettle();
 
     final field = find.byKey(const Key('payment-instructions'));

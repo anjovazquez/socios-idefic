@@ -78,7 +78,7 @@ void main() {
       find.textContaining('Estás administrando Club Demo'),
       findsOneWidget,
     );
-    expect(find.byKey(const Key('open-settings')), findsOneWidget);
+    expect(find.byKey(const Key('open-admin-menu')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('impersonation-exit')));
     await tester.pumpAndSettle();

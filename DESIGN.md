@@ -78,12 +78,18 @@ icono + texto, nunca solo color.
 
 ## 5. Navegación
 
-- Socio (móvil): navegación inferior Inicio · Mi carnet · Mis ventajas ·
-  Mi suscripción · Mis datos (VS-032).
-- Administración (web): secciones del §16 del documento funcional.
+- Socio: `ClubShell` con navegación inferior (móvil) o rail lateral
+  (≥ 1024 px): Inicio · Mi carnet · Mis ventajas · Mi suscripción · Mis datos,
+  con los colores del club (indicador `secondaryContainer` del tema del club).
+  Las secciones no tienen botón atrás; las subpantallas sí.
+- Administración: menú «Gestión» (icono maletín) en la cabecera de Inicio con
+  Socios, Pagos, Temporadas, Noticias, Patrocinadores, Ventajas y
+  Configuración; el «Resumen del club» en Inicio con accesos directos.
 - Cabecera (`AppBar`) con el color del club; acciones a la derecha:
-  Configuración (solo admin), Plataforma (solo superadmin), Cambiar de club
-  (si hay varios), Cerrar sesión.
+  Plataforma (solo superadmin), Gestión (solo admin), Cambiar de club (si hay
+  varios), Cerrar sesión.
+- Los SnackBar se muestran en la página activa (el shell tiene su propio
+  `ScaffoldMessenger`) para no tapar el FAB.
 - Subpantallas cuelgan de la ruta del área (`/club/settings`); el botón atrás
   vuelve al área.
 

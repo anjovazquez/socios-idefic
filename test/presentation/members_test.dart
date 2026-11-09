@@ -4,6 +4,7 @@ import 'package:socios_idefic/domain/member/club_member.dart';
 import 'package:socios_idefic/presentation/app/socios_app.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-006.md — Alta de socio.
 void main() {
@@ -57,8 +58,8 @@ void main() {
     await tester.enterText(find.byKey(const Key('login-password')), 'pw');
     await tester.tap(find.byKey(const Key('login-submit')));
     await tester.pumpAndSettle();
-    if (find.byKey(const Key('open-members')).evaluate().isNotEmpty) {
-      await tester.tap(find.byKey(const Key('open-members')));
+    if (find.byKey(const Key('open-admin-menu')).evaluate().isNotEmpty) {
+      await openAdminSection(tester, 'open-members');
       await tester.pumpAndSettle();
     }
   }
@@ -140,7 +141,7 @@ void main() {
   testWidgets('a member cannot sign up others', (tester) async {
     await openMembersAs(tester, 'ana@example.com');
 
-    expect(find.byKey(const Key('open-members')), findsNothing);
+    expect(find.byKey(const Key('open-admin-menu')), findsNothing);
     expect(find.byKey(const Key('new-member')), findsNothing);
   });
 

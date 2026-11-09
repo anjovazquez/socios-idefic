@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../application/app_use_cases.dart';
@@ -32,7 +31,8 @@ class _MyDataView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis datos'),
-        leading: BackButton(onPressed: () => context.go('/club')),
+        // A bottom bar section (ClubShell): no back button.
+        automaticallyImplyLeading: false,
       ),
       body: switch (viewModel.profile) {
         null when viewModel.isLoading => const Center(

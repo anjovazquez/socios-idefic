@@ -8,6 +8,7 @@ import 'package:socios_idefic/presentation/app/socios_app.dart';
 import 'package:socios_idefic/presentation/club/image_picking.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-025.md — Publicar en el blog.
 void main() {
@@ -42,7 +43,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('login-password')), 'pw');
     await tester.tap(find.byKey(const Key('login-submit')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('open-news-admin')));
+    await openAdminSection(tester, 'open-news-admin');
     await tester.pumpAndSettle();
   }
 

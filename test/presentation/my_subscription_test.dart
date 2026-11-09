@@ -127,9 +127,11 @@ void main() {
     expect(find.byKey(const Key('subscription-no-season')), findsOneWidget);
     expect(find.byKey(const Key('payments-empty')), findsOneWidget);
 
-    await tester.tap(find.byType(BackButton));
+    // «Mi suscripción» is a bottom bar section: back to Inicio from the bar.
+    expect(find.byType(BackButton), findsNothing);
+    await tester.tap(find.byKey(const Key('open-home')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('open-subscription')), findsOneWidget);
+    expect(find.byKey(const Key('home-show-card')), findsOneWidget);
   });
 
   // BDD: tasks/VS-019.md — Recibo.

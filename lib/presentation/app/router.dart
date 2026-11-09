@@ -7,6 +7,7 @@ import '../blog/post_editor_page.dart';
 import '../card/card_validation_page.dart';
 import '../card/my_card_page.dart';
 import '../club/club_home_page.dart';
+import '../club/club_shell.dart';
 import '../club/club_settings_page.dart';
 import '../member/members_page.dart';
 import '../onboarding/activation_page.dart';
@@ -141,86 +142,100 @@ GoRouter _createRouter(
       path: AppRoutes.clubs,
       builder: (context, state) => const ClubSelectorPage(),
     ),
-    GoRoute(
-      path: AppRoutes.club,
-      builder: (context, state) => const ClubHomePage(),
+    ShellRoute(
+      builder: (context, state, child) =>
+          ClubShell(location: state.uri.path, child: child),
       routes: [
         GoRoute(
-          path: 'settings',
-          builder: (context, state) => const ClubSettingsPage(),
-        ),
-        GoRoute(
-          path: 'members',
-          builder: (context, state) =>
-              MembersPage(openNew: state.uri.queryParameters['nuevo'] == '1'),
-        ),
-        GoRoute(path: 'card', builder: (context, state) => const MyCardPage()),
-        GoRoute(path: 'me', builder: (context, state) => const MyDataPage()),
-        GoRoute(
-          path: 'benefits',
-          builder: (context, state) => const MyPerksPage(),
+          path: AppRoutes.club,
+          builder: (context, state) => const ClubHomePage(),
           routes: [
             GoRoute(
-              path: 'detail',
-              builder: (context, state) =>
-                  PerkDetailPage(perk: state.extra as Perk?),
+              path: 'settings',
+              builder: (context, state) => const ClubSettingsPage(),
             ),
-          ],
-        ),
-        GoRoute(
-          path: 'perks',
-          builder: (context, state) => const PerksAdminPage(),
-          routes: [
             GoRoute(
-              path: 'edit',
-              builder: (context, state) =>
-                  PerkEditorPage(perkId: state.uri.queryParameters['id']),
-            ),
-          ],
-        ),
-        GoRoute(
-          path: 'sponsors',
-          builder: (context, state) => const SponsorsPage(),
-        ),
-        GoRoute(
-          path: 'post',
-          builder: (context, state) =>
-              PostDetailPage(postId: state.uri.queryParameters['id'] ?? ''),
-        ),
-        GoRoute(
-          path: 'news',
-          builder: (context, state) => const NewsAdminPage(),
-          routes: [
-            GoRoute(
-              path: 'edit',
-              builder: (context, state) =>
-                  PostEditorPage(postId: state.uri.queryParameters['id']),
-            ),
-          ],
-        ),
-        GoRoute(
-          path: 'payments',
-          builder: (context, state) => ClubPaymentsPage(
-            onlyPending: state.uri.queryParameters['estado'] == 'pendientes',
-          ),
-        ),
-        GoRoute(
-          path: 'subscription',
-          builder: (context, state) => MySubscriptionPage(
-            paymentResult: state.uri.queryParameters['pago'],
-            methodResult: state.uri.queryParameters['metodo'],
-          ),
-        ),
-        GoRoute(
-          path: 'seasons',
-          builder: (context, state) => const SeasonsPage(),
-          routes: [
-            GoRoute(
-              path: 'renew',
-              builder: (context, state) => RenewalPage(
-                seasonId: state.uri.queryParameters['season'] ?? '',
-                seasonName: state.uri.queryParameters['name'],
+              path: 'members',
+              builder: (context, state) => MembersPage(
+                openNew: state.uri.queryParameters['nuevo'] == '1',
               ),
+            ),
+            GoRoute(
+              path: 'card',
+              builder: (context, state) => const MyCardPage(),
+            ),
+            GoRoute(
+              path: 'me',
+              builder: (context, state) => const MyDataPage(),
+            ),
+            GoRoute(
+              path: 'benefits',
+              builder: (context, state) => const MyPerksPage(),
+              routes: [
+                GoRoute(
+                  path: 'detail',
+                  builder: (context, state) =>
+                      PerkDetailPage(perk: state.extra as Perk?),
+                ),
+              ],
+            ),
+            GoRoute(
+              path: 'perks',
+              builder: (context, state) => const PerksAdminPage(),
+              routes: [
+                GoRoute(
+                  path: 'edit',
+                  builder: (context, state) =>
+                      PerkEditorPage(perkId: state.uri.queryParameters['id']),
+                ),
+              ],
+            ),
+            GoRoute(
+              path: 'sponsors',
+              builder: (context, state) => const SponsorsPage(),
+            ),
+            GoRoute(
+              path: 'post',
+              builder: (context, state) =>
+                  PostDetailPage(postId: state.uri.queryParameters['id'] ?? ''),
+            ),
+            GoRoute(
+              path: 'news',
+              builder: (context, state) => const NewsAdminPage(),
+              routes: [
+                GoRoute(
+                  path: 'edit',
+                  builder: (context, state) =>
+                      PostEditorPage(postId: state.uri.queryParameters['id']),
+                ),
+              ],
+            ),
+            GoRoute(
+              path: 'payments',
+              builder: (context, state) => ClubPaymentsPage(
+                onlyPending:
+                    state.uri.queryParameters['estado'] == 'pendientes',
+              ),
+            ),
+            GoRoute(
+              path: 'subscription',
+              builder: (context, state) => MySubscriptionPage(
+                paymentResult: state.uri.queryParameters['pago'],
+                methodResult: state.uri.queryParameters['metodo'],
+              ),
+            ),
+            GoRoute(
+              path: 'seasons',
+              builder: (context, state) => const SeasonsPage(),
+              routes: [
+                GoRoute(
+                  path: 'renew',
+                  builder: (context, state) => RenewalPage(
+                    seasonId: state.uri.queryParameters['season'] ?? '',
+                    seasonName: state.uri.queryParameters['name'],
+                  ),
+                ),
+              ],
             ),
           ],
         ),

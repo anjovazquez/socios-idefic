@@ -5,6 +5,7 @@ import 'package:socios_idefic/infrastructure/perk/supabase_perk_repository.dart'
 import 'package:socios_idefic/presentation/app/socios_app.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-029.md — Gestionar ventajas.
 void main() {
@@ -41,7 +42,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('login-password')), 'pw');
     await tester.tap(find.byKey(const Key('login-submit')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('open-perks-admin')));
+    await openAdminSection(tester, 'open-perks-admin');
     await tester.pumpAndSettle();
   }
 

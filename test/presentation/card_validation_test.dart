@@ -10,6 +10,7 @@ import 'package:socios_idefic/presentation/app/socios_app.dart';
 import 'package:socios_idefic/presentation/card/card_qr.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-016.md — Validar carnet.
 void main() {
@@ -136,7 +137,7 @@ void main() {
     );
     await pumpApp(tester, members: members);
     await signIn(tester, 'admin@example.com');
-    await tester.tap(find.byKey(const Key('open-members')));
+    await openAdminSection(tester, 'open-members');
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('member-ana@example.com')));
     await tester.pumpAndSettle();

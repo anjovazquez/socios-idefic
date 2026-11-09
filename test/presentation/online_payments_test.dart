@@ -9,6 +9,7 @@ import 'package:socios_idefic/infrastructure/payment/supabase_payments_repositor
 import 'package:socios_idefic/presentation/app/socios_app.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-021.md — Pago online (lado app; el estado lo pone el webhook).
 void main() {
@@ -140,7 +141,7 @@ void main() {
     tester,
   ) async {
     await signIn(tester, 'admin@example.com');
-    await tester.tap(find.byKey(const Key('open-settings')));
+    await openAdminSection(tester, 'open-settings');
     await tester.pumpAndSettle();
     await tester.ensureVisible(
       find.byKey(const Key('online-payments-connect')),

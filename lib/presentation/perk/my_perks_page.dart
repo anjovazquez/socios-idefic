@@ -33,7 +33,8 @@ class _MyPerksPageState extends State<MyPerksPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis ventajas'),
-        leading: BackButton(onPressed: () => context.go('/club')),
+        // A bottom bar section (ClubShell): no back button.
+        automaticallyImplyLeading: false,
       ),
       body: FutureBuilder<List<Perk>>(
         future: _perks,

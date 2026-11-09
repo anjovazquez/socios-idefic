@@ -7,6 +7,7 @@ import 'package:socios_idefic/infrastructure/season/supabase_season_repository.d
 import 'package:socios_idefic/presentation/app/socios_app.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-014.md — Renovación masiva.
 void main() {
@@ -75,7 +76,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('login-password')), 'pw');
     await tester.tap(find.byKey(const Key('login-submit')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('open-seasons')));
+    await openAdminSection(tester, 'open-seasons');
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('season-renew-2027/2028')));
     await tester.pumpAndSettle();

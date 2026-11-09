@@ -223,7 +223,7 @@ class _Shortcuts extends StatelessWidget {
         onPressed: () => context.go('/club/news/edit'),
       ),
       ActionChip(
-        key: const Key('open-perks-admin'),
+        key: const Key('shortcut-perks'),
         avatar: const Icon(Icons.local_offer_outlined, size: 18),
         label: const Text('Ventajas'),
         onPressed: () => context.go('/club/perks'),

@@ -10,6 +10,7 @@ import 'package:socios_idefic/presentation/app/socios_app.dart';
 import 'package:socios_idefic/presentation/format/money.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-023.md — Aviso previo (lado app: fecha de cobro y próximo
 // cargo; el envío lo hace send-renewal-notices).
@@ -88,7 +89,7 @@ void main() {
       ideficAsAdmin.id: [next],
     });
     await signIn(tester, 'admin@example.com', seasons: seasons);
-    await tester.tap(find.byKey(const Key('open-seasons')));
+    await openAdminSection(tester, 'open-seasons');
     await tester.pumpAndSettle();
 
     expect(
@@ -123,7 +124,7 @@ void main() {
         ideficAsAdmin.id: [next],
       }),
     );
-    await tester.tap(find.byKey(const Key('open-seasons')));
+    await openAdminSection(tester, 'open-seasons');
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('season-renewal-2027/2028')));
     await tester.pumpAndSettle();

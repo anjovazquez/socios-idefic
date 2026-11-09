@@ -5,6 +5,7 @@ import 'package:socios_idefic/domain/season/season.dart';
 import 'package:socios_idefic/presentation/app/socios_app.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-012.md — Temporadas.
 void main() {
@@ -85,7 +86,7 @@ void main() {
   testWidgets('create and activate the next season', (tester) async {
     await signInAs(tester, 'admin@example.com');
     expect(find.text('Temporada 2026/2027'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('open-seasons')));
+    await openAdminSection(tester, 'open-seasons');
     await tester.pumpAndSettle();
 
     await createSeason(tester);
@@ -126,7 +127,7 @@ void main() {
 
   testWidgets('the fee is required', (tester) async {
     await signInAs(tester, 'admin@example.com');
-    await tester.tap(find.byKey(const Key('open-seasons')));
+    await openAdminSection(tester, 'open-seasons');
     await tester.pumpAndSettle();
     await createSeason(tester);
 
@@ -137,7 +138,7 @@ void main() {
 
   testWidgets('duplicate names are rejected', (tester) async {
     await signInAs(tester, 'admin@example.com');
-    await tester.tap(find.byKey(const Key('open-seasons')));
+    await openAdminSection(tester, 'open-seasons');
     await tester.pumpAndSettle();
 
     await createSeason(tester, name: '2026/2027');
@@ -151,6 +152,6 @@ void main() {
     await signInAs(tester, 'ana@example.com');
 
     expect(find.text('Temporada 2026/2027'), findsOneWidget);
-    expect(find.byKey(const Key('open-seasons')), findsNothing);
+    expect(find.byKey(const Key('open-admin-menu')), findsNothing);
   });
 }

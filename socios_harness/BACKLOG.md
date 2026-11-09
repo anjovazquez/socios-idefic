@@ -40,7 +40,7 @@ dependencias ya estén todas `DONE` (salvo bloqueo explícito por decisión).
 | VS-029 | Ventajas (admin) | DONE | VS-027 | 7 · 0.7 Comunidad | RF-024, RN-015 |
 | VS-030 | Mis ventajas | DONE | VS-029 | 7 · 0.7 Comunidad | RF-025 |
 | VS-031 | Dashboard del club | DONE | VS-020, VS-030 | 8 · 0.8 Piloto | §16 Dashboard |
-| VS-032 | Acabado visual y navegación final del socio | READY | VS-031 | 8 · 0.8 Piloto | §14, §20 |
+| VS-032 | Acabado visual y navegación final del socio | DONE | VS-031 | 8 · 0.8 Piloto | §14, §20 |
 | VS-033 | CI/CD y entorno staging | BLOCKED | (adelantada por el usuario) | 8 · 0.8 Piloto | - |
 | VS-034 | Piloto IDEFIC | TODO | VS-033 | 8 · 0.8 Piloto | §21 |
 

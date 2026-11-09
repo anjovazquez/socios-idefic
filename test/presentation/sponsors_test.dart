@@ -9,6 +9,7 @@ import 'package:socios_idefic/presentation/app/socios_app.dart';
 import 'package:socios_idefic/presentation/club/image_picking.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-027.md — Patrocinadores.
 void main() {
@@ -64,7 +65,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('login-password')), 'pw');
     await tester.tap(find.byKey(const Key('login-submit')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('open-sponsors')));
+    await openAdminSection(tester, 'open-sponsors');
     await tester.pumpAndSettle();
   }
 

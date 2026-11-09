@@ -6,8 +6,8 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 - Fase actual: **8 — Piloto IDEFIC (0.8)**.
 - Tarea activa: ninguna.
-- Última tarea completada: `VS-031 — Dashboard del club` (2026-11-09).
-- Siguiente tarea READY: `VS-032 — Acabado visual y navegación final del socio`.
+- Última tarea completada: `VS-032 — Acabado visual y navegación final del socio` (2026-11-09).
+- Siguiente tarea READY: ninguna. Pendientes: `VS-033` (BLOCKED: proyectos y secretos de staging del usuario) y `VS-034` (piloto, depende de VS-033).
 - Bloqueos globales: ninguno. VS-033 (staging) BLOCKED a la espera de credenciales del usuario.
 
 ## Milestones
@@ -22,7 +22,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 | 0.5 Pagos | DONE |
 | 0.6 Pago real y renovación automática | DONE (con Stripe falso local; prueba real pendiente de claves) |
 | 0.7 Comunidad | DONE |
-| 0.8 Piloto IDEFIC | IN_PROGRESS (VS-031 DONE; VS-032 READY; VS-033 BLOCKED por credenciales) |
+| 0.8 Piloto IDEFIC | IN_PROGRESS (VS-031, VS-032 DONE; VS-033 BLOCKED por credenciales; VS-034 TODO) |
 
 ## Decisiones pendientes del usuario
 
@@ -33,7 +33,7 @@ Snapshot operativo. Se actualiza al final de cada loop.
 
 ## Infraestructura
 
-- Flutter 240.35.1 (`.fvmrc`); proyecto `socios_idefic`, plataformas web/android/ios.
+- Flutter 247.35.1 (`.fvmrc`); proyecto `socios_idefic`, plataformas web/android/ios.
 - Config cliente: `--dart-define=SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` (ver `.env.example`).
 - Supabase CLI 2.122 (devDependency npm); signup deshabilitado; Google declarado y desactivado.
 - CI/CD: `.github/workflows/ci.yml` con `quality`, `edge-functions`, `sql-tests` y despliegue manual a staging (`deploy-migrations`, `deploy-functions`, `deploy-hosting`). Aún sin ejecutar en GitHub.
@@ -64,4 +64,5 @@ Snapshot operativo. Se actualiza al final de cada loop.
 - Ventajas (VS-029): `perks` (patrocinador opcional del mismo club, vigencia desde/hasta, draft/published/archived, imagen en `post-images`) con RLS (admin todo; socios activos solo publicadas y vigentes en hora de Madrid; `anon` sin privilegios); RPC `save_perk`, `set_perk_status`, `get_club_perks` (auditoría); pantallas `/club/perks` (Vigente/Próximamente/Caducada/Borrador/Archivada) y `/club/perks/edit`; acceso desde la tarjeta «Ventajas para socios» de la portada (admin); seed con 2 ventajas de IDEFIC.
 - Mis ventajas (VS-030): RPC `get_my_perks` (miembros; publicadas y vigentes en hora de Madrid; patrocinador activo con logo y web); pantallas `/club/benefits` y `/club/benefits/detail` (la ventaja va en `extra`) con «Presenta tu carnet» y «Mostrar mi carnet» → `/club/card`; botón «Mis ventajas» en Inicio.
 - Dashboard (VS-031): RPC `get_club_dashboard` (admin: temporada activa, activos/pendientes/sin renovar, invitaciones, renovación automática, cobrado/pendiente, ventajas vigentes, patrocinadores de la temporada, 3 últimas noticias); sección «Resumen del club» en la portada del admin (stat tiles) con accesos: Nuevo socio (`/club/members?nuevo=1` abre el alta), Registrar pago (`/club/payments?estado=pendientes`), Nueva noticia, Ventajas.
+- Navegación final (VS-032): `ShellRoute` del área `/club` con `ClubShell` (`NavigationBar` en móvil, `NavigationRail` ≥ 1024 px; Inicio · Mi carnet · Mis ventajas · Mi suscripción · Mis datos; claves `open-home`, `open-card`, `open-my-perks`, `open-subscription`, `open-my-data`); `ScaffoldMessenger` propio del shell (los SnackBar no tapan el FAB); pestañas sin botón atrás; portada con «Mostrar mi carnet» (`home-show-card`); gestión del admin en el menú «Gestión» (`open-admin-menu`; helper de tests `openAdminSection`); goldens en `test/golden/goldens/` (carnet y navegación IDEFIC / Club Demo).
 - Sesión cloud: Flutter en `$HOME/flutter/bin`; Docker requiere arrancar `dockerd` en segundo plano (ver `QUALITY_GATES.md`). Para probar Edge Functions arrancar sin excluir `edge-runtime`; emails locales en Mailpit `http://127.0.0.1:54324`. El edge-runtime del sandbox no puede descargar de npm (CA del proxy): las funciones no usan npm.

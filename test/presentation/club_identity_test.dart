@@ -7,6 +7,7 @@ import 'package:socios_idefic/presentation/club/image_picking.dart';
 import 'package:socios_idefic/presentation/theme/club_theme.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-004.md — Identidad visual del club.
 void main() {
@@ -59,7 +60,7 @@ void main() {
     await signInAs(tester, 'admin@example.com');
     expect(appBarColor(tester), const Color(0xFF0B3D91));
 
-    await tester.tap(find.byKey(const Key('open-settings')));
+    await openAdminSection(tester, 'open-settings');
     await tester.pumpAndSettle();
     expect(find.text('Configuración del club'), findsOneWidget);
 
@@ -110,7 +111,7 @@ void main() {
 
   testWidgets('a very light color keeps the header readable', (tester) async {
     await signInAs(tester, 'admin@example.com');
-    await tester.tap(find.byKey(const Key('open-settings')));
+    await openAdminSection(tester, 'open-settings');
     await tester.pumpAndSettle();
 
     await tester.enterText(
@@ -130,7 +131,7 @@ void main() {
 
   testWidgets('an invalid color is explained and not saved', (tester) async {
     await signInAs(tester, 'admin@example.com');
-    await tester.tap(find.byKey(const Key('open-settings')));
+    await openAdminSection(tester, 'open-settings');
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byKey(const Key('settings-primary')), 'azul');
@@ -146,6 +147,6 @@ void main() {
   testWidgets('members do not see the settings', (tester) async {
     await signInAs(tester, 'ana@example.com');
 
-    expect(find.byKey(const Key('open-settings')), findsNothing);
+    expect(find.byKey(const Key('open-admin-menu')), findsNothing);
   });
 }

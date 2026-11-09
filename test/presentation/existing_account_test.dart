@@ -4,6 +4,7 @@ import 'package:socios_idefic/domain/club/my_club.dart';
 import 'package:socios_idefic/presentation/app/socios_app.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-008.md — Usuario en varios clubes.
 void main() {
@@ -46,7 +47,7 @@ void main() {
 
     // Admin of Club Demo signs up the existing account, with capitals.
     await signIn('admin.demo@example.com');
-    await tester.tap(find.byKey(const Key('open-members')));
+    await openAdminSection(tester, 'open-members');
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('new-member')));
     await tester.pumpAndSettle();

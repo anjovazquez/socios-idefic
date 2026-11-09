@@ -4,6 +4,7 @@ import 'package:socios_idefic/domain/member/club_member.dart';
 import 'package:socios_idefic/presentation/app/socios_app.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-011.md — Gestión de socios.
 void main() {
@@ -58,7 +59,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('login-password')), 'pw');
     await tester.tap(find.byKey(const Key('login-submit')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('open-members')));
+    await openAdminSection(tester, 'open-members');
     await tester.pumpAndSettle();
   }
 

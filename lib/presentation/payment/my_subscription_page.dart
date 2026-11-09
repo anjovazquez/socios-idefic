@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../application/app_use_cases.dart';
@@ -48,7 +47,8 @@ class _MySubscriptionView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mi suscripción'),
-        leading: BackButton(onPressed: () => context.go('/club')),
+        // A bottom bar section (ClubShell): no back button.
+        automaticallyImplyLeading: false,
       ),
       body: switch ((viewModel.loadError, subscription)) {
         (final String error, _) => Center(

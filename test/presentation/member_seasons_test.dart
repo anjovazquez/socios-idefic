@@ -8,6 +8,7 @@ import 'package:socios_idefic/infrastructure/season/supabase_season_repository.d
 import 'package:socios_idefic/presentation/app/socios_app.dart';
 
 import '../support/fakes.dart';
+import '../support/navigation.dart';
 
 // BDD: tasks/VS-013.md — Socio por temporada.
 void main() {
@@ -85,7 +86,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('login-password')), 'pw');
     await tester.tap(find.byKey(const Key('login-submit')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('open-members')));
+    await openAdminSection(tester, 'open-members');
     await tester.pumpAndSettle();
   }
 
