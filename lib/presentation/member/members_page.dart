@@ -17,7 +17,10 @@ import 'new_member_dialog.dart';
 
 /// Members of the club for its administration (§16 Socios).
 class MembersPage extends StatelessWidget {
-  const MembersPage({super.key});
+  const MembersPage({super.key, this.openNew = false});
+
+  /// Opens «Nuevo socio» on arrival (dashboard shortcut).
+  final bool openNew;
 
   @override
   Widget build(BuildContext context) {
@@ -33,13 +36,15 @@ class MembersPage extends StatelessWidget {
       create: (context) =>
           MembersViewModel(context.read<AppUseCases>(), clubId: club.id)
             ..load(),
-      child: const _MembersView(),
+      child: _MembersView(openNew: openNew),
     );
   }
 }
 
 class _MembersView extends StatefulWidget {
-  const _MembersView();
+  const _MembersView({this.openNew = false});
+
+  final bool openNew;
 
   @override
   State<_MembersView> createState() => _MembersViewState();
@@ -47,6 +52,16 @@ class _MembersView extends StatefulWidget {
 
 class _MembersViewState extends State<_MembersView> {
   Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.openNew) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _newMember(context);
+      });
+    }
+  }
 
   @override
   void dispose() {

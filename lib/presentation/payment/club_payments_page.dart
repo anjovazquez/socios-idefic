@@ -14,7 +14,10 @@ import 'payment_labels.dart';
 
 /// Payments of the club for its admin (RF-018, §16 Pagos).
 class ClubPaymentsPage extends StatelessWidget {
-  const ClubPaymentsPage({super.key});
+  const ClubPaymentsPage({super.key, this.onlyPending = false});
+
+  /// Opens filtered on pending fees (dashboard shortcut).
+  final bool onlyPending;
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +30,11 @@ class ClubPaymentsPage extends StatelessWidget {
       );
     }
     return ChangeNotifierProvider(
-      create: (context) =>
-          ClubPaymentsViewModel(context.read<AppUseCases>(), clubId: club.id)
-            ..load(),
+      create: (context) => ClubPaymentsViewModel(
+        context.read<AppUseCases>(),
+        clubId: club.id,
+        initialStatus: onlyPending ? PaymentStatus.pending : null,
+      )..load(),
       child: const _ClubPaymentsView(),
     );
   }

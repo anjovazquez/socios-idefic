@@ -13,6 +13,7 @@ import 'package:socios_idefic/application/club/select_active_club.dart';
 import 'package:socios_idefic/application/member/member_use_cases.dart';
 import 'package:socios_idefic/application/onboarding/onboarding_use_cases.dart';
 import 'package:socios_idefic/application/blog/blog_use_cases.dart';
+import 'package:socios_idefic/application/dashboard/dashboard_use_cases.dart';
 import 'package:socios_idefic/application/payment/payment_use_cases.dart';
 import 'package:socios_idefic/application/perk/perk_use_cases.dart';
 import 'package:socios_idefic/application/sponsor/sponsor_use_cases.dart';
@@ -36,6 +37,7 @@ import 'package:socios_idefic/domain/onboarding/onboarding.dart';
 import 'package:socios_idefic/domain/onboarding/onboarding_repository.dart';
 import 'package:socios_idefic/domain/blog/blog_repository.dart';
 import 'package:socios_idefic/domain/blog/post.dart';
+import 'package:socios_idefic/domain/dashboard/club_dashboard.dart';
 import 'package:socios_idefic/domain/payment/club_payments.dart';
 import 'package:socios_idefic/domain/perk/perk.dart';
 import 'package:socios_idefic/domain/sponsor/sponsor.dart';
@@ -1470,6 +1472,14 @@ class FakePerkRepository implements PerkRepository {
   }
 }
 
+class FakeDashboardRepository implements DashboardRepository {
+  final Map<String, ClubDashboard> dashboards = {};
+
+  @override
+  Future<ClubDashboard> getClubDashboard(String clubId) async =>
+      dashboards[clubId] ?? const ClubDashboard();
+}
+
 AppUseCases buildUseCases({
   required FakeAuthRepository auth,
   required FakeClubRepository clubs,
@@ -1486,6 +1496,7 @@ AppUseCases buildUseCases({
   FakeBlogRepository? blog,
   FakeSponsorRepository? sponsors,
   FakePerkRepository? perks,
+  FakeDashboardRepository? dashboard,
 }) {
   final sponsorRepository = sponsors ?? FakeSponsorRepository();
   final perkRepository = (perks ?? FakePerkRepository())
@@ -1586,6 +1597,7 @@ AppUseCases buildUseCases({
     savePerk: SavePerk(perkRepository),
     setPerkStatus: SetPerkStatus(perkRepository),
     getMyPerks: GetMyPerks(perkRepository),
+    getClubDashboard: GetClubDashboard(dashboard ?? FakeDashboardRepository()),
     downloadReceipt: DownloadReceipt(
       paymentsRepository,
       receiptRenderer ?? FakeReceiptRenderer(),

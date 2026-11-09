@@ -151,7 +151,8 @@ GoRouter _createRouter(
         ),
         GoRoute(
           path: 'members',
-          builder: (context, state) => const MembersPage(),
+          builder: (context, state) =>
+              MembersPage(openNew: state.uri.queryParameters['nuevo'] == '1'),
         ),
         GoRoute(path: 'card', builder: (context, state) => const MyCardPage()),
         GoRoute(path: 'me', builder: (context, state) => const MyDataPage()),
@@ -199,7 +200,9 @@ GoRouter _createRouter(
         ),
         GoRoute(
           path: 'payments',
-          builder: (context, state) => const ClubPaymentsPage(),
+          builder: (context, state) => ClubPaymentsPage(
+            onlyPending: state.uri.queryParameters['estado'] == 'pendientes',
+          ),
         ),
         GoRoute(
           path: 'subscription',

@@ -8,7 +8,14 @@ import 'payment_labels.dart';
 
 /// Payments of the club for its admin (RF-018, §16 Pagos).
 class ClubPaymentsViewModel extends ChangeNotifier {
-  ClubPaymentsViewModel(this._useCases, {required this.clubId});
+  ClubPaymentsViewModel(
+    this._useCases, {
+    required this.clubId,
+    this.initialStatus,
+  });
+
+  /// Status filter on arrival (dashboard shortcut).
+  final PaymentStatus? initialStatus;
 
   final AppUseCases _useCases;
   final String clubId;
@@ -48,7 +55,7 @@ class ClubPaymentsViewModel extends ChangeNotifier {
     final active = _seasons
         .where((s) => s.status == SeasonStatus.active)
         .firstOrNull;
-    _filter = ClubPaymentsFilter(seasonId: active?.id);
+    _filter = ClubPaymentsFilter(seasonId: active?.id, status: initialStatus);
     await _fetch(reset: true);
   }
 

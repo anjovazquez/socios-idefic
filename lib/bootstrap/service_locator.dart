@@ -14,6 +14,7 @@ import '../application/club/select_active_club.dart';
 import '../application/member/member_use_cases.dart';
 import '../application/onboarding/onboarding_use_cases.dart';
 import '../application/blog/blog_use_cases.dart';
+import '../application/dashboard/dashboard_use_cases.dart';
 import '../application/payment/payment_use_cases.dart';
 import '../application/perk/perk_use_cases.dart';
 import '../application/sponsor/sponsor_use_cases.dart';
@@ -28,6 +29,7 @@ import '../domain/club/club_repository.dart';
 import '../domain/member/members_repository.dart';
 import '../domain/onboarding/onboarding_repository.dart';
 import '../domain/blog/blog_repository.dart';
+import '../domain/dashboard/club_dashboard.dart';
 import '../domain/payment/payment_gateway.dart';
 import '../domain/perk/perk.dart';
 import '../domain/sponsor/sponsor.dart';
@@ -44,6 +46,7 @@ import '../infrastructure/club/supabase_club_repository.dart';
 import '../infrastructure/member/supabase_members_repository.dart';
 import '../infrastructure/onboarding/supabase_onboarding_repository.dart';
 import '../infrastructure/blog/supabase_blog_repository.dart';
+import '../infrastructure/dashboard/supabase_dashboard_repository.dart';
 import '../infrastructure/payment/manual_payment_gateway.dart';
 import '../infrastructure/perk/supabase_perk_repository.dart';
 import '../infrastructure/sponsor/supabase_sponsor_repository.dart';
@@ -75,6 +78,9 @@ void configureDependencies() {
     )
     ..registerLazySingleton<ClubBrandingRepository>(
       () => SupabaseClubBrandingRepository(client),
+    )
+    ..registerLazySingleton<DashboardRepository>(
+      () => SupabaseDashboardRepository(client),
     )
     ..registerLazySingleton<PerkRepository>(
       () => SupabasePerkRepository(client),
@@ -196,6 +202,7 @@ void configureDependencies() {
         savePerk: SavePerk(serviceLocator()),
         setPerkStatus: SetPerkStatus(serviceLocator()),
         getMyPerks: GetMyPerks(serviceLocator()),
+        getClubDashboard: GetClubDashboard(serviceLocator()),
       ),
     );
 }

@@ -7,6 +7,7 @@ import 'card/card_use_cases.dart';
 import 'club/club_branding_use_cases.dart';
 import 'club/resolve_club_entry.dart';
 import 'club/select_active_club.dart';
+import 'dashboard/dashboard_use_cases.dart';
 import 'member/member_use_cases.dart';
 import 'onboarding/onboarding_use_cases.dart';
 import 'payment/payment_use_cases.dart';
@@ -94,6 +95,7 @@ class AppUseCases {
     required this.savePerk,
     required this.setPerkStatus,
     required this.getMyPerks,
+    required this.getClubDashboard,
   });
 
   final WatchSession watchSession;
@@ -173,4 +175,5 @@ class AppUseCases {
   final SavePerk savePerk;
   final SetPerkStatus setPerkStatus;
   final GetMyPerks getMyPerks;
+  final GetClubDashboard getClubDashboard;
 }
